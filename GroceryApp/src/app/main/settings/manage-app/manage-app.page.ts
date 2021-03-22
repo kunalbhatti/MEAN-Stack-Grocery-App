@@ -102,6 +102,8 @@ export class ManageAppPage implements OnInit {
       return;
     }
 
+    const id = uuid.v4();
+
     this.categories.push(category);
     this.settingsService.updateCategories(this.categories).subscribe(
       () => {
