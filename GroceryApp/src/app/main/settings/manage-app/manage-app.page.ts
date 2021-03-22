@@ -25,6 +25,10 @@ import {
   ConfirmDeleteComponent
 } from './modals/confirm-delete/confirm-delete.component';
 
+import {
+  SettingsModel
+} from './../../../models/settings.model';
+
 @Component({
   selector: 'app-manage-app',
   templateUrl: './manage-app.page.html',
@@ -33,15 +37,23 @@ import {
 export class ManageAppPage implements OnInit {
   groupError: string = '';
   addGroupForm: boolean;
-  groups: string[];
-
-  selectedGroup: string;
+  groups: {
+    [gid: string]: string
+  } [];
+  selectedGroup: {
+    group: string,
+    gid: string
+  };
 
   categoryError: string = '';
   addCategoryForm: boolean;
-  categories: any[];
-
-  selectedCategory: string;
+  categories: {
+    [cid: string]: string
+  } [];
+  selectedCategory: {
+    category: string,
+    cid: string
+  };
 
   constructor(private settingsService: SettingsService,
     private toasterService: ToasterService,
@@ -55,17 +67,9 @@ export class ManageAppPage implements OnInit {
 
     this.settingsService.getSettings().subscribe(
       (settingsData: {
-        settings: {
-          groups: string[],
-          selectedGroup: {
-            name: string,
-            id: number
-          };
-          categories: string[];
-        }
+        settings: SettingsModel
       }) => {
         if (settingsData.settings) {
-
           const userData = settingsData.settings;
           if (userData.groups) {
             this.groups = userData.groups;
@@ -83,26 +87,28 @@ export class ManageAppPage implements OnInit {
         }
       }, error => {
         this.groupError = error;
-      }
-    )
+      })
 
   }
 
   addCategory(form: NgForm) {
-    const category = form.value.category;
 
-    const index = this.categories.findIndex((catg: string) => {
-      if (category.toLowerCase() === catg.toLowerCase()) {
+    const index = this.categories.findIndex(catg => {
+      if (this.getKeyVal(catg).value.toLowerCase() === form.value.category.toLowerCase()) {
         return true;
       }
-      return false;
-    })
+    });
 
     if (index !== -1) {
       return;
     }
 
-    const id = uuid.v4();
+    const cid = uuid.v4();
+
+    const category = {
+      [cid]: form.value.category
+    };
+
 
     this.categories.push(category);
     this.settingsService.updateCategories(this.categories).subscribe(
@@ -116,16 +122,16 @@ export class ManageAppPage implements OnInit {
 
   editCategory(form: NgForm) {
     const category = form.value.category;
-    const index = this.categories.findIndex(loc => {
-      if (loc === this.selectedCategory) {
+    const index = this.categories.findIndex(catg => {
+      if (catg[this.selectedCategory.cid] === this.selectedCategory.category) {
         return true;
       }
     });
 
-    this.categories[index] = category;
+    this.categories[index][this.selectedCategory.cid] = category;
 
     this.settingsService.updateCategories(this.categories).subscribe(
-      result => {
+      () => {
         form.reset();
         this.toasterService.presentToast('Success!!', 'Category was editted successfully', 2000);
         this.selectedCategory = null;
@@ -135,22 +141,26 @@ export class ManageAppPage implements OnInit {
   }
 
   addGroup(form: NgForm) {
-    const group = form.value.group;
+
     if (this.groups.length === 3) {
       return;
     }
 
-    const index = this.groups.findIndex((loc: string) => {
-      if (group.toLowerCase() === loc.toLowerCase()) {
+    const index = this.groups.findIndex(grp => {
+      if (this.getKeyVal(grp).value.toLowerCase() === form.value.group.toLowerCase()) {
         return true;
       }
-
-      return false;
-    })
+    });
 
     if (index !== -1) {
       return;
     }
+
+    const gid = uuid.v4();
+
+    const group = {
+      [gid]: form.value.group
+    };
 
     this.groups.push(group);
     this.settingsService.updateGroup(this.groups).subscribe(
@@ -163,14 +173,14 @@ export class ManageAppPage implements OnInit {
   }
 
   editGroup(form: NgForm) {
-    const groups = form.value.group;
-    const index = this.groups.findIndex(loc => {
-      if (loc === this.selectedGroup) {
+    const group = form.value.group;
+    const index = this.groups.findIndex(grp => {
+      if (grp[this.selectedGroup.gid] === this.selectedGroup.group) {
         return true;
       }
     });
 
-    this.groups[index] = groups;
+    this.groups[index][this.selectedGroup.gid] = group;
 
     this.settingsService.updateGroup(this.groups).subscribe(
       () => {
@@ -182,8 +192,7 @@ export class ManageAppPage implements OnInit {
     );
   }
 
-
-  presentGroupActionSheet(group: string) {
+  presentGroupActionSheet(group: string, gid: string) {
     this.actionSheetController.create({
       header: 'Options',
       buttons: [{
@@ -195,7 +204,10 @@ export class ManageAppPage implements OnInit {
         icon: 'create-outline',
         handler: () => {
           this.addGroupForm = true;
-          this.selectedGroup = group;
+          this.selectedGroup = {
+            group,
+            gid
+          };
         }
 
       }, {
@@ -213,15 +225,19 @@ export class ManageAppPage implements OnInit {
           }).then(
             popoverResult => {
               if (popoverResult.role === 'delete') {
-                const groupArr = this.groups.filter((grp: string) => {
-                  if (grp !== group) {
+                const groupArr = this.groups.filter((grp: {
+                  [gid: string]: string
+                }) => {
+                  if (grp[gid] !== group) {
                     return true;
                   }
                 });
 
                 this.settingsService.updateGroup(groupArr).subscribe(
                   (result: {
-                    groups: string[]
+                    groups: {
+                      [cid: string]: string
+                    } []
                   }) => {
                     this.toasterService.presentToast('Success!!', 'Group was deleted successfully', 2000);
                     this.groups = result.groups;
@@ -236,7 +252,7 @@ export class ManageAppPage implements OnInit {
     })
   }
 
-  presentCategoryActionSheet(category: string) {
+  presentCategoryActionSheet(category: string, cid: string) {
     this.actionSheetController.create({
       header: 'Options',
       buttons: [{
@@ -247,19 +263,17 @@ export class ManageAppPage implements OnInit {
         text: 'Open',
         icon: 'open',
         handler: () => {
-          const index = this.categories.findIndex(catg => {
-            if (catg === category) {
-              return true;
-            }
-          })
-          this.router.navigate(['/', 'app', 'settings', 'manage-app', 'category', category, index]);
+          this.router.navigate(['/', 'app', 'settings', 'manage-app', 'category', category, cid]);
         }
       }, {
         text: 'Edit',
         icon: 'create-outline',
         handler: () => {
           this.addCategoryForm = true;
-          this.selectedCategory = category;
+          this.selectedCategory = {
+            category,
+            cid
+          };
         }
 
       }, {
@@ -277,15 +291,19 @@ export class ManageAppPage implements OnInit {
           }).then(
             popoverResult => {
               if (popoverResult.role === 'delete') {
-                const catgArr = this.categories.filter((catg: string) => {
-                  if (catg !== category) {
+                const catgArr = this.categories.filter((catg: {
+                  [cid: string]: string
+                }) => {
+                  if (catg[cid] !== category) {
                     return true;
                   }
                 });
 
                 this.settingsService.updateCategories(catgArr).subscribe(
                   (result: {
-                    categories: string[]
+                    categories: {
+                      [cid: string]: string
+                    } []
                   }) => {
                     this.toasterService.presentToast('Success!!', 'Category was deleted successfully', 2000);
                     this.categories = result.categories;
@@ -301,5 +319,21 @@ export class ManageAppPage implements OnInit {
     }).then(actionEl => {
       actionEl.present();
     })
+  }
+
+
+  getKeyVal(data: {
+    [id: string]: string
+  }): {
+    key: string,
+    value: string
+  } {
+    const value = Object.keys(data).map(key => {
+      return {
+        key,
+        value: data[key]
+      };
+    });
+    return value[0];
   }
 }

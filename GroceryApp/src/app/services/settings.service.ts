@@ -30,7 +30,9 @@ export class SettingsService {
   }
 
   updateGroup(
-    groups: string[]
+    groups: {
+      [id: string]: string
+    } []
   ): Observable < any > {
     return this.http.patch(`${config.url}/settings/update-group`, {
       groups
@@ -38,7 +40,9 @@ export class SettingsService {
   }
 
   updateCategories(
-    categories: string[]
+    categories: {
+      [id: string]: string
+    } []
   ): Observable < any > {
     return this.http.patch(`${config.url}/settings/update-category`, {
       categories

@@ -1,14 +1,12 @@
 export interface SettingsModel {
-  locations: {
-    name: string,
-    id: string
+  groups: {
+    [id: string]: string
   } [];
-  selectedLocation: {
+  selectedGroup: {
     name: string,
     id: number
   }
   categories: {
-    name: string,
-    id: string
+    [id: string]: string
   } [];
 }
