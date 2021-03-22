@@ -42,10 +42,11 @@ export class SettingsService {
   updateCategories(
     categories: {
       [id: string]: string
-    } []
+    } [], deletedId?: string
   ): Observable < any > {
     return this.http.patch(`${config.url}/settings/update-category`, {
-      categories
+      categories,
+      deletedId
     }).pipe(take(1), catchError(errorHandler));
   }
 

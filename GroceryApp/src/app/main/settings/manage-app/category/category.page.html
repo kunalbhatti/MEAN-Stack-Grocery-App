@@ -21,7 +21,7 @@
           </ion-buttons>
         </ion-toolbar>
 
-        <ion-list *ngIf="productError === ''" style="background-color: rgb(40, 41, 44);">
+        <ion-list *ngIf="productError === '' && products?.length > 0" style="background-color: rgb(40, 41, 44);">
           <ion-card *ngFor="let product of products">
             <ion-card-header>
               <ion-card-title>
@@ -43,7 +43,10 @@
             </ion-row>
           </ion-card>
         </ion-list>
-        <ion-text *ngIf="productError !== ''">{{productError}}</ion-text>
+        <ion-list style="background-color: rgb(40, 41, 44);" class="ion-padding">
+          <ion-text *ngIf="productError === '' && products?.length === 0">No Items Found</ion-text>
+          <ion-text *ngIf="productError !== ''">{{productError}}</ion-text>
+        </ion-list>
       </ion-col>
     </ion-row>
 

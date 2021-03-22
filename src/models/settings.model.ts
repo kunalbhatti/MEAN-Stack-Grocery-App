@@ -134,4 +134,11 @@ export class Settings {
             _id
         });
     }
+
+    static deleteProducts(cid: string): Promise < DeleteWriteOpResultObject > {
+        const db = getDb();
+        return db.collection('user_products').deleteMany({
+            cid
+        });
+    }
 }

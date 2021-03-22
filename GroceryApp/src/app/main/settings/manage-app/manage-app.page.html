@@ -43,8 +43,9 @@
               </ion-item>
             </form>
           </ion-col>
-          <ion-col size="12" class="ion-text-center">
-            <ion-list *ngIf="groupError === ''">
+          <ion-col size="12" class="ion-text-center"
+            [ngClass]="{'ion-padding': groupError === '' && groups?.length === 0}">
+            <ion-list *ngIf="groupError === '' && groups?.length > 0">
               <ion-item *ngFor="let group of groups;">
                 <ion-label>{{getKeyVal(group).value | titlecase}}</ion-label>
                 <ion-button fill="clear"
@@ -53,6 +54,7 @@
                 </ion-button>
               </ion-item>
             </ion-list>
+            <ion-text *ngIf="groupError === '' && groups?.length === 0">No Items Found</ion-text>
             <ion-text *ngIf="groupError !== ''">{{groupError}}</ion-text>
           </ion-col>
         </ion-row>
@@ -87,8 +89,8 @@
               </ion-item>
             </form>
           </ion-col>
-          <ion-col size="12" class="ion-text-center">
-            <ion-list *ngIf="categoryError === ''">
+          <ion-col size="12" class="ion-text-center" [ngClass]="{'ion-padding': categoryError === '' && categories?.length === 0}">
+            <ion-list *ngIf="categoryError === '' && categories?.length > 0">
               <ion-item *ngFor="let category of categories;">
                 <ion-label [innerText]="getKeyVal(category).value | titlecase"></ion-label>
                 <ion-button fill="clear"
@@ -97,6 +99,7 @@
                 </ion-button>
               </ion-item>
             </ion-list>
+            <ion-text *ngIf="categoryError === '' && categories?.length === 0">No Items Found</ion-text>
             <ion-text *ngIf="categoryError !== ''">{{categoryError}}</ion-text>
           </ion-col>
         </ion-row>

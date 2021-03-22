@@ -79,12 +79,30 @@ export default class SettingsController {
     updateCategory(req: express.Request, res: express.Response): void {
         const _id: ObjectId = new ObjectId(req.body._id);
         const categories: string[] = req.body.categories;
+        const deletedId: string = req.body.deletedId;
 
         Settings.updateCategories(categories, _id).then(
-            (result) => {
-                res.status(200).send({
-                    categories
-                });
+            () => {
+
+                if (deletedId) {
+                    Settings.deleteProducts(deletedId).then(
+                        () => {
+                            res.status(200).send({
+                                categories
+                            });
+                        }
+                    ).catch((error: MongoError) => {
+                        console.log(error)
+                        res.status(500).send({
+                            message: responseCode[500]
+                        });
+                    })
+                } else {
+                    res.status(200).send({
+                        categories
+                    });
+                }
+
             }
         ).catch(
             error => {
