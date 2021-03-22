@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{category | titlecase}}</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="['/', 'app', 'settings', 'manage-app']"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid>
+    <ion-row class="ion-justify-content-center">
+      <ion-col size="12" size-sm="10" size-md="8" class="ion-text-center">
+
+        <ion-toolbar size="12" class="ion-text-center ion-margin-top" style="background-color: #1f1f1f;">
+          <ion-title>Products</ion-title>
+          <ion-buttons slot="primary">
+            <ion-button (click)="presentProductModal()">
+              <ion-icon name="add-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+
+        <ion-list *ngIf="productError === ''" style="background-color: rgb(40, 41, 44);">
+          <ion-card *ngFor="let product of products">
+            <ion-card-header>
+              <ion-card-title>
+                {{product?.name | titlecase}}
+              </ion-card-title>
+              <ion-card-subtitle>
+                {{product?.brand | titlecase}}
+              </ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-item *ngIf="product?.size">Size: {{product?.size}}</ion-item>
+              <ion-item *ngIf="product?.weight">Weight: {{product?.weight}}</ion-item>
+              <ion-item *ngIf="product?.price">Price: {{product?.price}}</ion-item>
+            </ion-card-content>
+            <ion-row class="ion-justify-content-center">
+              <ion-button fill="clear" color="dark" (click)="presentProductActionSheet(product)">
+                <ion-icon name="ellipsis-horizontal"></ion-icon>
+              </ion-button>
+            </ion-row>
+          </ion-card>
+        </ion-list>
+        <ion-text *ngIf="productError !== ''">{{productError}}</ion-text>
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+</ion-content>

@@ -1,0 +1,8 @@
+.add-icon{
+    background-color: black;    
+    margin-left: -40px;
+}
+
+.add-icon:hover{
+    background-color: #222428;    
+}

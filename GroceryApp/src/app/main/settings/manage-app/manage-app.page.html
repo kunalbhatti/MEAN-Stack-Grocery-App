@@ -1,0 +1,106 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Manage App</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+
+  <ion-grid>
+    <ion-row class="ion-justify-content-center">
+      <ion-col size="12" size-sm="10" size-md="8">
+
+        <ion-toolbar size="12" class="ion-text-center ion-margin-top" style="background-color: #1f1f1f;">
+          <ion-title>Groups</ion-title>
+          <ion-buttons slot="primary">
+            <ion-button (click)="addGroupForm = !addGroupForm" [disabled]="groups?.length === 3">
+              <ion-icon name="add-outline" *ngIf="!addGroupForm"></ion-icon>
+              <ion-icon name="close" *ngIf="addGroupForm"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+
+        <ion-row style="background-color: rgb(40, 41, 44);">
+          <ion-col size="12" *ngIf="addGroupForm">
+            <form (ngSubmit)="addGroup(createGroupForm)" #createGroupForm="ngForm" *ngIf="!selectedGroup">
+              <ion-item lines="none">
+                <ion-input ngModel name="group" placeholder="Add Group" required minlength="3" maxlength="20">
+                </ion-input>
+                <ion-button type="submit" fill="clear" color="dark" [disabled]="createGroupForm.invalid">
+                  Add
+                </ion-button>
+              </ion-item>
+            </form>
+            <form (ngSubmit)="editGroup(updateGroupForm)" #updateGroupForm="ngForm" *ngIf="selectedGroup">
+              <ion-item lines="none">
+                <ion-input [ngModel]="selectedGroup" name="group" placeholder="Edit Group" required minlength="3"
+                  maxlength="20"></ion-input>
+                <ion-button type="submit" fill="clear" color="dark" [disabled]="updateGroupForm.invalid">
+                  Update
+                </ion-button>
+              </ion-item>
+
+            </form>
+          </ion-col>
+          <ion-col size="12" class="ion-text-center">
+            <ion-list *ngIf="groupError === ''">
+              <ion-item *ngFor="let group of groups;">
+                <ion-label>{{group | titlecase}}</ion-label>
+                <ion-button fill="clear" (click)="presentGroupActionSheet(group)">
+                  <ion-icon name="ellipsis-vertical" color="dark"></ion-icon>
+                </ion-button>
+              </ion-item>
+            </ion-list>
+            <ion-text *ngIf="groupError !== ''">{{groupError}}</ion-text>
+          </ion-col>
+        </ion-row>
+
+        <ion-toolbar size="12" class="ion-text-center ion-margin-top" style="background-color: #1f1f1f;">
+          <ion-title>Categories</ion-title>
+          <ion-buttons slot="primary">
+            <ion-button (click)="addCategoryForm = !addCategoryForm">
+              <ion-icon name="add-outline" *ngIf="!addCategoryForm"></ion-icon>
+              <ion-icon name="close" *ngIf="addCategoryForm"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+        <ion-row style="background-color: rgb(40, 41, 44);">
+          <ion-col size="12" *ngIf="addCategoryForm">
+            <form (ngSubmit)="addCategory(createCategoryForm)" #createCategoryForm="ngForm" *ngIf="!selectedCategory">
+              <ion-item lines="none">
+                <ion-input ngModel name="category" placeholder="Add Category" required minlength="3" maxlength="20">
+                </ion-input>
+                <ion-button type="submit" fill="clear" color="dark" [disabled]="createCategoryForm.invalid">
+                  Add
+                </ion-button>
+              </ion-item>
+            </form>
+            <form (ngSubmit)="editCategory(updateCategoryForm)" #updateCategoryForm="ngForm" *ngIf="selectedCategory">
+              <ion-item lines="none">
+                <ion-input [ngModel]="selectedCategory" name="category" placeholder="Edit Category" required
+                  minlength="3" maxlength="20"></ion-input>
+                <ion-button type="submit" fill="clear" color="dark" [disabled]="updateCategoryForm.invalid">
+                  Update
+                </ion-button>
+              </ion-item>
+            </form>
+          </ion-col>
+          <ion-col size="12" class="ion-text-center">
+            <ion-list *ngIf="categoryError === ''">
+              <ion-item *ngFor="let category of categories;">
+                <ion-label>{{category | titlecase}}</ion-label>
+                <ion-button fill="clear" (click)="presentCategoryActionSheet(category)">
+                  <ion-icon name="ellipsis-vertical" color="dark"></ion-icon>
+                </ion-button>
+              </ion-item>
+            </ion-list>
+            <ion-text *ngIf="categoryError !== ''">{{categoryError}}</ion-text>
+          </ion-col>
+        </ion-row>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+</ion-content>

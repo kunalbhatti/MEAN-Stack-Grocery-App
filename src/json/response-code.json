@@ -1,0 +1,6 @@
+{
+    "500": "Error on the server. Please try again later.",
+    "401": "Unauthorized. Please login to continue.",
+    "404": "Requested item could not be found.",
+    "409": "Email already registered."
+}

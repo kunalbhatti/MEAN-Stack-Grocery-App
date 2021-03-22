@@ -1,0 +1,54 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Grocery App</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-grid style="height: 100%;">
+    <ion-row class="ion-justify-content-center" style="height: 100%; align-content: center;">
+      <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4" class="ion-no-padding">
+        <ion-toolbar>
+          <ion-title class="ion-text-center ion-padding" style="border-bottom: 1px solid;">Register</ion-title>
+        </ion-toolbar>
+        <form (ngSubmit)="onSubmit()" [formGroup]="registrationForm">
+          <ion-item>
+            <ion-label position="floating">Name</ion-label>
+            <ion-input formControlName="name" type="text" required minlength="3" maxlength="20"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">Email</ion-label>
+            <ion-input formControlName="email" type="email" email required></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">Password
+              <small style="color: #ffd534" *ngIf="showPasswordHint">
+                (6-12 characters long)
+              </small>
+            </ion-label>
+            <ion-input formControlName="password" type="password" required minlength="6" maxlength="12"
+              (ionFocus)="showPasswordHint = true" (ionBlur)="showPasswordHint = false"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">Confirm Password
+              <small style="color: #ff4961"
+                *ngIf="registrationForm.errors?.invalidPassword && registrationForm.get('confirmPassword').dirty">
+                (Passwords do not match)</small>
+            </ion-label>
+            <ion-input formControlName="confirmPassword" type="password" required minlength="6" maxlength="12">
+            </ion-input>
+          </ion-item>
+          <ion-button type="submit" expand="full"
+            [disabled]="registrationForm.invalid && registrationForm.errors?.invalidPassword" class="ion-no-margin">
+            Register</ion-button>
+        </form>
+        <div style="text-align: center; padding: 5px;">
+        </div>
+      </ion-col>
+      <ion-col size="12" class="ion-text-center">
+        <ion-button fill="clear" color="primary" [routerLink]="['/', 'auth', 'login']"><small>Login</small></ion-button>
+        <ion-button fill="clear" color="primary" [routerLink]="['/', 'auth', 'login']"><small>Activation Code</small></ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

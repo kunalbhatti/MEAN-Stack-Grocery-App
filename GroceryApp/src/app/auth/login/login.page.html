@@ -1,0 +1,41 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Grocery App</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-grid style="height: 100%;">
+    <ion-row class="ion-justify-content-center" style="height: 100%; align-content: center;">
+      <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4" class="ion-no-padding">
+        <ion-toolbar>
+          <ion-title class="ion-text-center ion-padding" style="border-bottom: 1px solid;">Login</ion-title>
+        </ion-toolbar>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <ion-item>
+            <ion-label position="floating">Email</ion-label>
+            <ion-input type="email" formControlName="email" email required></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">Password</ion-label>
+            <ion-input type="password" formControlName="password" required></ion-input>
+          </ion-item>
+          <ion-button type="submit" expand="full" class="ion-no-margin">Login</ion-button>
+        </form>
+        <div style="text-align: center;">
+          <ion-text color="danger">
+            <small>
+              {{errorMessage}}
+            </small>
+          </ion-text>
+        </div>
+      </ion-col>
+      <ion-col size="12" class="ion-text-center">
+        <ion-button fill="clear" color="primary" [routerLink]="['/', 'auth', 'register']"><small>Register</small>
+        </ion-button>
+        <ion-button fill="clear" color="primary" [routerLink]="['/', 'auth', 'register']"><small>Forgot Password</small>
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

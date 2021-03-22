@@ -1,0 +1,103 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Profile</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-grid>
+    <ion-row class="ion-justify-content-center">
+      <ion-col size="12" size-sm="10" size-md="8">
+
+        <ion-toolbar size="12" class="ion-text-center ion-margin-top" style="background-color: #1f1f1f;">
+          <ion-title>Name</ion-title>
+          <ion-buttons slot="primary">
+            <ion-button (click)="updateNameForm = !updateNameForm">
+              <ion-icon name="create-outline" *ngIf="!updateNameForm"></ion-icon>
+              <ion-icon name="close" *ngIf="updateNameForm"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+
+        <ion-row style="background-color: rgb(40, 41, 44);" class="ion-justify-content-center">
+          <ion-col size="12" *ngIf="updateNameForm">
+            <form #updateNameForm="ngForm" (ngSubmit)="updateName(updateNameForm)">
+              <ion-item lines="none">
+                <ion-input name="name" ngModel [placeholder]="userName" required minlength="2" maxlength="20" required>
+                </ion-input>
+                <ion-button type="submit" fill="clear" color="dark" [disabled]="updateNameForm.invalid"
+                  [disabled]="updateNameForm.invalid">
+                  Update
+                </ion-button>
+              </ion-item>
+            </form>
+          </ion-col>
+          <ion-col size="12" *ngIf="!updateNameForm">
+            <ion-item *ngIf="userName">
+              <ion-label>{{userName | titlecase}}</ion-label>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+
+        <ion-toolbar size="12" class="ion-text-center ion-margin-top" style="background-color: #1f1f1f;">
+          <ion-title>Password</ion-title>
+          <ion-buttons slot="primary">
+            <ion-button (click)="updatePasswordForm = !updatePasswordForm">
+              <ion-icon name="create-outline" *ngIf="!updatePasswordForm"></ion-icon>
+              <ion-icon name="close" *ngIf="updatePasswordForm"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+
+        <ion-row style="background-color: rgb(40, 41, 44);" class="ion-justify-content-center">
+          <ion-col size="12" *ngIf="updatePasswordForm" class="ion-text-center">
+            <form [formGroup]="passwordResetForm" (ngSubmit)="updatePassword(passwordResetForm)">
+              <ion-item lines="none">
+                <ion-label position="floating">Old Password</ion-label>
+                <ion-input name="oldPassword" type="password" formControlName="oldPassword" required minlength="6"
+                  maxlength="12" required>
+                </ion-input>
+              </ion-item>
+              <ion-item lines="none">
+                <ion-label position="floating">New Password
+                  <small style="color: #ff4961"
+                    *ngIf="passwordResetForm.errors?.passwordNotChanged && passwordResetForm.get('newPassword').dirty">
+                    (Same as old password)</small>
+                </ion-label>
+                <ion-input name="newPassword" formControlName="newPassword" type="password" required minlength="6"
+                  maxlength="12" required>
+                </ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="floating">Confirm Password
+                  <small style="color: #ff4961"
+                    *ngIf="passwordResetForm.errors?.invalidPassword && passwordResetForm.get('confirmPassword').dirty">
+                    (Passwords do not match)</small>
+                </ion-label>
+                <ion-input name="confirmPassword" formControlName="confirmPassword" type="password" required
+                  minlength="6" maxlength="12" required>
+                </ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-row class="ion-justify-content-center" style="width: 100%;">
+                  <ion-button type="submit" fill="clear" color="dark" [disabled]="passwordResetForm.invalid">
+                    Update
+                  </ion-button>
+                </ion-row>
+              </ion-item>
+            </form>
+          </ion-col>
+          <ion-col size="12" *ngIf="!updatePasswordForm">
+            <ion-item>
+              ******
+            </ion-item>
+          </ion-col>
+        </ion-row>
+
+
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

@@ -1,0 +1,47 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{product?.name ? "Edit Product": "Create Product"}}</ion-title>
+    <ion-buttons slot="primary">
+      <ion-button (click)="onDismiss()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid>
+    <ion-row style="background-color: rgb(40, 41, 44);">
+      <ion-col size="12">
+        <form (ngSubmit)="product?.name ? editProduct(createProductForm): addProduct(createProductForm)"
+          #createProductForm="ngForm">
+          <ion-item lines="none">
+            <ion-label position="floating">Name <small>(Required)</small></ion-label>
+            <ion-input [ngModel]="product?.name" name="name" required minlength="2" maxlength="20"></ion-input>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-label position="floating">Brand</ion-label>
+            <ion-input [ngModel]="product?.brand" name="brand" minlength="2" maxlength="20"></ion-input>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-label position="floating">Size</ion-label>
+            <ion-input [ngModel]="product?.size" name="size" minlength="2" maxlength="20"></ion-input>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-label position="floating">Weight</ion-label>
+            <ion-input [ngModel]="product?.weight" name="weight" minlength="2" maxlength="20"></ion-input>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-label position="floating">Price <small>(Required)</small></ion-label>
+            <ion-input [ngModel]="product?.price" name="price" required minlength="2" maxlength="20"></ion-input>
+          </ion-item>
+          <ion-input hidden [ngModel]="product?._id" name="_id"></ion-input>
+          <ion-input hidden [ngModel]="cid" name="cid"></ion-input>
+          <ion-button type="submit" expand="full" color="primary" [disabled]="createProductForm.invalid">
+            {{product?.name ? "Edit": "Create"}}
+          </ion-button>
+        </form>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
