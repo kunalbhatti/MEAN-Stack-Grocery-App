@@ -2,7 +2,7 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 
-import  AuthController from '../controllers/auth.controller';
+import AuthController from '../controllers/auth.controller';
 import SettingsController from '../controllers/settings.controller';
 
 import {
@@ -20,7 +20,7 @@ class Server {
         this.http = http.createServer(this.app);
     }
 
-    initializeMiddlewares() {
+    initializeMiddlewares(): void {
         this.app.use(cors());
         this.app.use(express.json());
         this.app.use(express.urlencoded({
@@ -28,13 +28,13 @@ class Server {
         }));
     }
 
-    initializeControllers() {
+    initializeControllers(): void {
         this.app.use('/auth', new AuthController().router);
         this.app.use('/settings', new SettingsController().router);
     }
 
 
-    startServer() {
+    startServer(): void {
         connectToMongo(() => {
             this.http.listen(this.port, () => {
                 this.initializeMiddlewares();

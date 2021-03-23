@@ -16,15 +16,15 @@ import {
 } from 'rxjs/operators';
 import {
   AuthService
-} from 'src/app/services/auth.service';
+} from './../../../services/auth.service';
 import {
   ToasterService
-} from 'src/app/services/toaster.service';
+} from './../../../services/toaster.service';
 
 
 const checkPasswordChanged: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
-  const oldPassword = control.get('oldPassword');
-  const newPassword = control.get('newPassword');
+  const oldPassword: AbstractControl = control.get('oldPassword');
+  const newPassword: AbstractControl = control.get('newPassword');
 
   if (oldPassword.value !== newPassword.value) {
     return null;
@@ -37,14 +37,15 @@ const checkPasswordChanged: ValidatorFn = (control: AbstractControl): Validation
 
 const comparePassword: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
 
-  const newPassword = control.get('newPassword');
-  const confirmPassword = control.get('confirmPassword');
-  let same = false;
+  const newPassword: AbstractControl = control.get('newPassword');
+  const confirmPassword: AbstractControl = control.get('confirmPassword');
+  let same: boolean = false;
 
-
-  if (newPassword.value.length >= 6 && newPassword.value.length <= 12) {
-    same = newPassword.value === confirmPassword.value;
-  }
+  try {
+    if (newPassword.value.length >= 6 && newPassword.value.length <= 12) {
+      same = newPassword.value === confirmPassword.value;
+    }
+  } catch (error) {}
 
   if (same && control.get('confirmPassword').dirty) {
     return null;
@@ -94,7 +95,7 @@ export class ProfilePage implements OnInit {
   }
 
   updateName(form: NgForm) {
-    const name = form.value.name;
+    const name: string = form.value.name;
 
     this.authService.updateUserName(name).subscribe(
       (user: {
@@ -105,24 +106,27 @@ export class ProfilePage implements OnInit {
         this.updateNameForm = false;
         form.reset();
         this.toasterService.presentToast("Success", user.message, 2000);
+      }, (error: string) => {
+        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       }
     )
   }
 
   updatePassword(form: NgForm) {
-    const password = form.value.newPassword;
+    const newPassword: string = form.value.newPassword.trim();
+    const oldPassword: string = form.value.oldPassword.trim();
 
-    console.log(password)
-
-    this.authService.updateUserPassword(password).subscribe(
+    this.authService.updateUserPassword(newPassword, oldPassword).subscribe(
       (result: {
         message: string
       }) => {
         this.updatePasswordForm = false;
         form.reset();
         this.toasterService.presentToast("Success", result.message, 2000);
+      }, (error: string) => {
+        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       }
-    )
+    );
   }
 
 }

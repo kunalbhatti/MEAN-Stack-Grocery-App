@@ -1,4 +1,5 @@
 import {
+    Db,
     InsertOneWriteOpResult,
     ObjectId,
     UpdateWriteOpResult,
@@ -17,13 +18,13 @@ export interface UserModel {
 
 export default class User {
     static register(user: UserModel): Promise < InsertOneWriteOpResult < any > > {
-        const db = getDb();
+        const db: Db = getDb();
 
         return db.collection('users').insertOne(user);
     }
 
     static findUser(options: any): Promise < UserModel > {
-        const db = getDb();
+        const db: Db = getDb();
 
         return db.collection('users').findOne(options);
     }
@@ -31,7 +32,7 @@ export default class User {
     static updateUserData(options: {
         _id: ObjectId
     }, data: any): Promise < UpdateWriteOpResult > {
-        const db = getDb();
+        const db: Db = getDb();
 
         return db.collection('users').updateOne(options, {
             $set: data

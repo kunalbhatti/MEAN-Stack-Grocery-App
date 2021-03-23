@@ -1,5 +1,6 @@
 import {
     Cursor,
+    Db,
     DeleteWriteOpResultObject,
     InsertOneWriteOpResult,
     ObjectId,
@@ -11,12 +12,12 @@ import {
 
 
 export interface SettingsModel {
-    locations: string[];
+    groups: {[id: string]: string} ;
     selectedLocation: {
         name: string,
         id: number
     };
-    categories: string[];
+    categories: {[id: string]: string};
     _id ? : string;
 }
 
@@ -35,7 +36,7 @@ export class Settings {
 
     static getUserSettings(_id: ObjectId): Promise < SettingsModel > {
 
-        const db = getDb();
+        const db: Db = getDb();
 
         return db.collection('user_settings').findOne({
             _id
@@ -48,7 +49,7 @@ export class Settings {
         id: number
     }, _id: ObjectId): Promise < UpdateWriteOpResult > {
 
-        const db = getDb();
+        const db: Db = getDb();
 
         return db.collection('user_settings').updateOne({
             _id
@@ -61,7 +62,7 @@ export class Settings {
 
     static updateGroup(groups: string[], _id: ObjectId): Promise < UpdateWriteOpResult > {
 
-        const db = getDb();
+        const db: Db = getDb();
 
         return db.collection('user_settings').updateOne({
             _id
@@ -75,20 +76,22 @@ export class Settings {
     }
 
     static updateCategories(categories: string[], _id: ObjectId): Promise < UpdateWriteOpResult > {
-
-        const db = getDb();
-
+        const db: Db = getDb();
+        
         return db.collection('user_settings').updateOne({
             _id
         }, {
             $set: {
                 categories
             }
+        }, {
+            upsert: true
         })
     }
 
+
     static getProducts(uid: ObjectId, cid: string): Cursor < any > {
-        const db = getDb();
+        const db: Db = getDb();
         return db.collection('user_products').find({
             $and: [{
                     cid
@@ -100,21 +103,14 @@ export class Settings {
         });
     }
 
-    static getProduct(_id: ObjectId): Promise < ProductsModel > {
-        const db = getDb();
-        return db.collection('user_products').findOne({
-            _id
-        });
-    }
-
 
     static addProduct(product: ProductsModel): Promise < InsertOneWriteOpResult < any >> {
-        const db = getDb();
+        const db: Db = getDb();
         return db.collection('user_products').insertOne(product);
     }
 
     static editProduct(product: ProductsModel) {
-        const db = getDb();
+        const db: Db = getDb();
         return db.collection('user_products').updateOne({
             _id: product._id
         }, {
@@ -129,14 +125,14 @@ export class Settings {
     }
 
     static deleteProduct(_id: ObjectId): Promise < DeleteWriteOpResultObject > {
-        const db = getDb();
+        const db: Db = getDb();
         return db.collection('user_products').deleteOne({
             _id
         });
     }
 
     static deleteProducts(cid: string): Promise < DeleteWriteOpResultObject > {
-        const db = getDb();
+        const db: Db = getDb();
         return db.collection('user_products').deleteMany({
             cid
         });

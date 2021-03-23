@@ -11,7 +11,8 @@ import {
 } from '@ionic/angular';
 
 import {
-  ActivatedRoute
+  ActivatedRoute,
+  ParamMap
 } from '@angular/router';
 import {
   CreateProductComponent
@@ -61,7 +62,7 @@ export class CategoryPage implements OnInit {
 
 
     this.route.paramMap.subscribe(
-      params => {
+      (params: ParamMap) => {
         this.category = params.get('category')
         this.cid = params.get('cid');
         this.settingsService.getProducts(this.cid).subscribe(
@@ -73,21 +74,21 @@ export class CategoryPage implements OnInit {
             } else {
               this.products = [];
             }
-          }, error => {
+          }, (error: string) => {
             this.productError = error;
           }
         );
       }
-    )
+    );
 
   }
 
-  onDismiss() {
+  onDismiss(): void {
     this.modalController.dismiss(null, 'cancel');
   }
 
 
-  presentProductActionSheet(product: ProductModel) {
+  presentProductActionSheet(product: ProductModel): void {
     this.actionSheetController.create({
       header: 'Options',
       buttons: [{
@@ -104,13 +105,12 @@ export class CategoryPage implements OnInit {
         text: 'Delete',
         icon: 'trash-outline',
         handler: () => {
-
           this.popoverController.create({
             component: ConfirmDeleteComponent,
             componentProps: {
               type: 'product'
             }
-          }).then(popoverEl => {
+          }).then((popoverEl: HTMLIonPopoverElement) => {
             popoverEl.present();
             return popoverEl.onDidDismiss();
           }).then(
@@ -125,24 +125,22 @@ export class CategoryPage implements OnInit {
                           return true;
                         }
                       }
-                    )
+                    );
                   }, error => {
                     this.productError = error;
                   }
                 );
               }
-
             }
           )
-
         }
       }]
-    }).then(actionEl => {
-      actionEl.present()
+    }).then((actionEl: HTMLIonActionSheetElement) => {
+      actionEl.present();
     })
   }
 
-  presentProductModal(product ? : ProductModel) {
+  presentProductModal(product ? : ProductModel): void {
     this.modalController.create({
       component: CreateProductComponent,
       componentProps: {
@@ -150,7 +148,7 @@ export class CategoryPage implements OnInit {
         cid: this.cid
       }
     }).then(
-      modalEl => {
+      (modalEl: HTMLIonModalElement) => {
         modalEl.present();
         return modalEl.onDidDismiss();
       }
@@ -163,13 +161,13 @@ export class CategoryPage implements OnInit {
 
       if (modalResult.role === 'edit') {
         this.toasterService.presentToast('Success!!', 'Product was editted successfully', 2000);
-        const index = this.products.findIndex(prod => {
+        const index: number = this.products.findIndex((prod: ProductModel) => {
           if (prod._id === product._id) {
             return true;
           }
         });
-        this.products[index] = modalResult.data
+        this.products[index] = modalResult.data;
       }
-    })
+    });
   }
 }

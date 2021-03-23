@@ -15,16 +15,16 @@ import {
 export class ConfirmDeleteComponent implements OnInit {
 
   @Input() type: string;
-  
+
   constructor(private popoverController: PopoverController) {}
 
   ngOnInit() {}
 
-  onDismiss() {
+  onDismiss(): void {
     this.popoverController.dismiss(null, 'cancel');
   }
 
-  onDelete() {
+  onDelete(): void {
     this.popoverController.dismiss(null, 'delete');
   }
 

@@ -57,9 +57,10 @@ export class AuthService {
     }).pipe(take(1), catchError(errorHandler));
   }
 
-  updateUserPassword(password: string): Observable < any > {
+  updateUserPassword(newPassword: string, oldPassword: string): Observable < any > {
     return this.http.patch(`${config.url}/auth/update-user-password`, {
-      password
+      newPassword,
+      oldPassword
     }).pipe(take(1), catchError(errorHandler));
   }
 
@@ -82,7 +83,7 @@ export class AuthService {
     }));
   }
 
-  getAccessToken() {
+  getAccessToken(): string {
     let token = localStorage.getItem('groceryApp-token');
 
     if (!token) {

@@ -3,7 +3,6 @@ import {
     InsertOneWriteOpResult,
     MongoError,
     ObjectId,
-    UpdateWriteOpResult
 } from 'mongodb';
 import User, {
     UserModel
@@ -31,11 +30,9 @@ export default class AuthController {
         this.router.patch('/update-user-password', validateToken, this.updateUserPassword);
     }
 
-    private register(req: express.Request, res: express.Response) {
+    private register(req: express.Request, res: express.Response): void {
 
         let userData: UserModel = req.body;
-
-        console.log(userData)
 
         User.findUser({
             email: userData.email
@@ -62,7 +59,7 @@ export default class AuthController {
                         userData.password = hash;
 
                         User.register(userData).then(
-                            (result: InsertOneWriteOpResult < any > ) => {
+                            () => {
                                 res.status(200).send({
                                     registered: true,
                                     message: 'User registered successfully'
@@ -87,7 +84,7 @@ export default class AuthController {
         });
     }
 
-    private login(req: express.Request, res: express.Response) {
+    private login(req: express.Request, res: express.Response): void {
         let userData: UserModel = req.body;
 
         User.findUser({
@@ -138,13 +135,13 @@ export default class AuthController {
         });
     }
 
-    checkAuthStatus(req: express.Request, res: express.Response) {
+    checkAuthStatus(req: express.Request, res: express.Response): void {
         res.status(200).send({
             auth: true
         });
     }
 
-    getUserDetails(req: express.Request, res: express.Response) {
+    getUserDetails(req: express.Request, res: express.Response): void {
         User.findUser({
             _id: new ObjectId(req.body._id)
         }).then((user: UserModel) => {
@@ -160,7 +157,7 @@ export default class AuthController {
         })
     }
 
-    updateUserName(req: express.Request, res: express.Response) {
+    updateUserName(req: express.Request, res: express.Response): void {
         const name = req.body.name;
 
         User.updateUserData({
@@ -180,34 +177,61 @@ export default class AuthController {
         });
     }
 
-    updateUserPassword(req: express.Request, res: express.Response) {
-        const password = req.body.password;
+    updateUserPassword(req: express.Request, res: express.Response): void {
 
-        HelperUtil.genrateHash(password, (error: Error, password: string) => {
-            if (error) {
-                console.log(error);
-                res.status(500).send({
-                    message: responseCode[500]
-                });
-                return;
-            }
+        const _id: ObjectId = new ObjectId(req.body._id);
+        const oldPassword: string = req.body.oldPassword;
+        const newPassword: string = req.body.newPassword;
 
-            User.updateUserData({
-                _id: new ObjectId(req.body._id)
-            }, {
-                password
-            }).then(
-                () => {
-                    res.status(200).send({
-                        message: 'Password updated successfully'
+        User.findUser({
+            _id
+        }).then(
+            (user: UserModel) => {
+                if (user) {
+                    HelperUtil.compareHash(oldPassword, user.password, (error: Error, same: boolean) => {
+                        if (error) {
+                            console.log(error);
+                            res.status(500).send({
+                                message: responseCode[500]
+                            });
+                            return;
+                        }
+                        if (same) {
+                            HelperUtil.genrateHash(newPassword, (error: Error, password: string) => {
+                                if (error) {
+                                    console.log(error);
+                                    res.status(500).send({
+                                        message: responseCode[500]
+                                    });
+                                    return;
+                                }
+
+                                User.updateUserData({
+                                    _id: new ObjectId(req.body._id)
+                                }, {
+                                    password
+                                }).then(
+                                    () => {
+                                        res.status(200).send({
+                                            message: 'Password updated successfully'
+                                        });
+                                    }
+                                ).catch((error: MongoError) => {
+                                    console.log(error);
+                                    res.status(500).send({
+                                        messsage: responseCode[500]
+                                    });
+                                })
+                            })
+                        } else {
+                            res.status(401).send({
+                                message: 'The old password provided was invalid.'
+                            });
+                        }
                     });
                 }
-            ).catch((error: MongoError) => {
-                console.log(error);
-                res.status(500).send({
-                    messsage: responseCode[500]
-                });
-            })
-        })
+            }
+        )
+
     }
 }

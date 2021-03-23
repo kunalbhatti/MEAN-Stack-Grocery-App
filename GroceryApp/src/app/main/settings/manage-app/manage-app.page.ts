@@ -17,10 +17,10 @@ import * as uuid from 'uuid';
 
 import {
   SettingsService
-} from 'src/app/services/settings.service';
+} from './../../../services/settings.service';
 import {
   ToasterService
-} from 'src/app/services/toaster.service';
+} from './../../../services/toaster.service';
 import {
   ConfirmDeleteComponent
 } from './modals/confirm-delete/confirm-delete.component';
@@ -70,7 +70,8 @@ export class ManageAppPage implements OnInit {
         settings: SettingsModel
       }) => {
         if (settingsData.settings) {
-          const userData = settingsData.settings;
+          const userData: SettingsModel = settingsData.settings;
+
           if (userData.groups.length > 0) {
             this.groups = userData.groups;
           } else {
@@ -91,11 +92,13 @@ export class ManageAppPage implements OnInit {
 
   }
 
-  addCategory(form: NgForm) {
+  addCategory(form: NgForm): void {
 
-    const categoryName = form.value.category.toLowerCase().trim();
+    const categoryName: string = form.value.category.toLowerCase().trim();
 
-    const index = this.categories.findIndex(catg => {
+    const index: number = this.categories.findIndex((catg: {
+      [cid: string]: string
+    }) => {
       if (this.getKeyVal(catg).value.toLowerCase() === categoryName) {
         return true;
       }
@@ -105,25 +108,29 @@ export class ManageAppPage implements OnInit {
       return;
     }
 
-    const cid = uuid.v4();
+    const cid: string = uuid.v4();
 
-    const category = {
+    const category: {
+      [cid: string]: string
+    } = {
       [cid]: categoryName
     };
 
     this.categories.push(category);
 
     this.settingsService.updateCategories(this.categories).subscribe(
-      (result) => {
+      () => {
         form.reset();
         this.toasterService.presentToast('Success!!', 'Category was added successfully', 2000);
         this.addCategoryForm = false;
+      }, (error: string) => {
+        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       }
     );
   }
 
-  editCategory(form: NgForm) {
-    const category = form.value.category.trim().toLowerCase();
+  editCategory(form: NgForm): void {
+    const category: string = form.value.category.trim().toLowerCase();
 
     if (this.selectedCategory.category === category) {
       form.reset();
@@ -132,7 +139,9 @@ export class ManageAppPage implements OnInit {
       return;
     }
 
-    const index = this.categories.findIndex(catg => {
+    const index: number = this.categories.findIndex((catg: {
+      [cid: string]: string
+    }) => {
       if (catg[this.selectedCategory.cid] === this.selectedCategory.category) {
         return true;
       }
@@ -141,24 +150,26 @@ export class ManageAppPage implements OnInit {
     this.categories[index][this.selectedCategory.cid] = category;
 
     this.settingsService.updateCategories(this.categories).subscribe(
-      (result) => {
+      () => {
         form.reset();
         this.toasterService.presentToast('Success!!', 'Category was editted successfully', 2000);
         this.selectedCategory = null;
         this.addCategoryForm = false;
+      }, (error: string) => {
+        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       }
     );
   }
 
-  addGroup(form: NgForm) {
+  addGroup(form: NgForm): void {
 
-    const groupName = form.value.group.toLowerCase().trim();
+    const groupName: string = form.value.group.toLowerCase().trim();
 
     if (this.groups.length === 3) {
       return;
     }
 
-    const index = this.groups.findIndex(grp => {
+    const index: number = this.groups.findIndex(grp => {
       if (this.getKeyVal(grp).value.toLowerCase() === groupName) {
         return true;
       }
@@ -168,9 +179,11 @@ export class ManageAppPage implements OnInit {
       return;
     }
 
-    const gid = uuid.v4();
+    const gid: string = uuid.v4();
 
-    const group = {
+    const group: {
+      [gid: string]: string
+    } = {
       [gid]: groupName
     };
 
@@ -180,12 +193,14 @@ export class ManageAppPage implements OnInit {
         form.reset();
         this.toasterService.presentToast('Success!!', 'Group was added successfully', 2000);
         this.addGroupForm = false;
+      }, (error: string) => {
+        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       }
     );
   }
 
-  editGroup(form: NgForm) {
-    const group = form.value.group.toLowerCase().trim();
+  editGroup(form: NgForm): void {
+    const group: string = form.value.group.toLowerCase().trim();
 
     if (this.selectedGroup.group === group) {
       form.reset();
@@ -194,7 +209,9 @@ export class ManageAppPage implements OnInit {
       return;
     }
 
-    const index = this.groups.findIndex(grp => {
+    const index: number = this.groups.findIndex((grp: {
+      [gid: string]: string
+    }) => {
       if (grp[this.selectedGroup.gid] === this.selectedGroup.group) {
         return true;
       }
@@ -208,11 +225,13 @@ export class ManageAppPage implements OnInit {
         this.toasterService.presentToast('Success!!', 'Group was editted successfully', 2000);
         this.selectedGroup = null;
         this.addGroupForm = false;
+      }, (error: string) => {
+        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       }
     );
   }
 
-  presentGroupActionSheet(group: string, gid: string) {
+  presentGroupActionSheet(group: string, gid: string): void {
     this.actionSheetController.create({
       header: 'Options',
       buttons: [{
@@ -261,18 +280,20 @@ export class ManageAppPage implements OnInit {
                   }) => {
                     this.toasterService.presentToast('Success!!', 'Group was deleted successfully', 2000);
                     this.groups = result.groups;
+                  }, (error: string) => {
+                    this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
                   }
-                )
+                );
               }
             });
         }
       }]
-    }).then(actionEl => {
+    }).then((actionEl: HTMLIonActionSheetElement) => {
       actionEl.present();
     })
   }
 
-  presentCategoryActionSheet(category: string, cid: string) {
+  presentCategoryActionSheet(category: string, cid: string): void {
     this.actionSheetController.create({
       header: 'Options',
       buttons: [{
@@ -280,8 +301,8 @@ export class ManageAppPage implements OnInit {
         icon: 'close-outline',
         role: 'destructive'
       }, {
-        text: 'Open',
-        icon: 'open',
+        text: 'Products',
+        icon: 'prism-outline',
         handler: () => {
           this.router.navigate(['/', 'app', 'settings', 'manage-app', 'category', category, cid]);
         }
@@ -327,20 +348,22 @@ export class ManageAppPage implements OnInit {
                   }) => {
                     this.toasterService.presentToast('Success!!', 'Category was deleted successfully', 2000);
                     this.categories = result.categories;
-
+                  }, (error: string) => {
+                    this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
                   }
-                )
+                );
               }
             }
-          )
+          );
 
         }
       }]
-    }).then(actionEl => {
+    }).then((actionEl: HTMLIonActionSheetElement) => {
       actionEl.present();
     })
   }
 
+  // Utility functions
 
   getKeyVal(data: {
     [id: string]: string

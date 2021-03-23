@@ -31,7 +31,6 @@ export default class SettingsController {
         this.router.patch('/update-group', verifyToken, this.updateGroup);
         this.router.patch('/update-category', verifyToken, this.updateCategory);
         this.router.get('/get-products/:cid', verifyToken, this.getProducts);
-        this.router.get('/get-product', verifyToken, this.getProduct);
         this.router.post('/add-product', verifyToken, this.addProduct);
         this.router.patch('/edit-product', verifyToken, this.editProduct);
         this.router.delete('/delete-product/:productId', verifyToken, this.deleteProduct);
@@ -61,13 +60,13 @@ export default class SettingsController {
         const groups: string[] = req.body.groups;
 
         Settings.updateGroup(groups, _id).then(
-            (result) => {
+            () => {
                 res.status(200).send({
                     groups
                 });
             }
         ).catch(
-            error => {
+            (error: MongoError) => {
                 console.log(error)
                 res.status(500).send({
                     message: responseCode[500]
@@ -83,7 +82,6 @@ export default class SettingsController {
 
         Settings.updateCategories(categories, _id).then(
             () => {
-
                 if (deletedId) {
                     Settings.deleteProducts(deletedId).then(
                         () => {
@@ -105,7 +103,7 @@ export default class SettingsController {
 
             }
         ).catch(
-            error => {
+            (error: MongoError) => {
                 console.log(error)
                 res.status(500).send({
                     message: responseCode[500]
@@ -114,14 +112,15 @@ export default class SettingsController {
         )
     }
 
-    getProducts(req: express.Request, res: express.Response) {
-        const uid = new ObjectId(req.body._id);
-        const cid = req.params.cid;
+    getProducts(req: express.Request, res: express.Response): void {
+        const uid: ObjectId = new ObjectId(req.body._id);
+        const cid: string = req.params.cid;
+
         Settings.getProducts(uid, cid).toArray().then(
             products => {
                 res.status(200).send(products);
             }
-        ).catch(error => {
+        ).catch((error: MongoError) => {
             console.log(error);
             res.status(500).send({
                 message: responseCode[500]
@@ -129,7 +128,7 @@ export default class SettingsController {
         })
     }
 
-    addProduct(req: express.Request, res: express.Response) {
+    addProduct(req: express.Request, res: express.Response): void {
         const product: ProductsModel = req.body.product;
         product.uid = new ObjectId(req.body._id);
 
@@ -149,16 +148,18 @@ export default class SettingsController {
         );
     }
 
-    editProduct(req: express.Request, res: express.Response) {
+    editProduct(req: express.Request, res: express.Response): void {
         const product: ProductsModel = req.body.product;
+        
         product._id = new ObjectId(product._id);
+
         Settings.editProduct(product).then(
-            result => {
+            () => {
                 res.status(200).send({
                     product
                 });
             }
-        ).catch(error => {
+        ).catch((error: MongoError) => {
             console.log(error);
             res.status(500).send({
                 message: responseCode[500]
@@ -166,31 +167,17 @@ export default class SettingsController {
         })
     }
 
-    getProduct(req: express.Request, res: express.Response) {
-        const _id = new ObjectId(req.body.productId);
-        Settings.getProduct(_id).then(
-            result => {
-                res.status(200).send({
-                    result
-                });
-            }
-        ).catch(error => {
-            res.status(500).send({
-                message: responseCode[500]
-            });
-        })
-    }
-
-    deleteProduct(req: express.Request, res: express.Response) {
-        const _id = new ObjectId(req.params.productId);
+    deleteProduct(req: express.Request, res: express.Response): void {
+        const _id: ObjectId= new ObjectId(req.params.productId);
 
         Settings.deleteProduct(_id).then(
-            result => {
+            () => {
                 res.status(200).send({
                     message: 'Product Deleted'
                 });
             }
-        ).catch(error => {
+        ).catch((error: MongoError) => {
+            console.log(error);
             res.status(500).send({
                 message: responseCode[500]
             });

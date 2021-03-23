@@ -32,7 +32,7 @@
               </ion-card-subtitle>
             </ion-card-header>
             <ion-card-content>
-              <ion-item *ngIf="product?.size">Size: {{product?.size}}</ion-item>
+              <ion-item *ngIf="product?.size">Size: {{product?.size | titlecase}}</ion-item>
               <ion-item *ngIf="product?.weight">Weight: {{product?.weight}}</ion-item>
               <ion-item *ngIf="product?.price">Price: {{product?.price}}</ion-item>
             </ion-card-content>
