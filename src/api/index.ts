@@ -8,6 +8,7 @@ import SettingsController from '../controllers/settings.controller';
 import {
     connectToMongo
 } from './../util/db.util';
+import ProductsController from '../controllers/products.controller';
 
 const port: string | number = process.env.PORT || 3000;
 
@@ -31,6 +32,7 @@ class Server {
     initializeControllers(): void {
         this.app.use('/auth', new AuthController().router);
         this.app.use('/settings', new SettingsController().router);
+        this.app.use('/products', new ProductsController().router);
     }
 
 

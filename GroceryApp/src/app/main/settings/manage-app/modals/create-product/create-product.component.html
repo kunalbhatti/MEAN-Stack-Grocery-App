@@ -25,15 +25,15 @@
           </ion-item>
           <ion-item>
             <ion-label>Size</ion-label>
-            <ion-select value="brown" okText="Okay" cancelText="Dismiss" [ngModel]="product?.size" name="size">
+            <ion-select okText="Okay" cancelText="Dismiss" [ngModel]="product?.size" name="size">
               <ion-select-option value="small">Small</ion-select-option>
               <ion-select-option value="medium">Medium</ion-select-option>
               <ion-select-option value="large">Large</ion-select-option>
             </ion-select>
           </ion-item>
           <ion-item lines="none">
-            <ion-label position="floating">Weight</ion-label>
-            <ion-input [ngModel]="product?.weight" name="weight" minlength="2" maxlength="20"></ion-input>
+            <ion-label position="floating">Quantity</ion-label>
+            <ion-input [ngModel]="product?.quantity" name="quantity" minlength="2" maxlength="20"></ion-input>
           </ion-item>
           <ion-item lines="none">
             <ion-label position="floating">Price <small>(Required)</small></ion-label>

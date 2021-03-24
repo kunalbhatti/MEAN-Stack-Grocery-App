@@ -13,8 +13,12 @@ import verifyToken from './../middlewares/validate-token.middleware';
 import {
     Settings,
     SettingsModel,
-    ProductsModel
 } from './../models/settings.model';
+
+import {
+    Products,
+    ProductsModel
+} from './../models/products.model';
 
 import responseCode from './../json/response-code.json'
 
@@ -30,7 +34,7 @@ export default class SettingsController {
         this.router.get('/get-settings', verifyToken, this.getSettings);
         this.router.patch('/update-group', verifyToken, this.updateGroup);
         this.router.patch('/update-category', verifyToken, this.updateCategory);
-        this.router.get('/get-products/:cid', verifyToken, this.getProducts);
+        this.router.get('/get-products/:cid?', verifyToken, this.getProducts);
         this.router.post('/add-product', verifyToken, this.addProduct);
         this.router.patch('/edit-product', verifyToken, this.editProduct);
         this.router.delete('/delete-product/:productId', verifyToken, this.deleteProduct);
@@ -83,7 +87,7 @@ export default class SettingsController {
         Settings.updateCategories(categories, _id).then(
             () => {
                 if (deletedId) {
-                    Settings.deleteProducts(deletedId).then(
+                    Products.deleteProducts(deletedId).then(
                         () => {
                             res.status(200).send({
                                 categories
@@ -116,8 +120,8 @@ export default class SettingsController {
         const uid: ObjectId = new ObjectId(req.body._id);
         const cid: string = req.params.cid;
 
-        Settings.getProducts(uid, cid).toArray().then(
-            products => {
+        Products.getProducts(uid, cid).toArray().then(
+            (products: any[]) => {
                 res.status(200).send(products);
             }
         ).catch((error: MongoError) => {
@@ -128,11 +132,12 @@ export default class SettingsController {
         })
     }
 
+
     addProduct(req: express.Request, res: express.Response): void {
         const product: ProductsModel = req.body.product;
         product.uid = new ObjectId(req.body._id);
 
-        Settings.addProduct(product).then(
+        Products.addProduct(product).then(
             (result: InsertOneWriteOpResult < any > ) => {
                 product._id = result.insertedId;
                 delete product.uid;
@@ -150,10 +155,10 @@ export default class SettingsController {
 
     editProduct(req: express.Request, res: express.Response): void {
         const product: ProductsModel = req.body.product;
-        
+
         product._id = new ObjectId(product._id);
 
-        Settings.editProduct(product).then(
+        Products.editProduct(product).then(
             () => {
                 res.status(200).send({
                     product
@@ -168,9 +173,9 @@ export default class SettingsController {
     }
 
     deleteProduct(req: express.Request, res: express.Response): void {
-        const _id: ObjectId= new ObjectId(req.params.productId);
+        const _id: ObjectId = new ObjectId(req.params.productId);
 
-        Settings.deleteProduct(_id).then(
+        Products.deleteProduct(_id).then(
             () => {
                 res.status(200).send({
                     message: 'Product Deleted'
