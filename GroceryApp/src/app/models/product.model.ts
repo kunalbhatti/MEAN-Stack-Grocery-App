@@ -4,8 +4,12 @@ export interface ProductModel {
   quantity ? : string;
   size ? : string;
   brand ? : string;
-  stockCount ? : number;
-  stockStatus ? : string;
+  stockCount ? : {
+    [gid: string]: number;
+  };
+  stockStatus ? : {
+    [gid: string]: string;
+  };
   uid ? : string; // user id
   cid ? : string; // category id
   _id ? : string;

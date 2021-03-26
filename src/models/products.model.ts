@@ -3,7 +3,8 @@ import {
     Cursor,
     Db,
     InsertOneWriteOpResult,
-    DeleteWriteOpResultObject
+    DeleteWriteOpResultObject,
+    UpdateWriteOpResult
 } from 'mongodb';
 import {
     getDb
@@ -15,14 +16,20 @@ export interface ProductsModel {
     quantity ? : string;
     size ? : string;
     brand ? : string;
-    stockCount ? : string;
-    stockStatus ? : string;
+    stockCount ? : {
+        [gid: string]: number;
+    };
+    stockStatus ? : {
+        [gid: string]: string;
+    };
     uid ? : ObjectId; // user id
     cid ? : string; // category id
     _id ? : ObjectId; //
 }
 
 export class Products {
+    //cc1668f2-8b7f-4c4a-84f5-096721a587e1
+    //a35e54b4-5687-47b8-8833-6dab020b0a4f
     static getProducts(uid: ObjectId, cid ? : string): Cursor < any > {
         const db: Db = getDb();
 
@@ -79,8 +86,6 @@ export class Products {
                 brand: product.brand,
                 size: product.size,
                 quantity: product.quantity,
-                stockCount: product.stockCount,
-                stockStatus: product.stockStatus,
                 price: product.price
             }
         });
@@ -105,24 +110,22 @@ export class Products {
         return db.collection('user_products').find(filter);
     }
 
-    static updateStockCount(filter: any, count: string) {
+    static updateStockCount(filter: any, count: number, gid: string): Promise < UpdateWriteOpResult > {
         const db: Db = getDb();
-
         return db.collection('user_products').updateOne(
             filter, {
-                $set: {
-                    stockCount: count
+                $inc: {
+                    [`stockCount.${gid}`]: count
                 }
             });
     }
 
-    static updateStockStatus(filter: any, status: string) {
+    static updateStockStatus(filter: any, status: string, gid: string): Promise < UpdateWriteOpResult > {
         const db: Db = getDb();
-
         return db.collection('user_products').updateOne(
             filter, {
                 $set: {
-                    stockStatus: status
+                    [`stockStatus.${gid}`]: status
                 }
             });
     }

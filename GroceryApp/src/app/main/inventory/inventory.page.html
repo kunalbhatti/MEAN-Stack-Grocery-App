@@ -10,10 +10,8 @@
     <ion-row class="ion-justify-content-center">
       <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4"
         class="ion-margin-start ion-margin-end ion-no-padding">
-        <ion-item style="border-radius: 20px;" lines="none">
-          <ion-input #searchStr placeholder="Search Item" (ionInput)="getProductList(searchStr.value)"></ion-input>
-          <ion-icon name="search-outline" slot="start"></ion-icon>
-        </ion-item>
+        <ion-searchbar color="light" showCancelButton="focus" #searchStr (ionInput)="getProductList(searchStr.value)">
+        </ion-searchbar>
       </ion-col>
     </ion-row>
   </ion-grid>
@@ -29,8 +27,41 @@
             </ion-button>
           </ion-buttons>
         </ion-toolbar>
-        <ion-list style="background-color: rgb(40, 41, 44);">
+        <ion-list style="background-color: rgb(40, 41, 44);" *ngIf="searchString === ''">
           <ion-card *ngFor="let product of products">
+            <ion-card-header>
+              <ion-card-title>
+                {{product?.name | titlecase}}
+              </ion-card-title>
+              <ion-card-subtitle>
+                {{product?.brand | titlecase}}
+              </ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-item *ngIf="product?.size">
+                <ion-label>
+                  Size: {{product?.size | titlecase}}
+                </ion-label>
+              </ion-item>
+              <ion-item *ngIf="product?.quantity">
+                <ion-label>
+                  Quantity: {{product?.quantity}}
+                </ion-label>
+              </ion-item>
+              <ion-item *ngIf="product?.price">
+                <ion-label>Price: {{product?.price}}</ion-label>
+              </ion-item>
+              <ion-item *ngIf="product?.stockCount[currentGroup] !== 0">
+                <ion-label>Stock: {{product?.stockCount[currentGroup]}}</ion-label>
+              </ion-item>
+              <ion-item *ngIf="product?.stockStatus[currentGroup] !== ''">
+                <ion-label>Status: {{product?.stockStatus[currentGroup] | titlecase}}</ion-label>
+              </ion-item>
+            </ion-card-content>
+          </ion-card>
+        </ion-list>
+        <ion-list style="background-color: rgb(40, 41, 44);" *ngIf="searchString !== ''">
+          <ion-card *ngFor="let product of filtered">
             <ion-card-header>
               <ion-card-title>
                 {{product?.name | titlecase}}
@@ -43,20 +74,25 @@
               <ion-item *ngIf="product?.size">Size: {{product?.size | titlecase}}</ion-item>
               <ion-item *ngIf="product?.quantity">Quantity: {{product?.quantity}}</ion-item>
               <ion-item *ngIf="product?.price">Price: {{product?.price}}</ion-item>
-              <ion-item *ngIf="product?.stockCount">Count: {{product?.stockCount}}</ion-item>
-              <ion-item *ngIf="product?.stockStatus">Status: {{product?.stockStatus}}</ion-item>
-            </ion-card-content>
-            <ion-row class="ion-justify-content-center">
-              <ion-item>
-                <ion-button fill="clear" color="dark" size="small">
-                  <ion-icon name="remove-outline"></ion-icon>
+              <ion-item>Stock:
+                <ion-button fill="clear" color="dark" size="small" (click)="updateProductStockCount(product, -1);">
+                  <ion-icon name="caret-down-outline"></ion-icon>
                 </ion-button>
-                <ion-text class="ion-padding-left ion-padding right">0</ion-text>
-                <ion-button fill="clear" color="dark" size="small">
-                  <ion-icon name="add-outline"></ion-icon>
+                <ion-text>{{product?.stockCount[currentGroup]}}</ion-text>
+                <ion-button fill="clear" color="dark" size="small" (click)="updateProductStockCount(product, 1);">
+                  <ion-icon name="caret-up-outline"></ion-icon>
                 </ion-button>
               </ion-item>
-            </ion-row>
+              <ion-item>
+                <ion-label>Status:</ion-label>
+                <ion-select okText="Okay" cancelText="Dismiss" [value]="product?.stockStatus[currentGroup]" #stockStatus
+                  (ionChange)="updateProductStockStatus(product, stockStatus.value)">
+                  <ion-select-option value="full">Full</ion-select-option>
+                  <ion-select-option value="half">Half</ion-select-option>
+                  <ion-select-option value="empty">Empty</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-card-content>
           </ion-card>
         </ion-list>
       </ion-col>
@@ -64,4 +100,3 @@
   </ion-grid>
 
 </ion-content>
-

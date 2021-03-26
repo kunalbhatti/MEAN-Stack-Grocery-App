@@ -50,6 +50,9 @@ export class CreateProductComponent implements OnInit {
   }
 
   editProduct(form: NgForm): void {
+    form.value.stockCount = this.product.stockCount;
+    form.value.stockStatus = this.product.stockStatus;
+
     this.settingsService.editProduct(form.value).subscribe((result: {
       product: ProductModel
     }) => {

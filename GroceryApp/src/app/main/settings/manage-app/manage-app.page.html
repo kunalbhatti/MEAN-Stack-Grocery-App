@@ -46,13 +46,16 @@
           <ion-col size="12" class="ion-text-center"
             [ngClass]="{'ion-padding': groupError === '' && groups?.length === 0}">
             <ion-list *ngIf="groupError === '' && groups?.length > 0">
-              <ion-item *ngFor="let group of groups;">
-                <ion-label>{{getKeyVal(group).value | titlecase}}</ion-label>
-                <ion-button fill="clear"
-                  (click)="presentGroupActionSheet(getKeyVal(group).value, getKeyVal(group).key)">
-                  <ion-icon name="ellipsis-vertical" color="dark"></ion-icon>
-                </ion-button>
-              </ion-item>
+              <ion-radio-group [value]="currentGroup" #selectedGrp (ionChange)="setSelectedGroup(selectedGrp.value)">
+                <ion-item *ngFor="let group of groups;">
+                  <ion-radio slot="start" [value]="getKeyVal(group).key"></ion-radio>
+                  <ion-label>{{getKeyVal(group).value | titlecase}}</ion-label>
+                  <ion-button fill="clear"
+                    (click)="presentGroupActionSheet(getKeyVal(group).value, getKeyVal(group).key)">
+                    <ion-icon name="ellipsis-vertical" color="dark"></ion-icon>
+                  </ion-button>
+                </ion-item>
+              </ion-radio-group>
             </ion-list>
             <ion-text *ngIf="groupError === '' && groups?.length === 0">No Items Found</ion-text>
             <ion-text *ngIf="groupError !== ''">{{groupError}}</ion-text>
@@ -89,7 +92,8 @@
               </ion-item>
             </form>
           </ion-col>
-          <ion-col size="12" class="ion-text-center" [ngClass]="{'ion-padding': categoryError === '' && categories?.length === 0}">
+          <ion-col size="12" class="ion-text-center"
+            [ngClass]="{'ion-padding': categoryError === '' && categories?.length === 0}">
             <ion-list *ngIf="categoryError === '' && categories?.length > 0">
               <ion-item *ngFor="let category of categories;">
                 <ion-label [innerText]="getKeyVal(category).value | titlecase"></ion-label>

@@ -45,6 +45,8 @@ export class ManageAppPage implements OnInit {
     gid: string
   };
 
+  currentGroup: string;
+
   categoryError: string = '';
   addCategoryForm: boolean;
   categories: {
@@ -71,7 +73,7 @@ export class ManageAppPage implements OnInit {
       }) => {
         if (settingsData.settings) {
           const userData: SettingsModel = settingsData.settings;
-
+          this.currentGroup = userData.selectedGroup;
           if (userData.groups.length > 0) {
             this.groups = userData.groups;
           } else {
@@ -361,6 +363,18 @@ export class ManageAppPage implements OnInit {
     }).then((actionEl: HTMLIonActionSheetElement) => {
       actionEl.present();
     })
+  }
+
+  setSelectedGroup(groupId: string): void {
+    this.settingsService.updateSelectedGroup(groupId).subscribe(
+      () => {
+        console.log('updated');
+      }, (error: {
+        message: string
+      }) => {
+        console.log(error);
+      }
+    )
   }
 
   // Utility functions

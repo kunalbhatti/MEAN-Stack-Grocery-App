@@ -44,9 +44,17 @@ export default class ProductsController {
             $and: [{
                 uid
             }, {
-                stockCount: {
-                    $gt: 0
-                }
+                $or: [{
+                        stockCount: {
+                            $gt: 0
+                        },
+                    }, {
+                        stockStatus: {
+                            $ne: 'empty'
+                        }
+                    }
+                ]
+
             }]
         }
         Products.getInventory(query).toArray().then((products: ProductsModel[]) => {
@@ -83,13 +91,14 @@ export default class ProductsController {
 
     updateStockCount(req: express.Request, res: express.Response) {
         const _id: ObjectId = new ObjectId(req.params.pid);
-        const count: string = req.body.count;
+        const count: number = +req.body.count;
+        const gid: string = req.body.gid;
 
         const query = {
             _id
         }
 
-        Products.updateStockCount(query, count).then(() => {
+        Products.updateStockCount(query, count, gid).then(() => {
             res.status(200).send({
                 updated: true
             });
@@ -99,12 +108,13 @@ export default class ProductsController {
     updateStockStatus(req: express.Request, res: express.Response) {
         const _id: ObjectId = new ObjectId(req.params.pid);
         const status: string = req.body.status;
+        const gid: string = req.body.gid;
 
         const query = {
             _id
         }
 
-        Products.updateStockStatus(query, status).then(() => {
+        Products.updateStockStatus(query, status, gid).then(() => {
             res.status(200).send({
                 updated: true
             });

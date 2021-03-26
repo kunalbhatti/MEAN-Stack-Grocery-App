@@ -29,6 +29,12 @@ export class SettingsService {
     return this.http.get(`${config.url}/settings/get-settings`).pipe(take(1), catchError(errorHandler));
   }
 
+  updateSelectedGroup(gid: string): Observable < any > {
+    return this.http.patch(`${config.url}/settings/update-selected-group`, {
+      gid
+    }).pipe(take(1), catchError(errorHandler));
+  }
+
   updateGroup(
     groups: {
       [id: string]: string
@@ -42,7 +48,7 @@ export class SettingsService {
   updateCategories(
     categories: {
       [id: string]: string
-    } [], deletedId?: string
+    } [], deletedId ? : string
   ): Observable < any > {
     return this.http.patch(`${config.url}/settings/update-category`, {
       categories,
@@ -68,5 +74,9 @@ export class SettingsService {
 
   deleteProduct(productId: string): Observable < any > {
     return this.http.delete(`${config.url}/settings/delete-product/${productId}`)
+  }
+
+  getCurrentGroup(): string {
+    return localStorage.getItem('currentGroup');
   }
 }

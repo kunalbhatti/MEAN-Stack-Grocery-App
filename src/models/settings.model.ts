@@ -9,6 +9,7 @@ import {
 
 
 export interface SettingsModel {
+    selectedGroup: string;
     groups: {
         [id: string]: string
     };
@@ -31,6 +32,18 @@ export class Settings {
         return db.collection('user_settings').findOne({
             _id
         });
+    }
+
+    static updateSelectedGroup(_id: ObjectId, gid: string) {
+        const db: Db = getDb();
+
+        return db.collection('user_settings').updateOne({
+            _id
+        }, {
+            $set: {
+                selectedGroup: gid
+            }
+        })
     }
 
 
