@@ -46,7 +46,7 @@
           <ion-col size="12" class="ion-text-center"
             [ngClass]="{'ion-padding': groupError === '' && groups?.length === 0}">
             <ion-list *ngIf="groupError === '' && groups?.length > 0">
-              <ion-radio-group [value]="currentGroup" #selectedGrp (ionChange)="setSelectedGroup(selectedGrp.value)">
+              <ion-radio-group [value]="currentGroup" #currentGrp (ionChange)="setCurrentGroup(currentGrp.value)">
                 <ion-item *ngFor="let group of groups;">
                   <ion-radio slot="start" [value]="getKeyVal(group).key"></ion-radio>
                   <ion-label>{{getKeyVal(group).value | titlecase}}</ion-label>

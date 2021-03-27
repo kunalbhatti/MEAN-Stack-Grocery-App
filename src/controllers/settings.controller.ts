@@ -32,7 +32,7 @@ export default class SettingsController {
 
     constructor() {
         this.router.get('/get-settings', verifyToken, this.getSettings);
-        this.router.patch('/update-selected-group', verifyToken, this.updateSelectedGroup);
+        this.router.patch('/update-current-group', verifyToken, this.updateCurrentGroup);
         this.router.patch('/update-group', verifyToken, this.updateGroup);
         this.router.patch('/update-category', verifyToken, this.updateCategory);
         this.router.get('/get-products/:cid?', verifyToken, this.getProducts);
@@ -60,14 +60,14 @@ export default class SettingsController {
         });
     }
 
-    updateSelectedGroup(req: express.Request, res: express.Response) {
+    updateCurrentGroup(req: express.Request, res: express.Response) {
         const _id: ObjectId = new ObjectId(req.body._id);
         const gid: string = req.body.gid;
 
-        Settings.updateSelectedGroup(_id, gid).then(
+        Settings.updateCurrentGroup(_id, gid).then(
             () => {
                 res.status(200).send({
-                    message: 'Updated selected group'
+                    message: 'Updated current group'
                 });
             }
         ).catch((error: MongoError) => {

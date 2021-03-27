@@ -2,6 +2,15 @@ import {
   Component,
   OnInit
 } from "@angular/core";
+import {
+  ActivatedRoute
+} from "@angular/router";
+import {
+  SettingsModel
+} from "../models/settings.model";
+import {
+  SettingsService
+} from "../services/settings.service";
 
 @Component({
   selector: 'app-main',
@@ -9,4 +18,11 @@ import {
   styleUrls: ['main.page.css']
 })
 
-export class MainPage {}
+export class MainPage implements OnInit {
+
+  constructor(private route: ActivatedRoute, private settingsService: SettingsService) {}
+
+  ngOnInit() {
+    this.settingsService.settings = this.route.snapshot.data['data']['settings'];
+  }
+}

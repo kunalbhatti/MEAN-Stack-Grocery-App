@@ -2,7 +2,7 @@ export interface SettingsModel {
   groups: {
     [id: string]: string
   } [];
-  selectedGroup: string;
+  currentGroup: string;
   categories: {
     [id: string]: string
   } [];

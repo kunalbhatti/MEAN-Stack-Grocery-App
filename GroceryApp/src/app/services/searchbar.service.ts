@@ -30,7 +30,7 @@ export class SearchBarService {
   currentGroup: string;
 
   constructor(private http: HttpClient, private settingsService: SettingsService) {
-    this.currentGroup = this.settingsService.getCurrentGroup();
+    this.currentGroup = this.settingsService.settings.currentGroup;
   }
 
   getProductList(searchStr: string): Observable < any > {
@@ -50,6 +50,8 @@ export class SearchBarService {
             };
           }
         }
+
+        console.log(products)
         return products;
       }
     ), catchError(errorHandler))

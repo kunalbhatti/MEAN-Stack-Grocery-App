@@ -21,10 +21,11 @@ export default class ProductsController {
 
     constructor() {
         this.router.get('/filter-products/:searchStr?', verifyToken, this.filterProducts);
-        this.router.get('/inventory-by-products', verifyToken, this.getInventoryByProducts);
+        this.router.get('/inventory-by-products/:gid', verifyToken, this.getInventoryByProducts);
         this.router.get('/inventory-by-category/:cid', verifyToken, this.getInventoryByCategory);
         this.router.patch('/update-stock-count/:pid', verifyToken, this.updateStockCount);
         this.router.patch('/update-stock-status/:pid', verifyToken, this.updateStockStatus);
+        this.router.patch('/update-cart-count/:pid', verifyToken, this.updateCartCount);
     }
 
     filterProducts(req: express.Request, res: express.Response) {
@@ -39,25 +40,27 @@ export default class ProductsController {
     }
 
     getInventoryByProducts(req: express.Request, res: express.Response) {
-        const uid = new ObjectId(req.body._id);
+        const uid: ObjectId = new ObjectId(req.body._id);
+        const gid: string = req.params.gid;
+
         const query = {
             $and: [{
                 uid
             }, {
-                $or: [{
-                        stockCount: {
-                            $gt: 0
-                        },
-                    }, {
-                        stockStatus: {
-                            $ne: 'empty'
-                        }
+                $and: [{
+                    [`stockCount.${gid}`]: {
+                        $gt: 0
+                    },
+                }, {
+                    [`stockStatus.${gid}`]: {
+                        $ne: 'empty'
                     }
-                ]
-
+                }]
             }]
         }
+
         Products.getInventory(query).toArray().then((products: ProductsModel[]) => {
+            console.log(products)
             res.status(200).send(products);
         }).catch((error: MongoError) => {
             console.log(error);
@@ -102,7 +105,10 @@ export default class ProductsController {
             res.status(200).send({
                 updated: true
             });
-        })
+        }).catch((error: MongoError) => {
+            console.log(error);
+            res.status(500).send(responseCode[500]);
+        });
     }
 
     updateStockStatus(req: express.Request, res: express.Response) {
@@ -118,6 +124,28 @@ export default class ProductsController {
             res.status(200).send({
                 updated: true
             });
-        })
+        }).catch((error: MongoError) => {
+            console.log(error);
+            res.status(500).send(responseCode[500]);
+        });
+    }
+
+    updateCartCount(req: express.Request, res: express.Response) {
+        const _id: ObjectId = new ObjectId(req.params.pid);
+        const count: number = +req.body.count;
+        const gid: string = req.body.gid;
+
+        const query = {
+            _id
+        }
+
+        Products.updateCartCount(query, count, gid).then(() => {
+            res.status(200).send({
+                updated: true
+            });
+        }).catch((error: MongoError) => {
+            console.log(error);
+            res.status(500).send(responseCode[500]);
+        });
     }
 }

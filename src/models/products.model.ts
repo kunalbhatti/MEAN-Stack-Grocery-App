@@ -22,6 +22,9 @@ export interface ProductsModel {
     stockStatus ? : {
         [gid: string]: string;
     };
+    cartCount ? : {
+        [gid: string]: number;
+    }
     uid ? : ObjectId; // user id
     cid ? : string; // category id
     _id ? : ObjectId; //
@@ -127,6 +130,19 @@ export class Products {
                 $set: {
                     [`stockStatus.${gid}`]: status
                 }
-            });
+            }
+        );
+    }
+
+    static updateCartCount(filter: any, count: number, gid: string): Promise < UpdateWriteOpResult > {
+        const db: Db = getDb();
+
+        return db.collection('user_products').updateOne(
+            filter, {
+                $set: {
+                    [`cart.${gid}`]: count
+                }
+            }
+        );
     }
 }

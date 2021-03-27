@@ -13,6 +13,10 @@ import {
   AuthGuard
 } from './guards/auth.guard';
 
+import {
+  SettingsResolveGuard
+} from './guards/settings-resolve.guard';
+
 const routes: Routes = [{
   path: '',
   redirectTo: 'auth',
@@ -24,6 +28,9 @@ const routes: Routes = [{
 }, {
   path: 'app',
   loadChildren: () => import('./main/main.module').then(m => m.MainModule),
+  resolve: {
+    data: SettingsResolveGuard
+  },
   canLoad: [AppGuard]
 }];
 

@@ -9,7 +9,7 @@ import {
 
 
 export interface SettingsModel {
-    selectedGroup: string;
+    currentGroup: string;
     groups: {
         [id: string]: string
     };
@@ -34,14 +34,14 @@ export class Settings {
         });
     }
 
-    static updateSelectedGroup(_id: ObjectId, gid: string) {
+    static updateCurrentGroup(_id: ObjectId, gid: string) {
         const db: Db = getDb();
 
         return db.collection('user_settings').updateOne({
             _id
         }, {
             $set: {
-                selectedGroup: gid
+                currentGroup: gid
             }
         })
     }

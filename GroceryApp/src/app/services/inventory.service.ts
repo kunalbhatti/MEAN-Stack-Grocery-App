@@ -8,7 +8,9 @@ import {
   Observable
 } from "rxjs";
 import {
-  catchError, map, take
+  catchError,
+  map,
+  take
 } from "rxjs/operators";
 import {
   ProductModel
@@ -16,7 +18,9 @@ import {
 
 import * as config from './config.json';
 import errorHandler from './error.handler';
-import { SettingsService } from "./settings.service";
+import {
+  SettingsService
+} from "./settings.service";
 
 @Injectable({
   providedIn: 'root'
@@ -24,11 +28,11 @@ import { SettingsService } from "./settings.service";
 export class InventoryService {
   currentGroup: string;
   constructor(private http: HttpClient, private settingsService: SettingsService) {
-    this.currentGroup = this.settingsService.getCurrentGroup();
+    this.currentGroup = this.settingsService.settings.currentGroup;
   }
 
-  getInventoryByProducts(): Observable < any > {
-    return this.http.get(`${config.url}/products/inventory-by-products`).pipe(take(1), map(
+  getInventoryByProducts(gid: string): Observable < any > {
+    return this.http.get(`${config.url}/products/inventory-by-products/${gid}`).pipe(take(1), map(
       (products: ProductModel[]) => {
 
         for (let product of products) {

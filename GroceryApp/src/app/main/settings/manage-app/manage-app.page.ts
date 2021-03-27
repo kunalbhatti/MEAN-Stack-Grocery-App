@@ -67,13 +67,14 @@ export class ManageAppPage implements OnInit {
     this.addGroupForm = false;
     this.addCategoryForm = false;
 
+    // can be changed to use the settings property
     this.settingsService.getSettings().subscribe(
       (settingsData: {
         settings: SettingsModel
       }) => {
         if (settingsData.settings) {
           const userData: SettingsModel = settingsData.settings;
-          this.currentGroup = userData.selectedGroup;
+          this.currentGroup = userData.currentGroup;
           if (userData.groups.length > 0) {
             this.groups = userData.groups;
           } else {
@@ -365,8 +366,8 @@ export class ManageAppPage implements OnInit {
     })
   }
 
-  setSelectedGroup(groupId: string): void {
-    this.settingsService.updateSelectedGroup(groupId).subscribe(
+  setCurrentGroup(groupId: string): void {
+    this.settingsService.updateCurrentGroup(groupId).subscribe(
       () => {
         console.log('updated');
       }, (error: {

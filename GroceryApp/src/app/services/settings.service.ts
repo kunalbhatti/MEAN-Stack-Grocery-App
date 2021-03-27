@@ -14,6 +14,9 @@ import {
 import {
   ProductModel
 } from "../models/product.model";
+import {
+  SettingsModel
+} from "../models/settings.model";
 
 import * as config from './config.json';
 import errorHandler from './error.handler';
@@ -23,14 +26,17 @@ import errorHandler from './error.handler';
 })
 
 export class SettingsService {
+
+  settings: SettingsModel;
+
   constructor(private http: HttpClient) {}
 
   getSettings(): Observable < any > {
     return this.http.get(`${config.url}/settings/get-settings`).pipe(take(1), catchError(errorHandler));
   }
 
-  updateSelectedGroup(gid: string): Observable < any > {
-    return this.http.patch(`${config.url}/settings/update-selected-group`, {
+  updateCurrentGroup(gid: string): Observable < any > {
+    return this.http.patch(`${config.url}/settings/update-current-group`, {
       gid
     }).pipe(take(1), catchError(errorHandler));
   }
