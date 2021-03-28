@@ -31,8 +31,6 @@ export interface ProductsModel {
 }
 
 export class Products {
-    //cc1668f2-8b7f-4c4a-84f5-096721a587e1
-    //a35e54b4-5687-47b8-8833-6dab020b0a4f
     static getProducts(uid: ObjectId, cid ? : string): Cursor < any > {
         const db: Db = getDb();
 
@@ -53,21 +51,11 @@ export class Products {
         return db.collection('user_products').find(cid ? andQuery : query);
     }
 
-    static filterProducts(uid: ObjectId, searchStr: string) {
+    static filterProducts(filter: any) {
         const db: Db = getDb();
 
-        return db.collection('user_products').find({
-            $and: [{
-                uid
-            }, {
 
-                name: {
-                    $regex: `^.*${searchStr}.*$`,
-                    $options: 'i'
-                }
-            }]
-
-        }, {
+        return db.collection('user_products').find(filter, {
             projection: {
                 uid: 0
             }

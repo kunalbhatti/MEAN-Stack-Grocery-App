@@ -29,31 +29,10 @@ export class SearchBarService {
 
   currentGroup: string;
 
-  constructor(private http: HttpClient, private settingsService: SettingsService) {
+  constructor(private http: HttpClient, private settingsService: SettingsService) {}
+
+  getProductList(searchStr: string, cid ? : string): Observable < any > {
     this.currentGroup = this.settingsService.settings.currentGroup;
-  }
-
-  getProductList(searchStr: string): Observable < any > {
-    return this.http.get(`${config.url}/products/filter-products/${searchStr}`).pipe(take(1), map(
-      (products: ProductModel[]) => {
-
-        for (let product of products) {
-          if (!product.stockCount) {
-            product['stockCount'] = {
-              [this.currentGroup]: 0
-            };
-
-          }
-          if (!product.stockStatus) {
-            product['stockStatus'] = {
-              [this.currentGroup]: ''
-            };
-          }
-        }
-
-        console.log(products)
-        return products;
-      }
-    ), catchError(errorHandler))
+    return this.http.get(`${config.url}/products/filter-products/?searchStr=${searchStr}&cid=${cid}&gid=${this.currentGroup}`).pipe(catchError(errorHandler));
   }
 }

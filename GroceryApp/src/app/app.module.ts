@@ -27,6 +27,9 @@ import {
 import {
   RequestInterceptor
 } from './interceptors/request.interceptor';
+import {
+  TitleCasePipe
+} from '@angular/common';
 
 @NgModule({
   declarations: [AppComponent],
@@ -39,7 +42,7 @@ import {
     provide: HTTP_INTERCEPTORS,
     useClass: RequestInterceptor,
     multi: true
-  }],
+  }, TitleCasePipe],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

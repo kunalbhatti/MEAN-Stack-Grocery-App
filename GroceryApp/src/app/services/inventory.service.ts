@@ -27,12 +27,11 @@ import {
 })
 export class InventoryService {
   currentGroup: string;
-  constructor(private http: HttpClient, private settingsService: SettingsService) {
-    this.currentGroup = this.settingsService.settings.currentGroup;
-  }
+  constructor(private http: HttpClient, private settingsService: SettingsService) {}
 
-  getInventoryByProducts(gid: string): Observable < any > {
-    return this.http.get(`${config.url}/products/inventory-by-products/${gid}`).pipe(take(1), map(
+  getInventory(cid ? : string): Observable < any > {
+    this.currentGroup = this.settingsService.settings.currentGroup;
+    return this.http.get(`${config.url}/products/get-inventory/?cid=${cid}&gid=${this.currentGroup}`).pipe(take(1), map(
       (products: ProductModel[]) => {
 
         for (let product of products) {

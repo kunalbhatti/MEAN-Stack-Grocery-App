@@ -1,6 +1,9 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Inventroy</ion-title>
+    <ion-title>
+      Inventory
+      <ion-label><small>({{groupName|titlecase}})</small></ion-label>
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -20,10 +23,15 @@
     <ion-row class="ion-justify-content-center">
       <ion-col size="12" size-sm="10" size-md="8" class="ion-text-center">
         <ion-toolbar size="12" class="ion-text-center ion-margin-top" style="background-color: #1f1f1f;">
-          <ion-title>Products</ion-title>
+          <ion-title>{{selectedCategory.name | titlecase}}</ion-title>
+          <ion-buttons slot="start">
+            <ion-button (click)="presentFilterAlert()" size="small">
+              <ion-icon name="filter-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
           <ion-buttons slot="end">
-            <ion-button>
-              <ion-icon name="options-outline"></ion-icon>
+            <ion-button (click)="presentFilterAlert()" size="small">
+              <ion-icon name="funnel-outline"></ion-icon>
             </ion-button>
           </ion-buttons>
         </ion-toolbar>

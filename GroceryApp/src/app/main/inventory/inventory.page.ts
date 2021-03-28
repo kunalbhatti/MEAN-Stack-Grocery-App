@@ -1,6 +1,6 @@
 import {
   Component,
-  OnInit,
+  OnInit
 } from "@angular/core";
 import {
   AlertController
@@ -18,14 +18,18 @@ import {
   SettingsService
 } from "./../../services/settings.service";
 import {
-  SearchBarService
+  SearchBarService,
 } from "./../../services/searchbar.service";
 import {
   take
 } from "rxjs/operators";
 import {
-  ActivatedRoute
-} from "@angular/router";
+  ToasterService
+} from "src/app/services/toaster.service";
+
+import {
+  TitleCasePipe
+} from '@angular/common';
 
 @Component({
   selector: 'app-inventory',
@@ -41,34 +45,81 @@ export class InventoryPage implements OnInit {
 
   currentGroup: string;
 
+  selectedCategory: {
+    id: string
+    name: string,
+  } = {
+    id: '',
+    name: 'all products'
+  };
+
+  groupName: string;
+
   updateLock: boolean = false;
 
   constructor(private searchBarService: SearchBarService,
     private inventoryService: InventoryService,
     private alertController: AlertController,
     private settingsService: SettingsService,
-    private cartService: CartService) {}
+    private cartService: CartService,
+    private toasterService: ToasterService,
+    private titleCasePipe: TitleCasePipe) {}
 
-  ngOnInit() {
-
-  }
+  ngOnInit() {}
 
   ionViewDidEnter() {
     this.currentGroup = this.settingsService.settings.currentGroup;
-    this.inventoryService.getInventoryByProducts(this.currentGroup).pipe(take(1)).subscribe((products: ProductModel[]) => {
+
+    const groups = this.settingsService.settings.groups;
+
+    groups.forEach(group => {
+      if (group[this.currentGroup]) {
+        this.groupName = group[this.currentGroup];
+        return;
+      }
+    });
+
+    this.inventoryService.getInventory(this.selectedCategory.id).pipe(take(1)).subscribe((products: ProductModel[]) => {
       this.products = products;
     });
+  }
+
+  ionViewDidLeave() {
+    this.filtered = [];
+    this.products = [];
   }
 
   getProductList(searchStr: string) {
 
     this.searchString = searchStr;
+    this.filtered = [];
 
-    this.searchBarService.getProductList(searchStr).pipe(take(1)).subscribe((data: ProductModel[]) => {
+    this.searchBarService.getProductList(searchStr, this.selectedCategory.id).pipe(take(1)).subscribe((data: ProductModel[]) => {
       this.filtered = data;
     }, error => {
       console.log(error.message)
     });
+  }
+
+  updateProducts(product: ProductModel) {
+    const index: number = this.products.findIndex((prod: ProductModel) => {
+      if (prod._id === product._id) {
+        return true;
+      }
+    });
+
+    if (index !== -1) {
+      this.products[index] = product;
+    } else {
+      this.products.push(product);
+    }
+
+    this.products = this.products.filter(prod => {
+      if (prod.stockStatus[this.currentGroup] !== 'empty') {
+        return true;
+      }
+    });
+
   }
 
   updateProductStockCount(product: ProductModel, count: number) {
@@ -77,6 +128,8 @@ export class InventoryPage implements OnInit {
       () => {
         product.stockCount[this.currentGroup] += count;
         this.updateProducts(product);
+        this.updateLock = false;
+        this.toasterService.presentToast('', 'Inventoy Updated', 500);
       }
     )
 
@@ -86,6 +139,7 @@ export class InventoryPage implements OnInit {
         () => {
           product.stockStatus[this.currentGroup] = 'full';
           this.updateProducts(product);
+          this.toasterService.presentToast('', 'Inventoy Updated', 500);
         }
       )
     }
@@ -95,15 +149,10 @@ export class InventoryPage implements OnInit {
         () => {
           product.stockStatus[this.currentGroup] = 'empty';
           this.updateProducts(product);
+          this.toasterService.presentToast('', 'Inventoy Updated', 500);
         }
       )
-
     }
-
-    setTimeout(() => {
-      this.updateLock = false;
-    }, 200)
-
   }
 
   updateProductStockStatus(product: ProductModel, status: string) {
@@ -134,6 +183,7 @@ export class InventoryPage implements OnInit {
           }) => {
             this.cartService.updateCartCount(product._id, +data.count, this.currentGroup).pipe(take(1)).subscribe(
               () => {
+                this.toasterService.presentToast('', 'Cart Updated', 500);
                 this.inventoryService.updateStockStatus(product._id, status, this.currentGroup).pipe(take(1)).subscribe(
                   () => {
                     product.stockStatus[this.currentGroup] = status;
@@ -156,30 +206,63 @@ export class InventoryPage implements OnInit {
           product.stockStatus[this.currentGroup] = status;
           if (product.stockStatus[this.currentGroup] !== '') {
             this.updateProducts(product);
+            this.toasterService.presentToast('', 'Inventoy Updated', 500);
+
           }
         }
       )
     }
   }
 
-  updateProducts(product: ProductModel) {
-    const index: number = this.products.findIndex((prod: ProductModel) => {
-      if (prod._id === product._id) {
-        return true;
-      }
-    });
+  presentFilterAlert() {
+    let filter: any[] = [{
+      name: 'all products',
+      type: 'radio',
+      label: 'All Products',
+      value: {
+        id: '',
+        name: 'All Products'
+      },
+      checked: this.selectedCategory.id === '' ? true : false
+    }];
 
-    if (index !== -1) {
-      this.products[index] = product;
-    } else {
-      this.products.push(product);
+    let categoryKeys: string[] = []
+
+    const categories = this.settingsService.settings.categories;
+    categories.forEach(category => {
+      categoryKeys.push(Object.keys(category).toString());
+    })
+
+    for (let [i, category] of categories.entries()) {
+      filter.push({
+        name: category[categoryKeys[i]],
+        type: 'radio',
+        label: this.titleCasePipe.transform(category[categoryKeys[i]]),
+        value: {
+          id: categoryKeys[i],
+          name: category[categoryKeys[i]]
+        },
+        checked: this.selectedCategory.id === categoryKeys[i] ? true : false
+      });
     }
 
-    this.products = this.products.filter(prod => {
-      if (prod.stockStatus[this.currentGroup] !== 'empty') {
-        return true;
-      }
+    this.alertController.create({
+      header: 'Filter By:',
+      inputs: filter,
+      buttons: [{
+        text: 'Cancel',
+        role: 'cancel'
+      }, {
+        text: 'Ok',
+        handler: (data) => {
+          this.selectedCategory = data;
+          this.inventoryService.getInventory(this.selectedCategory.id).pipe(take(1)).subscribe((products: ProductModel[]) => {
+            this.products = products;
+          })
+        }
+      }]
+    }).then((actionEl: HTMLIonAlertElement) => {
+      actionEl.present();
     });
-
   }
 }

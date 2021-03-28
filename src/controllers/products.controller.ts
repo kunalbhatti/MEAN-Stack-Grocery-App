@@ -20,9 +20,8 @@ export default class ProductsController {
     }
 
     constructor() {
-        this.router.get('/filter-products/:searchStr?', verifyToken, this.filterProducts);
-        this.router.get('/inventory-by-products/:gid', verifyToken, this.getInventoryByProducts);
-        this.router.get('/inventory-by-category/:cid', verifyToken, this.getInventoryByCategory);
+        this.router.get('/filter-products', verifyToken, this.filterProducts);
+        this.router.get('/get-inventory', verifyToken, this.getInventory);
         this.router.patch('/update-stock-count/:pid', verifyToken, this.updateStockCount);
         this.router.patch('/update-stock-status/:pid', verifyToken, this.updateStockStatus);
         this.router.patch('/update-cart-count/:pid', verifyToken, this.updateCartCount);
@@ -30,20 +29,99 @@ export default class ProductsController {
 
     filterProducts(req: express.Request, res: express.Response) {
         const uid: ObjectId = new ObjectId(req.body._id);
-        const searchStr: string = req.params.searchStr;
 
-        Products.filterProducts(uid, searchStr).toArray().then(
-            products => {
+        const searchStr: string = req.query.searchStr.toString();
+        const gid: string = req.query.gid.toString();
+        const cid: string = req.query.cid.toString();
+
+        const categoryFilter = {
+            $and: [{
+                uid
+            }, {
+                cid
+            }, {
+                name: {
+                    $regex: `^.*${searchStr}.*$`,
+                    $options: 'i'
+                }
+            }]
+        }
+
+        const normalFilter = {
+            $and: [{
+                uid
+            }, {
+                name: {
+                    $regex: `^.*${searchStr}.*$`,
+                    $options: 'i'
+                }
+            }]
+        }
+
+        Products.filterProducts(cid ? categoryFilter : normalFilter).toArray().then(
+            (products: ProductsModel[]) => {
+
+                products.map((product: ProductsModel) => {
+                    if (product.stockCount) {
+                        if (!product.stockCount[gid]) {
+
+                            product.stockCount = {
+                                [gid]: 0
+                            };
+                        }
+                    }
+                    if (!product.stockCount) {
+                        product.stockCount = {
+                            [gid]: 0
+                        };
+                    }
+
+                    if (product.stockStatus) {
+                        if (!product.stockStatus[gid]) {
+
+                            product.stockStatus = {
+                                [gid]: ''
+                            };
+                        }
+                    }
+
+                    if (!product.stockStatus) {
+                        product.stockStatus = {
+                            [gid]: ''
+                        };
+                    }
+                })
                 res.status(200).send(products)
             }
         );
     }
 
-    getInventoryByProducts(req: express.Request, res: express.Response) {
+    getInventory(req: express.Request, res: express.Response) {
         const uid: ObjectId = new ObjectId(req.body._id);
-        const gid: string = req.params.gid;
+        const gid: string = req.query.gid.toString();
+        const cid: string = req.query.cid.toString();
 
-        const query = {
+        console.log(gid)
+
+        const categoryFilter = {
+            $and: [{
+                uid
+            }, {
+                cid
+            }, {
+                $and: [{
+                    [`stockCount.${gid}`]: {
+                        $gt: 0
+                    },
+                }, {
+                    [`stockStatus.${gid}`]: {
+                        $ne: 'empty'
+                    }
+                }]
+            }]
+        }
+
+        const normalFilter = {
             $and: [{
                 uid
             }, {
@@ -59,32 +137,37 @@ export default class ProductsController {
             }]
         }
 
-        Products.getInventory(query).toArray().then((products: ProductsModel[]) => {
-            console.log(products)
-            res.status(200).send(products);
-        }).catch((error: MongoError) => {
-            console.log(error);
-            res.status(500).send(responseCode[500]);
-        });
-    }
+        Products.getInventory(cid ? categoryFilter : normalFilter).toArray().then((products: ProductsModel[]) => {
+            products.map((product: ProductsModel) => {
+                if (product.stockCount) {
+                    if (!product.stockCount[gid]) {
 
-    getInventoryByCategory(req: express.Request, res: express.Response) {
-        const uid: ObjectId = new ObjectId(req.body._id);
-        const cid: string = req.params.cid;
-
-        const query = {
-            $and: [{
-                uid
-            }, {
-                cid
-            }, {
-                stockCount: {
-                    $gt: 0
+                        product.stockCount = {
+                            [gid]: 0
+                        };
+                    }
                 }
-            }]
-        }
+                if (!product.stockCount) {
+                    product.stockCount = {
+                        [gid]: 0
+                    };
+                }
 
-        Products.getInventory(query).toArray().then((products: ProductsModel[]) => {
+                if (product.stockStatus) {
+                    if (!product.stockStatus[gid]) {
+
+                        product.stockStatus = {
+                            [gid]: ''
+                        };
+                    }
+                }
+
+                if (!product.stockStatus) {
+                    product.stockStatus = {
+                        [gid]: ''
+                    };
+                }
+            })
             res.status(200).send(products);
         }).catch((error: MongoError) => {
             console.log(error);

@@ -35,6 +35,9 @@ import {
   styleUrls: ['./manage-app.page.scss'],
 })
 export class ManageAppPage implements OnInit {
+
+  settings: SettingsModel;
+
   groupError: string = '';
   addGroupForm: boolean;
   groups: {
@@ -67,31 +70,24 @@ export class ManageAppPage implements OnInit {
     this.addGroupForm = false;
     this.addCategoryForm = false;
 
-    // can be changed to use the settings property
-    this.settingsService.getSettings().subscribe(
-      (settingsData: {
-        settings: SettingsModel
-      }) => {
-        if (settingsData.settings) {
-          const userData: SettingsModel = settingsData.settings;
-          this.currentGroup = userData.currentGroup;
-          if (userData.groups.length > 0) {
-            this.groups = userData.groups;
-          } else {
-            this.groups = [];
-          }
-          if (userData.categories.length > 0) {
-            this.categories = userData.categories;
-          } else {
-            this.categories = [];
-          }
-        } else {
-          this.groups = [];
-          this.categories = [];
-        }
-      }, error => {
-        this.groupError = error;
-      })
+    this.settings = this.settingsService.settings
+    if (this.settings) {
+      const userData: SettingsModel = this.settings;
+      this.currentGroup = userData.currentGroup;
+      if (userData.groups.length > 0) {
+        this.groups = userData.groups;
+      } else {
+        this.groups = [];
+      }
+      if (userData.categories.length > 0) {
+        this.categories = userData.categories;
+      } else {
+        this.categories = [];
+      }
+    } else {
+      this.groups = [];
+      this.categories = [];
+    }
 
   }
 
@@ -124,6 +120,8 @@ export class ManageAppPage implements OnInit {
     this.settingsService.updateCategories(this.categories).subscribe(
       () => {
         form.reset();
+        this.updateSettings('categories', this.categories);
+        console.log(this.settings)
         this.toasterService.presentToast('Success!!', 'Category was added successfully', 2000);
         this.addCategoryForm = false;
       }, (error: string) => {
@@ -155,6 +153,7 @@ export class ManageAppPage implements OnInit {
     this.settingsService.updateCategories(this.categories).subscribe(
       () => {
         form.reset();
+        this.updateSettings('categories', this.categories);
         this.toasterService.presentToast('Success!!', 'Category was editted successfully', 2000);
         this.selectedCategory = null;
         this.addCategoryForm = false;
@@ -162,6 +161,18 @@ export class ManageAppPage implements OnInit {
         this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       }
     );
+  }
+
+  setCurrentGroup(groupId: string): void {
+    this.settingsService.updateCurrentGroup(groupId).subscribe(
+      () => {
+        this.updateSettings('currentGroup', groupId);
+      }, (error: {
+        message: string
+      }) => {
+        console.log(error);
+      }
+    )
   }
 
   addGroup(form: NgForm): void {
@@ -172,7 +183,9 @@ export class ManageAppPage implements OnInit {
       return;
     }
 
-    const index: number = this.groups.findIndex(grp => {
+    const index: number = this.groups.findIndex((grp: {
+      [gid: string]: string
+    }) => {
       if (this.getKeyVal(grp).value.toLowerCase() === groupName) {
         return true;
       }
@@ -194,6 +207,7 @@ export class ManageAppPage implements OnInit {
     this.settingsService.updateGroup(this.groups).subscribe(
       () => {
         form.reset();
+        this.updateSettings('groups', this.groups);
         this.toasterService.presentToast('Success!!', 'Group was added successfully', 2000);
         this.addGroupForm = false;
       }, (error: string) => {
@@ -225,6 +239,7 @@ export class ManageAppPage implements OnInit {
     this.settingsService.updateGroup(this.groups).subscribe(
       () => {
         form.reset();
+        this.updateSettings('groups', this.groups);
         this.toasterService.presentToast('Success!!', 'Group was editted successfully', 2000);
         this.selectedGroup = null;
         this.addGroupForm = false;
@@ -283,6 +298,7 @@ export class ManageAppPage implements OnInit {
                   }) => {
                     this.toasterService.presentToast('Success!!', 'Group was deleted successfully', 2000);
                     this.groups = result.groups;
+                    this.updateSettings('groups', this.groups);
                   }, (error: string) => {
                     this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
                   }
@@ -351,6 +367,7 @@ export class ManageAppPage implements OnInit {
                   }) => {
                     this.toasterService.presentToast('Success!!', 'Category was deleted successfully', 2000);
                     this.categories = result.categories;
+                    this.updateSettings('categories', this.categories);
                   }, (error: string) => {
                     this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
                   }
@@ -364,18 +381,6 @@ export class ManageAppPage implements OnInit {
     }).then((actionEl: HTMLIonActionSheetElement) => {
       actionEl.present();
     })
-  }
-
-  setCurrentGroup(groupId: string): void {
-    this.settingsService.updateCurrentGroup(groupId).subscribe(
-      () => {
-        console.log('updated');
-      }, (error: {
-        message: string
-      }) => {
-        console.log(error);
-      }
-    )
   }
 
   // Utility functions
@@ -393,5 +398,10 @@ export class ManageAppPage implements OnInit {
       };
     });
     return value[0];
+  }
+
+  updateSettings(type: string, data: any) {
+    this.settings[type] = data;
+    this.settingsService.settings = this.settings;
   }
 }
