@@ -118,7 +118,7 @@ export class CategoryPage implements OnInit {
               if (popoverResult.role === 'delete') {
                 this.settingsService.deleteProduct(product._id).subscribe(
                   () => {
-                    this.toasterService.presentToast('Success!!', 'Product was deleted successfully', 2000);
+                    this.toasterService.presentToast('Success!!', 'Product was deleted successfully', 500);
                     this.products = this.products.filter(
                       prod => {
                         if (prod._id !== product._id) {
@@ -155,12 +155,12 @@ export class CategoryPage implements OnInit {
     ).then(modalResult => {
 
       if (modalResult.role === 'create') {
-        this.toasterService.presentToast('Success!!', 'Product was added successfully', 2000);
+        this.toasterService.presentToast('Success!!', 'Product was added successfully', 500);
         this.products.push(modalResult.data);
       }
 
       if (modalResult.role === 'edit') {
-        this.toasterService.presentToast('Success!!', 'Product was editted successfully', 2000);
+        this.toasterService.presentToast('Success!!', 'Product was editted successfully', 500);
         const index: number = this.products.findIndex((prod: ProductModel) => {
           if (prod._id === product._id) {
             return true;

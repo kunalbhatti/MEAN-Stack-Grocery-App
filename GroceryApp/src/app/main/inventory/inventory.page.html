@@ -1,36 +1,34 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>
+    <ion-title class="ion-padding-top">
       Inventory
       <ion-label><small>({{groupName|titlecase}})</small></ion-label>
     </ion-title>
+    <ion-grid>
+      <ion-row class="ion-justify-content-center">
+        <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4"
+          class="ion-margin-start ion-margin-end ion-no-padding">
+          <ion-searchbar color="light" showCancelButton="focus" #searchStr (ionInput)="getProductList(searchStr.value)">
+          </ion-searchbar>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-
-  <ion-grid class="ion-margin-top">
-    <ion-row class="ion-justify-content-center">
-      <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4"
-        class="ion-margin-start ion-margin-end ion-no-padding">
-        <ion-searchbar color="light" showCancelButton="focus" #searchStr (ionInput)="getProductList(searchStr.value)">
-        </ion-searchbar>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
-
   <ion-grid>
     <ion-row class="ion-justify-content-center">
       <ion-col size="12" size-sm="10" size-md="8" class="ion-text-center">
         <ion-toolbar size="12" class="ion-text-center ion-margin-top" style="background-color: #1f1f1f;">
           <ion-title>{{selectedCategory.name | titlecase}}</ion-title>
-          <ion-buttons slot="start">
+          <ion-buttons slot="start" *ngIf="searchString === ''">
             <ion-button (click)="presentFilterAlert()" size="small">
               <ion-icon name="filter-outline"></ion-icon>
             </ion-button>
           </ion-buttons>
-          <ion-buttons slot="end">
-            <ion-button (click)="presentFilterAlert()" size="small">
+          <ion-buttons slot="end" *ngIf="searchString === ''">
+            <ion-button (click)="presentSortAlert()" size="small">
               <ion-icon name="funnel-outline"></ion-icon>
             </ion-button>
           </ion-buttons>
@@ -99,7 +97,7 @@
                   (ionChange)="updateProductStockStatus(product, stockStatus.value)" [disabled]="updateLock">
                   <ion-select-option value="full">Full</ion-select-option>
                   <ion-select-option value="half">Half</ion-select-option>
-                  <ion-select-option value="empty">Empty</ion-select-option>
+                  <ion-select-option value="empty" disabled>Empty</ion-select-option>
                 </ion-select>
               </ion-item>
             </ion-card-content>

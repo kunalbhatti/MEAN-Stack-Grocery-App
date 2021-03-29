@@ -122,10 +122,10 @@ export class ManageAppPage implements OnInit {
         form.reset();
         this.updateSettings('categories', this.categories);
         console.log(this.settings)
-        this.toasterService.presentToast('Success!!', 'Category was added successfully', 2000);
+        this.toasterService.presentToast('Success!!', 'Category was added successfully', 500);
         this.addCategoryForm = false;
       }, (error: string) => {
-        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
+        this.toasterService.presentToast('Failure!!', error, 500, 'danger');
       }
     );
   }
@@ -154,11 +154,11 @@ export class ManageAppPage implements OnInit {
       () => {
         form.reset();
         this.updateSettings('categories', this.categories);
-        this.toasterService.presentToast('Success!!', 'Category was editted successfully', 2000);
+        this.toasterService.presentToast('Success!!', 'Category was editted successfully', 500);
         this.selectedCategory = null;
         this.addCategoryForm = false;
       }, (error: string) => {
-        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
+        this.toasterService.presentToast('Failure!!', error, 500, 'danger');
       }
     );
   }
@@ -208,10 +208,10 @@ export class ManageAppPage implements OnInit {
       () => {
         form.reset();
         this.updateSettings('groups', this.groups);
-        this.toasterService.presentToast('Success!!', 'Group was added successfully', 2000);
+        this.toasterService.presentToast('Success!!', 'Group was added successfully', 500);
         this.addGroupForm = false;
       }, (error: string) => {
-        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
+        this.toasterService.presentToast('Failure!!', error, 500, 'danger');
       }
     );
   }
@@ -244,7 +244,7 @@ export class ManageAppPage implements OnInit {
         this.selectedGroup = null;
         this.addGroupForm = false;
       }, (error: string) => {
-        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
+        this.toasterService.presentToast('Failure!!', error, 500, 'danger');
       }
     );
   }
@@ -300,7 +300,7 @@ export class ManageAppPage implements OnInit {
                     this.groups = result.groups;
                     this.updateSettings('groups', this.groups);
                   }, (error: string) => {
-                    this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
+                    this.toasterService.presentToast('Failure!!', error, 500, 'danger');
                   }
                 );
               }
@@ -369,7 +369,7 @@ export class ManageAppPage implements OnInit {
                     this.categories = result.categories;
                     this.updateSettings('categories', this.categories);
                   }, (error: string) => {
-                    this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
+                    this.toasterService.presentToast('Failure!!', error, 500, 'danger');
                   }
                 );
               }

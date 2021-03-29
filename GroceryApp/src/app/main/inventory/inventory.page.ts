@@ -38,12 +38,14 @@ import {
 })
 export class InventoryPage implements OnInit {
 
+  allProducts: ProductModel[] = [];
   products: ProductModel[];
   filtered: ProductModel[];
 
   searchString: string = '';
 
   currentGroup: string;
+  groupName: string;
 
   selectedCategory: {
     id: string
@@ -53,7 +55,9 @@ export class InventoryPage implements OnInit {
     name: 'all products'
   };
 
-  groupName: string;
+  sortBy: string = 'none';
+
+
 
   updateLock: boolean = false;
 
@@ -80,6 +84,7 @@ export class InventoryPage implements OnInit {
     });
 
     this.inventoryService.getInventory(this.selectedCategory.id).pipe(take(1)).subscribe((products: ProductModel[]) => {
+      this.allProducts = products;
       this.products = products;
     });
   }
@@ -87,6 +92,12 @@ export class InventoryPage implements OnInit {
   ionViewDidLeave() {
     this.filtered = [];
     this.products = [];
+    this.selectedCategory = {
+      id: '',
+      name: 'All Products'
+    }
+    this.sortBy = 'none';
+    this.searchString = '';
   }
 
   getProductList(searchStr: string) {
@@ -111,7 +122,7 @@ export class InventoryPage implements OnInit {
     if (index !== -1) {
       this.products[index] = product;
     } else {
-      this.products.push(product);
+      this.products = [product].concat(this.products);
     }
 
     this.products = this.products.filter(prod => {
@@ -120,6 +131,7 @@ export class InventoryPage implements OnInit {
       }
     });
 
+    this.allProducts = this.products;
   }
 
   updateProductStockCount(product: ProductModel, count: number) {
@@ -128,6 +140,7 @@ export class InventoryPage implements OnInit {
       () => {
         product.stockCount[this.currentGroup] += count;
         this.updateProducts(product);
+        this.sortBy = 'none';
         this.updateLock = false;
         this.toasterService.presentToast('', 'Inventoy Updated', 500);
       }
@@ -139,7 +152,6 @@ export class InventoryPage implements OnInit {
         () => {
           product.stockStatus[this.currentGroup] = 'full';
           this.updateProducts(product);
-          this.toasterService.presentToast('', 'Inventoy Updated', 500);
         }
       )
     }
@@ -149,7 +161,6 @@ export class InventoryPage implements OnInit {
         () => {
           product.stockStatus[this.currentGroup] = 'empty';
           this.updateProducts(product);
-          this.toasterService.presentToast('', 'Inventoy Updated', 500);
         }
       )
     }
@@ -191,7 +202,7 @@ export class InventoryPage implements OnInit {
                       this.updateProducts(product);
                     }
                   }
-                )
+                );
               }
             )
           }
@@ -207,7 +218,17 @@ export class InventoryPage implements OnInit {
           if (product.stockStatus[this.currentGroup] !== '') {
             this.updateProducts(product);
             this.toasterService.presentToast('', 'Inventoy Updated', 500);
+          }
 
+          if (product.stockCount[this.currentGroup] === 0) {
+            this.inventoryService.updateStockCount(product._id, 1, this.currentGroup).pipe(take(1)).subscribe(
+              () => {
+                product.stockCount[this.currentGroup] = 1;
+                this.updateProducts(product);
+                this.sortBy = 'none';
+                this.toasterService.presentToast('', 'Inventoy Updated', 500);
+              }
+            )
           }
         }
       )
@@ -256,13 +277,107 @@ export class InventoryPage implements OnInit {
         text: 'Ok',
         handler: (data) => {
           this.selectedCategory = data;
-          this.inventoryService.getInventory(this.selectedCategory.id).pipe(take(1)).subscribe((products: ProductModel[]) => {
-            this.products = products;
-          })
+          this.applyProductCategoryFilter(this.selectedCategory.id);
         }
       }]
     }).then((actionEl: HTMLIonAlertElement) => {
       actionEl.present();
     });
+  }
+
+  presentSortAlert() {
+    let filter: any[] = [{
+      name: 'none',
+      type: 'radio',
+      label: 'None',
+      value: 'none',
+      checked: this.sortBy === 'none' ? true : false
+    }, {
+      name: 'stockAsc',
+      type: 'radio',
+      label: 'Ascending',
+      value: 'stockAsc',
+      checked: this.sortBy === 'stockAsc' ? true : false
+    }, {
+      name: 'stockDesc',
+      type: 'radio',
+      label: 'Descending',
+      value: 'stockDesc',
+      checked: this.sortBy === 'stockDesc' ? true : false
+    }];
+
+    this.alertController.create({
+      header: 'Sort By:',
+      inputs: filter,
+      buttons: [{
+        text: 'Cancel',
+        role: 'cancel'
+      }, {
+        text: 'Ok',
+        handler: (data) => {
+          this.sortBy = data;
+          this.products = this.applyProductSortFilter(data)
+        }
+      }]
+    }).then((actionEl: HTMLIonAlertElement) => {
+      actionEl.present();
+    })
+  }
+
+
+  applyProductCategoryFilter(cid: string): void {
+    if (cid === '') {
+      this.products = this.allProducts;
+      return;
+    }
+
+    const tempProducts: ProductModel[] = [...this.allProducts];
+
+    this.products = tempProducts.filter(prod => {
+      if (prod.cid === cid) {
+        return true;
+      }
+    });
+  }
+
+  applyProductSortFilter(sortBy: string): ProductModel[] {
+
+    const tempProducts: ProductModel[] = [...this.allProducts];
+    let products: ProductModel[];
+
+    if (sortBy === 'none') {
+      products = this.allProducts;
+      return;
+    }
+
+    if (sortBy === 'stockAsc') {
+      products = tempProducts.sort((prod1: ProductModel, prod2: ProductModel) => {
+
+        return prod1.stockCount[this.currentGroup] - prod2.stockCount[this.currentGroup];
+      })
+    }
+
+
+    if (sortBy === 'stockDesc') {
+      products = tempProducts.sort((prod1: ProductModel, prod2: ProductModel) => {
+
+        return prod2.stockCount[this.currentGroup] - prod1.stockCount[this.currentGroup];
+      })
+    }
+
+    if (sortBy === 'name') {
+      products = tempProducts.sort((prod1: ProductModel, prod2: ProductModel) => {
+        if (prod1.name < prod2.name) {
+          return -1;
+        }
+        if (prod1.name > prod2.name) {
+          return 1;
+        }
+        return 0;
+      });
+    }
+
+    return products;
+
   }
 }

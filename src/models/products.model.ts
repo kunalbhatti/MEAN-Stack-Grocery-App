@@ -48,7 +48,9 @@ export class Products {
             uid
         };
 
-        return db.collection('user_products').find(cid ? andQuery : query);
+        return db.collection('user_products').find(cid ? andQuery : query).sort({
+            'name': 1
+        });
     }
 
     static filterProducts(filter: any) {
@@ -59,6 +61,8 @@ export class Products {
             projection: {
                 uid: 0
             }
+        }).sort({
+            'name': 1
         });
     }
 
@@ -98,7 +102,9 @@ export class Products {
 
     static getInventory(filter: any): Cursor < any > {
         const db: Db = getDb();
-        return db.collection('user_products').find(filter);
+        return db.collection('user_products').find(filter).sort({
+            'name': 1
+        });
     }
 
     static updateStockCount(filter: any, count: number, gid: string): Promise < UpdateWriteOpResult > {

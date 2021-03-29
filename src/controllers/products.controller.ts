@@ -101,8 +101,6 @@ export default class ProductsController {
         const gid: string = req.query.gid.toString();
         const cid: string = req.query.cid.toString();
 
-        console.log(gid)
-
         const categoryFilter = {
             $and: [{
                 uid
@@ -231,4 +229,7 @@ export default class ProductsController {
             res.status(500).send(responseCode[500]);
         });
     }
+
+
+    
 }

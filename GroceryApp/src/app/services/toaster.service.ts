@@ -17,7 +17,11 @@ export class ToasterService {
       header,
       message,
       duration,
-      color
+      color,
+      buttons: [{
+        icon: 'close-outline',
+        role: 'cancel'
+      }]
     }).then((toastEl: HTMLIonToastElement) => {
       toastEl.present();
     });
