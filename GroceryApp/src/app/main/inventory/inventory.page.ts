@@ -45,6 +45,8 @@ export class InventoryPage implements OnInit {
   products: ProductModel[];
   filtered: ProductModel[];
 
+  productError: string = '';
+
   searchString: string = '';
 
   currentGroup: string;
@@ -60,6 +62,9 @@ export class InventoryPage implements OnInit {
 
   sortBy: string = 'none';
 
+  searchStatus: string;
+  filterStatus: string;
+
   updateLock: boolean = false;
 
   constructor(private searchBarService: SearchBarService,
@@ -74,6 +79,7 @@ export class InventoryPage implements OnInit {
   ngOnInit() {}
 
   ionViewDidEnter() {
+    this.searchStatus = 'Loading Inventory';
     this.currentGroup = this.settingsService.settings.currentGroup;
 
     const groups = this.settingsService.settings.groups;
@@ -85,13 +91,19 @@ export class InventoryPage implements OnInit {
           return;
         }
       });
-    } if(!groups) {
+    }
+    if (!groups) {
       this.groupName = '';
     }
 
     this.inventoryService.getInventory(this.selectedCategory.id).pipe(take(1)).subscribe((products: ProductModel[]) => {
       this.allProducts = products;
       this.products = products;
+      if (this.products.length === 0) {
+        this.searchStatus = 'No Items Found';
+      }
+    }, (error: string) => {
+      this.productError = error;
     });
   }
 
@@ -108,13 +120,19 @@ export class InventoryPage implements OnInit {
 
   getProductList(searchStr: string) {
     this.searchString = searchStr;
-    this.filtered = [];
+    if (searchStr !== '') {
+      this.filterStatus = 'Searching Products'
+      this.filtered = [];
 
-    this.searchBarService.getProductList(searchStr, this.selectedCategory.id).pipe(take(1)).subscribe((data: ProductModel[]) => {
-      this.filtered = data;
-    }, error => {
-      console.log(error.message)
-    });
+      this.searchBarService.getProductList(searchStr, this.selectedCategory.id).pipe(take(1)).subscribe((data: ProductModel[]) => {
+        this.filtered = data;
+        if (this.filtered.length === 0) {
+          this.filterStatus = 'No Items Found';
+        }
+      }, (error: string) => {
+        this.productError = error;
+      });
+    }
   }
 
   updateProducts(product: ProductModel) {
