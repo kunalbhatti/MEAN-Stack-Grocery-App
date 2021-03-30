@@ -30,6 +30,9 @@ import {
 import {
   TitleCasePipe
 } from '@angular/common';
+import {
+  Router
+} from "@angular/router";
 
 @Component({
   selector: 'app-inventory',
@@ -57,8 +60,6 @@ export class InventoryPage implements OnInit {
 
   sortBy: string = 'none';
 
-
-
   updateLock: boolean = false;
 
   constructor(private searchBarService: SearchBarService,
@@ -67,7 +68,8 @@ export class InventoryPage implements OnInit {
     private settingsService: SettingsService,
     private cartService: CartService,
     private toasterService: ToasterService,
-    private titleCasePipe: TitleCasePipe) {}
+    private titleCasePipe: TitleCasePipe,
+    private router: Router) {}
 
   ngOnInit() {}
 
@@ -76,12 +78,16 @@ export class InventoryPage implements OnInit {
 
     const groups = this.settingsService.settings.groups;
 
-    groups.forEach(group => {
-      if (group[this.currentGroup]) {
-        this.groupName = group[this.currentGroup];
-        return;
-      }
-    });
+    if (groups) {
+      groups.forEach(group => {
+        if (group[this.currentGroup]) {
+          this.groupName = group[this.currentGroup];
+          return;
+        }
+      });
+    } if(!groups) {
+      this.groupName = '';
+    }
 
     this.inventoryService.getInventory(this.selectedCategory.id).pipe(take(1)).subscribe((products: ProductModel[]) => {
       this.allProducts = products;
@@ -101,7 +107,6 @@ export class InventoryPage implements OnInit {
   }
 
   getProductList(searchStr: string) {
-
     this.searchString = searchStr;
     this.filtered = [];
 
@@ -135,103 +140,139 @@ export class InventoryPage implements OnInit {
   }
 
   updateProductStockCount(product: ProductModel, count: number) {
-    this.updateLock = true;
-    this.inventoryService.updateStockCount(product._id, count, this.currentGroup).pipe(take(1)).subscribe(
-      () => {
-        product.stockCount[this.currentGroup] += count;
-        this.updateProducts(product);
-        this.sortBy = 'none';
-        this.updateLock = false;
-        this.toasterService.presentToast('', 'Inventoy Updated', 500);
+    if (this.currentGroup.length > 0) {
+      this.updateLock = true;
+      this.inventoryService.updateStockCount(product._id, count, this.currentGroup).pipe(take(1)).subscribe(
+        () => {
+          product.stockCount[this.currentGroup] += count;
+          this.updateProducts(product);
+          this.sortBy = 'none';
+          this.updateLock = false;
+          this.toasterService.presentToast('', 'Inventoy Updated', 500);
+        }
+      )
+
+      if (product.stockCount[this.currentGroup] + count > 0 && product.stockStatus[this.currentGroup] === 'empty' ||
+        product.stockCount[this.currentGroup] + count > 0 && !product.stockStatus[this.currentGroup]) {
+        this.inventoryService.updateStockStatus(product._id, 'full', this.currentGroup).pipe(take(1)).subscribe(
+          () => {
+            product.stockStatus[this.currentGroup] = 'full';
+            this.updateProducts(product);
+          }
+        )
       }
-    )
 
-    if (product.stockCount[this.currentGroup] + count > 0 && product.stockStatus[this.currentGroup] === 'empty' ||
-      product.stockCount[this.currentGroup] + count > 0 && !product.stockStatus[this.currentGroup]) {
-      this.inventoryService.updateStockStatus(product._id, 'full', this.currentGroup).pipe(take(1)).subscribe(
-        () => {
-          product.stockStatus[this.currentGroup] = 'full';
-          this.updateProducts(product);
-        }
-      )
-    }
-
-    if (product.stockCount[this.currentGroup] + count === 0) {
-      this.inventoryService.updateStockStatus(product._id, 'empty', this.currentGroup).pipe(take(1)).subscribe(
-        () => {
-          product.stockStatus[this.currentGroup] = 'empty';
-          this.updateProducts(product);
-        }
-      )
+      if (product.stockCount[this.currentGroup] + count === 0) {
+        this.inventoryService.updateStockStatus(product._id, 'empty', this.currentGroup).pipe(take(1)).subscribe(
+          () => {
+            product.stockStatus[this.currentGroup] = 'empty';
+            this.updateProducts(product);
+          }
+        )
+      }
+    } else {
+      this.alertController.create({
+        header: 'No Group Selected',
+        message: 'Please go to settings and select a group.',
+        buttons: [{
+          text: 'Cancel',
+          role: 'cancel'
+        }, {
+          text: 'Ok',
+          handler: () => {
+            this.router.navigate(['/', 'app', 'settings', 'manage-app'])
+          }
+        }]
+      }).then((alertEl: HTMLIonAlertElement) => {
+        alertEl.present();
+      })
     }
   }
 
   updateProductStockStatus(product: ProductModel, status: string) {
-    if (status === 'empty') {
+    if (this.currentGroup.length > 0) {
+      if (status === 'empty') {
 
+        this.alertController.create({
+          header: 'Out of stock?',
+          message: 'Do you want to add this product to cart?',
+          inputs: [{
+            type: 'number',
+            name: 'count',
+            placeholder: 'Number of products'
+          }],
+          buttons: [{
+            text: 'Cancel',
+            role: 'cancel',
+            handler: () => {
+              this.products = this.products.filter(prod => {
+                if (prod._id !== product._id) {
+                  return true;
+                }
+              })
+            }
+          }, {
+            text: 'Okay',
+            handler: (data: {
+              count: string
+            }) => {
+              this.cartService.updateCartCount(product._id, +data.count, this.currentGroup).pipe(take(1)).subscribe(
+                () => {
+                  this.toasterService.presentToast('', 'Cart Updated', 500);
+                  this.inventoryService.updateStockStatus(product._id, status, this.currentGroup).pipe(take(1)).subscribe(
+                    () => {
+                      product.stockStatus[this.currentGroup] = status;
+                      if (product.stockStatus[this.currentGroup] !== 'empty') {
+                        this.updateProducts(product);
+                      }
+                    }
+                  );
+                }
+              )
+            }
+          }]
+        }).then(actionEl => {
+          actionEl.present();
+        });
+
+      } else {
+        this.inventoryService.updateStockStatus(product._id, status, this.currentGroup).pipe(take(1)).subscribe(
+          () => {
+            product.stockStatus[this.currentGroup] = status;
+            if (product.stockStatus[this.currentGroup] !== '') {
+              this.updateProducts(product);
+              this.toasterService.presentToast('', 'Inventoy Updated', 500);
+            }
+
+            if (product.stockCount[this.currentGroup] === 0) {
+              this.inventoryService.updateStockCount(product._id, 1, this.currentGroup).pipe(take(1)).subscribe(
+                () => {
+                  product.stockCount[this.currentGroup] = 1;
+                  this.updateProducts(product);
+                  this.sortBy = 'none';
+                  this.toasterService.presentToast('', 'Inventoy Updated', 500);
+                }
+              )
+            }
+          }
+        )
+      }
+    } else {
       this.alertController.create({
-        header: 'Out of stock?',
-        message: 'Do you want to add this product to cart?',
-        inputs: [{
-          type: 'number',
-          name: 'count',
-          placeholder: 'Number of products'
-        }],
+        header: 'No Group Selected',
+        message: 'Please go to settings and select a group.',
         buttons: [{
           text: 'Cancel',
-          role: 'cancel',
-          handler: () => {
-            this.products = this.products.filter(prod => {
-              if (prod._id !== product._id) {
-                return true;
-              }
-            })
-          }
+          role: 'cancel'
         }, {
-          text: 'Okay',
-          handler: (data: {
-            count: string
-          }) => {
-            this.cartService.updateCartCount(product._id, +data.count, this.currentGroup).pipe(take(1)).subscribe(
-              () => {
-                this.toasterService.presentToast('', 'Cart Updated', 500);
-                this.inventoryService.updateStockStatus(product._id, status, this.currentGroup).pipe(take(1)).subscribe(
-                  () => {
-                    product.stockStatus[this.currentGroup] = status;
-                    if (product.stockStatus[this.currentGroup] !== 'empty') {
-                      this.updateProducts(product);
-                    }
-                  }
-                );
-              }
-            )
+          text: 'Ok',
+          handler: () => {
+            this.router.navigate(['/', 'app', 'settings', 'manage-app'])
           }
         }]
-      }).then(actionEl => {
-        actionEl.present();
-      });
-
-    } else {
-      this.inventoryService.updateStockStatus(product._id, status, this.currentGroup).pipe(take(1)).subscribe(
-        () => {
-          product.stockStatus[this.currentGroup] = status;
-          if (product.stockStatus[this.currentGroup] !== '') {
-            this.updateProducts(product);
-            this.toasterService.presentToast('', 'Inventoy Updated', 500);
-          }
-
-          if (product.stockCount[this.currentGroup] === 0) {
-            this.inventoryService.updateStockCount(product._id, 1, this.currentGroup).pipe(take(1)).subscribe(
-              () => {
-                product.stockCount[this.currentGroup] = 1;
-                this.updateProducts(product);
-                this.sortBy = 'none';
-                this.toasterService.presentToast('', 'Inventoy Updated', 500);
-              }
-            )
-          }
-        }
-      )
+      }).then((alertEl: HTMLIonAlertElement) => {
+        alertEl.present();
+      })
     }
   }
 

@@ -2,7 +2,7 @@
   <ion-toolbar>
     <ion-title class="ion-padding-top">
       Inventory
-      <ion-label><small>({{groupName|titlecase}})</small></ion-label>
+      <ion-label *ngIf="groupName"><small>({{groupName|titlecase}})</small></ion-label>
     </ion-title>
     <ion-grid>
       <ion-row class="ion-justify-content-center">

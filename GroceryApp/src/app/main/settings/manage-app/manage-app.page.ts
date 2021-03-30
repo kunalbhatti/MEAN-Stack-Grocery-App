@@ -7,6 +7,7 @@ import {
 } from '@angular/forms';
 import {
   ActionSheetController,
+  AlertController,
   PopoverController
 } from '@ionic/angular';
 import {
@@ -74,12 +75,12 @@ export class ManageAppPage implements OnInit {
     if (this.settings) {
       const userData: SettingsModel = this.settings;
       this.currentGroup = userData.currentGroup;
-      if (userData.groups.length > 0) {
+      if (userData.groups && userData.groups.length > 0) {
         this.groups = userData.groups;
       } else {
         this.groups = [];
       }
-      if (userData.categories.length > 0) {
+      if (userData.categories && userData.categories.length > 0) {
         this.categories = userData.categories;
       } else {
         this.categories = [];
@@ -121,7 +122,6 @@ export class ManageAppPage implements OnInit {
       () => {
         form.reset();
         this.updateSettings('categories', this.categories);
-        console.log(this.settings)
         this.toasterService.presentToast('Success!!', 'Category was added successfully', 500);
         this.addCategoryForm = false;
       }, (error: string) => {
@@ -167,6 +167,9 @@ export class ManageAppPage implements OnInit {
     this.settingsService.updateCurrentGroup(groupId).subscribe(
       () => {
         this.updateSettings('currentGroup', groupId);
+        if (this.groups.length === 1) {
+          this.currentGroup = groupId;
+        }
       }, (error: {
         message: string
       }) => {
@@ -210,6 +213,12 @@ export class ManageAppPage implements OnInit {
         this.updateSettings('groups', this.groups);
         this.toasterService.presentToast('Success!!', 'Group was added successfully', 500);
         this.addGroupForm = false;
+
+        if (this.groups.length === 1) {
+          const cgid = Object.keys(this.groups[0]).toString();
+          this.setCurrentGroup(cgid);
+        }
+
       }, (error: string) => {
         this.toasterService.presentToast('Failure!!', error, 500, 'danger');
       }
@@ -290,6 +299,7 @@ export class ManageAppPage implements OnInit {
                   }
                 });
 
+
                 this.settingsService.updateGroup(groupArr).subscribe(
                   (result: {
                     groups: {
@@ -299,10 +309,21 @@ export class ManageAppPage implements OnInit {
                     this.toasterService.presentToast('Success!!', 'Group was deleted successfully', 2000);
                     this.groups = result.groups;
                     this.updateSettings('groups', this.groups);
+
+                    if (gid === this.currentGroup && this.groups.length > 0) {
+                      const cgid = Object.keys(this.groups[0]).toString();
+                      this.setCurrentGroup(cgid);
+                      this.currentGroup = cgid;
+                    }
+
+                    if(this.groups.length === 0) {
+                      this.setCurrentGroup('');
+                      this.currentGroup = '';
+                    }
                   }, (error: string) => {
                     this.toasterService.presentToast('Failure!!', error, 500, 'danger');
                   }
-                );
+                  );
               }
             });
         }
