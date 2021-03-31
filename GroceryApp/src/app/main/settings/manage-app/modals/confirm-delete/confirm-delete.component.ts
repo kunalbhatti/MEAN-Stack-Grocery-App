@@ -1,7 +1,7 @@
 import {
   Component,
   Input,
-  OnInit
+  OnInit,
 } from '@angular/core';
 import {
   PopoverController
@@ -15,6 +15,7 @@ import {
 export class ConfirmDeleteComponent implements OnInit {
 
   @Input() type: string;
+  @Input() message: string;
 
   constructor(private popoverController: PopoverController) {}
 
@@ -27,7 +28,4 @@ export class ConfirmDeleteComponent implements OnInit {
   onDelete(): void {
     this.popoverController.dismiss(null, 'delete');
   }
-
-
-
 }

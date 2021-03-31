@@ -27,7 +27,15 @@ import errorHandler from './error.handler';
 
 export class SettingsService {
 
-  settings: SettingsModel;
+  private _settings: SettingsModel;
+
+  get settings() {
+    return this._settings;
+  }
+
+  set settings(settings: SettingsModel) {
+    this._settings = settings;
+  }
 
   constructor(private http: HttpClient) {}
 

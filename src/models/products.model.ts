@@ -22,7 +22,7 @@ export interface ProductsModel {
     stockStatus ? : {
         [gid: string]: string;
     };
-    cartCount ? : {
+    cart ? : {
         [gid: string]: number;
     }
     uid ? : ObjectId; // user id
@@ -133,7 +133,7 @@ export class Products {
 
         return db.collection('user_products').updateOne(
             filter, {
-                $set: {
+                $inc: {
                     [`cart.${gid}`]: count
                 }
             }

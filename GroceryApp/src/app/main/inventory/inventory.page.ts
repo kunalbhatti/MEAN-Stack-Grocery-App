@@ -25,7 +25,7 @@ import {
 } from "rxjs/operators";
 import {
   ToasterService
-} from "src/app/services/toaster.service";
+} from "./../../services/toaster.service";
 
 import {
   TitleCasePipe

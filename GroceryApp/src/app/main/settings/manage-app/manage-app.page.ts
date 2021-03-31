@@ -283,7 +283,8 @@ export class ManageAppPage implements OnInit {
           this.popoverController.create({
             component: ConfirmDeleteComponent,
             componentProps: {
-              type: 'group'
+              type: 'Group',
+              message: 'Are you sure you want to delete this group?'
             }
           }).then(popoverEl => {
             popoverEl.present();
@@ -298,7 +299,6 @@ export class ManageAppPage implements OnInit {
                     return true;
                   }
                 });
-
 
                 this.settingsService.updateGroup(groupArr).subscribe(
                   (result: {
@@ -364,7 +364,8 @@ export class ManageAppPage implements OnInit {
           this.popoverController.create({
             component: ConfirmDeleteComponent,
             componentProps: {
-              type: 'category'
+              type: 'Category',
+              message: 'Are data related to this category will be deleted. Proceed?'
             }
           }).then(popoverEl => {
             popoverEl.present();

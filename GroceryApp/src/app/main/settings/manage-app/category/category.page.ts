@@ -108,7 +108,8 @@ export class CategoryPage implements OnInit {
           this.popoverController.create({
             component: ConfirmDeleteComponent,
             componentProps: {
-              type: 'product'
+              type: 'Product',
+              message: 'Are data related to this product will be deleted. Proceed?'
             }
           }).then((popoverEl: HTMLIonPopoverElement) => {
             popoverEl.present();

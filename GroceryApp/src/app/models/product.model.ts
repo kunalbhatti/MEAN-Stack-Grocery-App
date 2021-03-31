@@ -10,7 +10,7 @@ export interface ProductModel {
   stockStatus ? : {
     [gid: string]: string;
   };
-  cartCount ? : {
+  cart ? : {
     [gid: string]: number;
   }
   uid ? : string; // user id
