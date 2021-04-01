@@ -38,6 +38,12 @@ import {
 import {
   InventoryService
 } from "./../../services/inventory.service";
+import {
+  ExpensesService
+} from "src/app/services/expenses.service";
+import {
+  ExpensesModel
+} from "src/app/models/expense.model";
 
 @Component({
   selector: 'app-cart',
@@ -81,6 +87,7 @@ export class CartPage implements OnInit {
     private cartService: CartService,
     private inventoryService: InventoryService,
     private searchBarService: SearchBarService,
+    private expensesService: ExpensesService,
     private alertController: AlertController,
     private popoverController: PopoverController,
     private actionSheetController: ActionSheetController,
@@ -141,7 +148,6 @@ export class CartPage implements OnInit {
 
       this.searchBarService.getProductList(searchStr, this.selectedCategory.id).pipe(take(1)).subscribe((data: ProductModel[]) => {
         this.filtered = data;
-        console.log(this.filtered)
         if (this.filtered.length === 0) {
           this.filterStatus = 'No Items Found';
         }
@@ -397,13 +403,25 @@ export class CartPage implements OnInit {
                         () => {
                           if (product.stockCount[this.currentGroup.id] === 0) {
                             this.inventoryService.updateStockStatus(product._id, 'full', this.currentGroup.id).subscribe(
-                              () => {
-                                this.toasterService.presentToast('', 'Inventory Updated', 500);
-                              }
+                              () => {}
                             )
                           }
+                          const expense: ExpensesModel = {
+                            pid: product._id,
+                            cid: product.cid,
+                            gid: this.currentGroup.id,
+                            cost: data.price,
+                            units: data.count,
+                            name: product.name
+                          }
+                          this.expensesService.addExpense(expense).subscribe(
+                            () => {
+
+                            }
+                          )
+                          this.toasterService.presentToast('', 'Inventory Updated', 500);
                         }
-                      )
+                      );
                     }
                   );
                 }
@@ -438,7 +456,7 @@ export class CartPage implements OnInit {
                 }
               );
             }
-          })
+          });
         }
       }]
     }).then((actionEl: HTMLIonActionSheetElement) => {
