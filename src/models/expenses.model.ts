@@ -46,6 +46,6 @@ export class Expenses {
     static getExpense(filter: any) {
         const db: Db = getDb();
 
-        return db.collection('user_expenses').find(filter);
+        return db.collection('user_expenses').find(filter).sort({'date.date': 1});
     }
 }

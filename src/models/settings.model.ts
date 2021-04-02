@@ -20,6 +20,9 @@ export interface SettingsModel {
     categories: {
         [id: string]: string
     };
+    expenses: {
+        [id: string]: string
+    } [];
     _id ? : string;
 }
 
@@ -90,5 +93,20 @@ export class Settings {
         }, {
             upsert: true
         });
+    }
+
+    static updateExpenses(expenses: string[], _id: ObjectId): Promise < UpdateWriteOpResult > {
+
+        const db: Db = getDb();
+
+        return db.collection('user_settings').updateOne({
+            _id
+        }, {
+            $set: {
+                expenses
+            },
+        }, {
+            upsert: true
+        })
     }
 }

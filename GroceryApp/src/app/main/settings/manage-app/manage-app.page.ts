@@ -7,7 +7,6 @@ import {
 } from '@angular/forms';
 import {
   ActionSheetController,
-  AlertController,
   PopoverController
 } from '@ionic/angular';
 import {
@@ -61,6 +60,17 @@ export class ManageAppPage implements OnInit {
     cid: string
   };
 
+  expenseError: string = '';
+  addExpenseForm: boolean;
+  expenses: {
+    [eid: string]: string
+  } [];
+  selectedExpense: {
+    expense: string,
+    eid: string
+  };
+
+
   constructor(private settingsService: SettingsService,
     private toasterService: ToasterService,
     private actionSheetController: ActionSheetController,
@@ -70,6 +80,7 @@ export class ManageAppPage implements OnInit {
   ngOnInit() {
     this.addGroupForm = false;
     this.addCategoryForm = false;
+    this.addExpenseForm = false;
 
     this.settings = this.settingsService.settings
     if (this.settings) {
@@ -85,9 +96,15 @@ export class ManageAppPage implements OnInit {
       } else {
         this.categories = [];
       }
+      if (userData.expenses && userData.expenses.length > 0) {
+        this.expenses = userData.expenses;
+      } else {
+        this.expenses = [];
+      }
     } else {
       this.groups = [];
       this.categories = [];
+      this.expenses = [];
     }
 
   }
@@ -258,6 +275,48 @@ export class ManageAppPage implements OnInit {
     );
   }
 
+
+  addExpense(form: NgForm) {
+    const expenseName: string = form.value.expense.toLowerCase().trim();
+
+    const index: number = this.expenses.findIndex((exp: {
+      [eid: string]: string
+    }) => {
+      if (this.getKeyVal(exp).value.toLowerCase() === expenseName) {
+        return true;
+      }
+    });
+
+    if (index !== -1) {
+      return;
+    }
+
+    const eid: string = uuid.v4();
+
+    const expense: {
+      [eid: string]: string
+    } = {
+      [eid]: expenseName
+    };
+
+    this.expenses.push(expense);
+
+    this.settingsService.updateExpenses(this.expenses).subscribe(
+      () => {
+        form.reset();
+        this.updateSettings('expenses', this.expenses);
+        this.toasterService.presentToast('Success!!', 'Expense was added successfully', 500);
+        this.addExpenseForm = false;
+      }, (error: string) => {
+        this.toasterService.presentToast('Failure!!', error, 500, 'danger');
+      }
+    );
+  }
+
+  editExpense(form: NgForm) {
+
+  }
+
   presentGroupActionSheet(group: string, gid: string): void {
     this.actionSheetController.create({
       header: 'Options',
@@ -316,14 +375,14 @@ export class ManageAppPage implements OnInit {
                       this.currentGroup = cgid;
                     }
 
-                    if(this.groups.length === 0) {
+                    if (this.groups.length === 0) {
                       this.setCurrentGroup('');
                       this.currentGroup = '';
                     }
                   }, (error: string) => {
                     this.toasterService.presentToast('Failure!!', error, 500, 'danger');
                   }
-                  );
+                );
               }
             });
         }
@@ -404,6 +463,9 @@ export class ManageAppPage implements OnInit {
       actionEl.present();
     })
   }
+
+
+
 
   // Utility functions
 

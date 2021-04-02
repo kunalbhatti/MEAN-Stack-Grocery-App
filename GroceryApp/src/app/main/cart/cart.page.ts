@@ -373,13 +373,11 @@ export class CartPage implements OnInit {
             inputs: [{
               name: 'count',
               type: 'number',
-              value: 'stock',
               min: 0,
               placeholder: 'Units Purchased'
             }, {
               name: 'price',
               type: 'number',
-              value: 'price',
               min: 0,
               placeholder: 'Cost Per Unit'
             }],

@@ -70,6 +70,17 @@ export class SettingsService {
     }).pipe(take(1), catchError(errorHandler));
   }
 
+  updateExpenses(
+    expenses: {
+      [id: string]: string
+    } []
+  ): Observable < any > {
+    console.log(expenses)
+    return this.http.patch(`${config.url}/settings/update-expense`, {
+      expenses
+    }).pipe(take(1), catchError(errorHandler));
+  }
+
   getProducts(cid: string) {
     return this.http.get(`${config.url}/settings/get-products/${cid}`).pipe(take(1), catchError(errorHandler));
   }

@@ -6,4 +6,7 @@ export interface SettingsModel {
   categories: {
     [id: string]: string
   } [];
+  expenses: {
+    [id: string]: string
+  } [];
 }

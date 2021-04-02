@@ -35,6 +35,7 @@ export default class SettingsController {
         this.router.patch('/update-current-group', verifyToken, this.updateCurrentGroup);
         this.router.patch('/update-group', verifyToken, this.updateGroup);
         this.router.patch('/update-category', verifyToken, this.updateCategory);
+        this.router.patch('/update-expense', verifyToken, this.updateExpense);
         this.router.get('/get-products/:cid?', verifyToken, this.getProducts);
         this.router.post('/add-product', verifyToken, this.addProduct);
         this.router.patch('/edit-product', verifyToken, this.editProduct);
@@ -124,6 +125,26 @@ export default class SettingsController {
                     });
                 }
 
+            }
+        ).catch(
+            (error: MongoError) => {
+                console.log(error)
+                res.status(500).send({
+                    message: responseCode[500]
+                });
+            }
+        )
+    }
+
+    updateExpense(req: express.Request, res: express.Response): void {
+        const _id: ObjectId = new ObjectId(req.body._id);
+        const expenses: string[] = req.body.expenses;
+
+        Settings.updateExpenses(expenses, _id).then(
+            () => {
+                res.status(200).send({
+                    expenses
+                });
             }
         ).catch(
             (error: MongoError) => {

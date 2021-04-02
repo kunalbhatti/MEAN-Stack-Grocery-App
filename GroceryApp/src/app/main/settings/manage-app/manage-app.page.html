@@ -107,6 +107,52 @@
             <ion-text *ngIf="categoryError !== ''">{{categoryError}}</ion-text>
           </ion-col>
         </ion-row>
+
+        <ion-toolbar size="12" class="ion-text-center ion-margin-top" style="background-color: #1f1f1f;">
+          <ion-title>Expenses</ion-title>
+          <ion-buttons slot="primary">
+            <ion-button (click)="addExpenseForm = !addExpenseForm; selectedExpense = ''">
+              <ion-icon name="add-outline" *ngIf="!addExpenseForm"></ion-icon>
+              <ion-icon name="close" *ngIf="addExpenseForm"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+        <ion-row style="background-color: rgb(40, 41, 44);">
+          <ion-col size="12" *ngIf="addExpenseForm">
+            <form (ngSubmit)="addExpense(createExpenseForm)" #createExpenseForm="ngForm" *ngIf="!selectedExpense">
+              <ion-item lines="none">
+                <ion-input ngModel name="expense" placeholder="Add Expense" required minlength="3" maxlength="20">
+                </ion-input>
+                <ion-button type="submit" fill="clear" color="dark" [disabled]="createExpenseForm.invalid">
+                  Add
+                </ion-button>
+              </ion-item>
+            </form>
+            <form (ngSubmit)="editExpense(updateExpenseForm)" #updateExpenseForm="ngForm" *ngIf="selectedExpense">
+              <ion-item lines="none">
+                <ion-input [ngModel]="selectedExpense.expense" name="expense" placeholder="Edit Expense" required
+                  minlength="3" maxlength="20"></ion-input>
+                <ion-button type="submit" fill="clear" color="dark" [disabled]="updateExpenseForm.invalid">
+                  Update
+                </ion-button>
+              </ion-item>
+            </form>
+          </ion-col>
+          <ion-col size="12" class="ion-text-center"
+            [ngClass]="{'ion-padding': expenseError === '' && expenses?.length === 0}">
+            <ion-list *ngIf="expenseError === '' && expenses?.length > 0">
+              <ion-item *ngFor="let expense of expenses;">
+                <ion-label [innerText]="getKeyVal(expense).value | titlecase"></ion-label>
+                <ion-button fill="clear"
+                  (click)="presentCategoryActionSheet(getKeyVal(expense).value, getKeyVal(expense).key)">
+                  <ion-icon name="ellipsis-vertical" color="dark"></ion-icon>
+                </ion-button>
+              </ion-item>
+            </ion-list>
+            <ion-text *ngIf="expenseError === '' && expenses?.length === 0">No Items Found</ion-text>
+            <ion-text *ngIf="expenseError !== ''">{{expenseError}}</ion-text>
+          </ion-col>
+        </ion-row>
       </ion-col>
     </ion-row>
   </ion-grid>
