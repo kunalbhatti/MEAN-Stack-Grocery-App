@@ -11,7 +11,7 @@ import {
 
 export interface ExpensesModel {
     uid : ObjectId;
-    pid ? : ObjectId;
+    pid ? : ObjectId | string;
     cid ? : string;
     gid: string;
     name: string;

@@ -73,11 +73,11 @@ export class SettingsService {
   updateExpenses(
     expenses: {
       [id: string]: string
-    } []
+    } [], deletedId ? : string
   ): Observable < any > {
-    console.log(expenses)
     return this.http.patch(`${config.url}/settings/update-expense`, {
-      expenses
+      expenses,
+      deletedId
     }).pipe(take(1), catchError(errorHandler));
   }
 

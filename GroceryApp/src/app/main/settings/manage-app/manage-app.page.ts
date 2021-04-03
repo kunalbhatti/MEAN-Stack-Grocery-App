@@ -314,7 +314,37 @@ export class ManageAppPage implements OnInit {
   }
 
   editExpense(form: NgForm) {
+    const expenseName: string = form.value.expense.toLowerCase().trim();
 
+    if (this.selectedExpense.expense === expenseName) {
+      form.reset();
+      this.selectedExpense = null;
+      this.addExpenseForm = false;
+      return;
+    }
+
+
+    const index: number = this.expenses.findIndex((exp: {
+      [exp: string]: string
+    }) => {
+      if (exp[this.selectedExpense.eid] === this.selectedExpense.expense) {
+        return true;
+      }
+    });
+
+    this.expenses[index][this.selectedExpense.eid] = expenseName;
+
+    this.settingsService.updateExpenses(this.expenses).subscribe(
+      () => {
+        form.reset();
+        this.updateSettings('expenses', this.expenses);
+        this.toasterService.presentToast('Success!!', 'Expense was editted successfully', 2000);
+        this.selectedExpense = null;
+        this.addExpenseForm = false;
+      }, (error: string) => {
+        this.toasterService.presentToast('Failure!!', error, 500, 'danger');
+      }
+    );
   }
 
   presentGroupActionSheet(group: string, gid: string): void {
@@ -362,7 +392,7 @@ export class ManageAppPage implements OnInit {
                 this.settingsService.updateGroup(groupArr).subscribe(
                   (result: {
                     groups: {
-                      [cid: string]: string
+                      [gid: string]: string
                     } []
                   }) => {
                     this.toasterService.presentToast('Success!!', 'Group was deleted successfully', 2000);
@@ -449,6 +479,72 @@ export class ManageAppPage implements OnInit {
                     this.toasterService.presentToast('Success!!', 'Category was deleted successfully', 2000);
                     this.categories = result.categories;
                     this.updateSettings('categories', this.categories);
+                  }, (error: string) => {
+                    this.toasterService.presentToast('Failure!!', error, 500, 'danger');
+                  }
+                );
+              }
+            }
+          );
+
+        }
+      }]
+    }).then((actionEl: HTMLIonActionSheetElement) => {
+      actionEl.present();
+    })
+  }
+
+  presentExpenseActionSheet(expense: string, eid: string): void {
+    this.actionSheetController.create({
+      header: 'Options',
+      buttons: [{
+        text: 'Close',
+        icon: 'close-outline',
+        role: 'destructive'
+      }, {
+        text: 'Edit',
+        icon: 'create-outline',
+        handler: () => {
+          this.addExpenseForm = true;
+          this.selectedExpense = {
+            expense,
+            eid
+          };
+        }
+
+      }, {
+        text: 'Delete',
+        icon: 'trash-outline',
+        handler: () => {
+          this.popoverController.create({
+            component: ConfirmDeleteComponent,
+            componentProps: {
+              type: 'Category',
+              message: 'Are data related to this category will be deleted. Proceed?'
+            }
+          }).then(popoverEl => {
+            popoverEl.present();
+            return popoverEl.onDidDismiss();
+          }).then(
+            popoverResult => {
+              if (popoverResult.role === 'delete') {
+                const expArr = this.expenses.filter((exp: {
+                  [eid: string]: string
+                }) => {
+                  if (exp[eid] !== expense) {
+                    return true;
+                  }
+                });
+
+                this.settingsService.updateExpenses(expArr, eid).subscribe(
+                  (result: {
+                    expenses: {
+                      [eid: string]: string
+                    } []
+                  }) => {
+                    this.toasterService.presentToast('Success!!', 'Category was deleted successfully', 2000);
+                    this.expenses = result.expenses;
+                    this.updateSettings('expenses', this.categories);
                   }, (error: string) => {
                     this.toasterService.presentToast('Failure!!', error, 500, 'danger');
                   }

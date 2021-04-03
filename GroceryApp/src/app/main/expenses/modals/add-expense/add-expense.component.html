@@ -1,0 +1,36 @@
+<ion-header>
+  <ion-toolbar class="ion-text-center">
+    <ion-title>Add Expense</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-no-padding">
+
+  <form #createExpenseForm="ngForm" (ngSubmit)="onSubmit(createExpenseForm)">
+    <ion-item>
+      <ion-label position="floating">Date</ion-label>
+      <ion-datetime type="date" [ngModel]="todaysDate" name="date"></ion-datetime>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Expense <small>(Required)</small></ion-label>
+      <ion-select ngModel name="expense" required>
+        <ion-select-option [value]="expense" *ngFor="let expense of expenses">{{expense?.name | titlecase}}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Units</ion-label>
+      <ion-input type="number" ngModel="1" name="units" min="1"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Cost <small>(Required)</small></ion-label>
+      <ion-input type="number" ngModel name="cost" required></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-row class="ion-justify-content-center">
+        <ion-button fill="clear" (click)="onDismiss()">Cancel</ion-button>
+        <ion-button type="submit" fill="clear" [disabled]="createExpenseForm.invalid">Add Expense</ion-button>
+      </ion-row>
+    </ion-item>
+  </form>
+</ion-content>

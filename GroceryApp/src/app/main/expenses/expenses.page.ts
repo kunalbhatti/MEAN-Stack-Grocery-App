@@ -3,17 +3,23 @@ import {
   OnInit
 } from "@angular/core";
 import {
+  PopoverController
+} from "@ionic/angular";
+import {
   take
 } from "rxjs/operators";
 import {
   ExpensesModel
-} from "src/app/models/expense.model";
+} from "./../../models/expense.model";
 import {
   ExpensesService
-} from "src/app/services/expenses.service";
+} from "./../../services/expenses.service";
 import {
   SettingsService
-} from "src/app/services/settings.service";
+} from "./../../services/settings.service";
+import {
+  AddExpenseComponent
+} from "./modals/add-expense/add-expense.component";
 
 @Component({
   selector: 'app-expenses',
@@ -21,6 +27,8 @@ import {
   styleUrls: ['expenses.page.css']
 })
 export class ExpensesPage implements OnInit {
+
+  allExpenses: ExpensesModel[];
 
   expenses: {
     [date: number]: ExpensesModel[]
@@ -48,7 +56,14 @@ export class ExpensesPage implements OnInit {
   months: string[] = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   days: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-  constructor(private settingsService: SettingsService, private expensesService: ExpensesService) {}
+  expensesArr: {
+    name: string,
+    id: string
+  }[] = [];
+
+  constructor(private settingsService: SettingsService,
+    private expensesService: ExpensesService,
+    private popoverController: PopoverController) {}
 
   ngOnInit() {}
 
@@ -76,8 +91,18 @@ export class ExpensesPage implements OnInit {
     }
 
     this.expensesService.getExpense(this.selectedMonth + 1, this.selectedYear, this.currentGroup.id).pipe(take(1)).subscribe((expenses: ExpensesModel[]) => {
+      this.allExpenses = expenses;
       this.extractExpenses(expenses);
     });
+
+    const expArr = this.settingsService.settings.expenses;
+    for (let exp of expArr) {
+      const key = Object.keys(exp).toString();
+      this.expensesArr.push({
+        id: key,
+        name: exp[key]
+      })
+    }
 
   }
 
@@ -85,6 +110,7 @@ export class ExpensesPage implements OnInit {
     this.expenses = {};
     this.expenseDates = [];
     this.expensesDateTotal = {};
+    this.expensesArr = [];
     this.total = 0;
   }
 
@@ -145,5 +171,30 @@ export class ExpensesPage implements OnInit {
     } else {
       this.expenses = {};
     }
+
+
+  }
+
+  presentExpenseAlert() {
+    this.popoverController.create({
+      component: AddExpenseComponent,
+      componentProps: {
+        expenses: this.expensesArr,
+        gid: this.currentGroup.id
+      }
+    }).then(
+      (popoverEl: HTMLIonPopoverElement) => {
+        popoverEl.present();
+        return popoverEl.onDidDismiss();
+      }
+    ).then((popoverResult: {
+      role: string,
+      data: ExpensesModel
+    }) => {
+      if(popoverResult.role === 'create') {
+        this.allExpenses.push(popoverResult.data);
+        this.extractExpenses([...this.allExpenses]);
+      }
+    })
   }
 }

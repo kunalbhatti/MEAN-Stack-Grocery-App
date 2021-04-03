@@ -28,12 +28,19 @@ export class ExpensesController {
     addExpense(req: express.Request, res: express.Response) {
 
         const uid: ObjectId = new ObjectId(req.body._id);
-        const pid: ObjectId = new ObjectId(req.body.pid);
         const cid: string = req.body.cid;
         const gid: string = req.body.gid;
         const name: string = req.body.name;
         const cost: number = +req.body.cost;
         const units: number = +req.body.units;
+        
+        let pid: ObjectId | string;
+        
+        try{
+            pid = new ObjectId(req.body.pid);
+        } catch(error) {
+            pid = req.body.pid;
+        }
 
         const date: {
             year: number,
