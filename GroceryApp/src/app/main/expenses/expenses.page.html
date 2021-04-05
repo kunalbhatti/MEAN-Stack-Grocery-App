@@ -40,20 +40,25 @@
           <ion-card *ngFor="let date of expenseDates">
             <ion-card-header>
               <ion-card-subtitle>
-                {{months[selectedMonth] | titlecase}}, {{date}}
+                {{months[selectedMonth] | titlecase}}, {{date.date}}
               </ion-card-subtitle>
             </ion-card-header>
             <ion-item style="font-size: 0.9rem;">
               <ion-label color="primary">Product(s)</ion-label>
               <ion-text color="primary">Units | Cost</ion-text>
             </ion-item>
-            <ion-item *ngFor="let expense of expenses[date]">
-              <ion-label><small>{{expense.name | titlecase}}</small></ion-label>
-              <ion-text><small>{{expense.units}} | {{expense.cost}}</small></ion-text>
+            <ion-item *ngFor="let expense of expenses[date.date]; let i = index;">
+              <ion-label><small>{{expense?.name | titlecase}} <span *ngIf="expense?.brand">
+                    {{"(" + expense?.brand + ")" | titlecase }}</span></small></ion-label>
+              <ion-text><small>{{expense?.units}} | {{expense?.cost}}</small></ion-text>
+              <ion-button fill="clear" (click)="presentExpenseActionSheet(expense, i)" class="ion-no-padding">
+                <ion-icon name="ellipsis-vertical" color="dark" slot="end"></ion-icon>
+              </ion-button>
             </ion-item>
+
             <ion-item style="font-size: 0.9rem;">
               <ion-label color="warning">Total</ion-label>
-              <ion-text>{{expensesDateTotal[date]}} /-</ion-text>
+              <ion-text>{{expensesDateTotal[date.date]}} /-</ion-text>
             </ion-item>
           </ion-card>
 

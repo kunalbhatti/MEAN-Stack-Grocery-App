@@ -52,7 +52,7 @@ export class AddExpenseComponent implements OnInit {
       pid: form.value.expense.id,
       date: {
         date: selectedDate.getDate(),
-        month: selectedDate.getMonth(),
+        month: selectedDate.getMonth() + 1,
         year: selectedDate.getFullYear()
       }
     };

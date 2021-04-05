@@ -216,7 +216,37 @@ export default class ProductsController {
         }
 
         Products.getInventory(cid ? categoryFilter : normalFilter).toArray().then(
-            products => {
+            (products: ProductsModel[]) => {
+                products.map((product: ProductsModel) => {
+                    if (product.stockCount) {
+                        if (!product.stockCount[gid]) {
+
+                            product.stockCount = {
+                                [gid]: 0
+                            };
+                        }
+                    }
+                    if (!product.stockCount) {
+                        product.stockCount = {
+                            [gid]: 0
+                        };
+                    }
+
+                    if (product.stockStatus) {
+                        if (!product.stockStatus[gid]) {
+
+                            product.stockStatus = {
+                                [gid]: ''
+                            };
+                        }
+                    }
+
+                    if (!product.stockStatus) {
+                        product.stockStatus = {
+                            [gid]: ''
+                        };
+                    }
+                })
                 res.status(200).send(products);
             }
         ).catch((error: MongoError) => {

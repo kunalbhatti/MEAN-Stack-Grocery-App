@@ -5,6 +5,9 @@ import {
   NgModule
 } from "@angular/core";
 import {
+  FormsModule
+} from "@angular/forms";
+import {
   IonicModule
 } from "@ionic/angular";
 import {
@@ -13,10 +16,13 @@ import {
 import {
   CartPage
 } from "./cart.page";
+import {
+  AddToInventoryComponent
+} from "./modals/add-to-inventory/add-to-inventory.component";
 
 @NgModule({
-  declarations: [CartPage],
-  imports: [CommonModule, IonicModule, CartRoutingModule]
+  declarations: [CartPage, AddToInventoryComponent],
+  imports: [CommonModule, IonicModule, CartRoutingModule, FormsModule]
 })
 export class CartModule {
 

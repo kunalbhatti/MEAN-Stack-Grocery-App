@@ -21,8 +21,36 @@ export class ExpensesController {
     }
 
     constructor() {
-        this.router.post('/add-expense', verifyToken, this.addExpense);
         this.router.get('/get-expense', verifyToken, this.getExpense);
+        this.router.post('/add-expense', verifyToken, this.addExpense);
+        this.router.patch('/update-expense', verifyToken, this.updateExpense);
+        this.router.delete('/delete-expense/:eid', verifyToken, this.deleteExpense);
+    }
+
+    getExpense(req: express.Request, res: express.Response) {
+
+        const month: number = +req.query.month.toString();
+        const year: number = +req.query.year.toString();
+        const gid: string = req.query.gid.toString();
+
+        const query = {
+            $and: [{
+                    gid
+                }, {
+
+                    ['date.year']: year
+                },
+                {
+                    ['date.month']: month
+                }
+            ]
+        }
+
+        Expenses.getExpense(query).toArray().then(
+            (expenses: ExpensesModel[]) => {
+                res.status(200).send(expenses);
+            }
+        );
     }
 
     addExpense(req: express.Request, res: express.Response) {
@@ -31,25 +59,17 @@ export class ExpensesController {
         const cid: string = req.body.cid;
         const gid: string = req.body.gid;
         const name: string = req.body.name;
+        const brand: string = req.body.brand;
         const cost: number = +req.body.cost;
         const units: number = +req.body.units;
-        
-        let pid: ObjectId | string;
-        
-        try{
-            pid = new ObjectId(req.body.pid);
-        } catch(error) {
-            pid = req.body.pid;
-        }
+        const date: ExpensesModel['date'] = req.body.date;
 
-        const date: {
-            year: number,
-            month: number,
-            date: number
-        } = {
-            year: new Date().getFullYear(),
-            month: new Date().getMonth() + 1,
-            date: new Date().getDate()
+        let pid: ObjectId | string;
+
+        try {
+            pid = new ObjectId(req.body.pid);
+        } catch (error) {
+            pid = req.body.pid;
         }
 
         const expense: ExpensesModel = {
@@ -60,6 +80,7 @@ export class ExpensesController {
             cost,
             units,
             name,
+            brand,
             date
         }
 
@@ -78,28 +99,51 @@ export class ExpensesController {
         )
     }
 
-    getExpense(req: express.Request, res: express.Response) {
 
-        const month: number = +req.query.month.toString();
-        const year: number = +req.query.year.toString();
-        const gid: string = req.query.gid.toString();
+    updateExpense(req: express.Request, res: express.Response) {
 
-        const query = {
-            $and: [{
-                gid
-            }, {
+        const eid: ObjectId = new ObjectId(req.body.eid);
+        const update: {
+            date: ExpensesModel['date'],
+            cost: ExpensesModel['cost']
+        } = req.body.update;
 
-                ['date.year']: year
-            },
-            {
-                ['date.month']: month
-            }]
+
+
+        Expenses.updateExpense({
+            _id: eid
+        }, update).then(
+            () => {
+                res.status(200).send({
+                    message: 'updated'
+                })
+            }
+        ), (error: MongoError) => {
+            console.log(error);
+            res.status(500).send({
+                message: responseCode[500]
+            });
         }
 
-        Expenses.getExpense(query).toArray().then(
-            (expenses: ExpensesModel[]) => {
-                res.status(200).send(expenses);
+    }
+
+    deleteExpense(req: express.Request, res: express.Response) {
+        const eid: ObjectId = new ObjectId(req.params.eid);
+
+        Expenses.deleteExpense(eid).then(
+            () => {
+                res.status(200).send({
+                    message: 'Expense deleted successfully'
+                });
             }
-        );
+        ).catch(
+            (error: MongoError) => {
+                console.log(error);
+                res.status(500).send({
+                    message: responseCode[500]
+                });
+            }
+        )
+
     }
 }

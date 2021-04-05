@@ -375,7 +375,7 @@ export class InventoryPage implements OnInit {
         text: 'Ok',
         handler: (data) => {
           this.sortBy = data;
-          this.products = this.applyProductSortFilter(data)
+          this.products = this.applyProductSortFilter(data);
         }
       }]
     }).then((actionEl: HTMLIonAlertElement) => {
@@ -405,8 +405,8 @@ export class InventoryPage implements OnInit {
     let products: ProductModel[];
 
     if (sortBy === 'none') {
-      products = this.allProducts;
-      return;
+      products = [...this.allProducts];
+      return products;
     }
 
     if (sortBy === 'stockAsc') {

@@ -3,6 +3,8 @@ import {
   OnInit
 } from "@angular/core";
 import {
+  ActionSheetController,
+  AlertController,
   PopoverController
 } from "@ionic/angular";
 import {
@@ -20,6 +22,9 @@ import {
 import {
   AddExpenseComponent
 } from "./modals/add-expense/add-expense.component";
+import {
+  EditExpenseComponent
+} from "./modals/edit-expense/edit-expense.component";
 
 @Component({
   selector: 'app-expenses',
@@ -34,7 +39,7 @@ export class ExpensesPage implements OnInit {
     [date: number]: ExpensesModel[]
   } = {};
 
-  expenseDates: number[] = [];
+  expenseDates: ExpensesModel['date'][] = [];
 
   expensesDateTotal: {
     [date: number]: number
@@ -59,11 +64,13 @@ export class ExpensesPage implements OnInit {
   expensesArr: {
     name: string,
     id: string
-  }[] = [];
+  } [] = [];
 
   constructor(private settingsService: SettingsService,
     private expensesService: ExpensesService,
-    private popoverController: PopoverController) {}
+    private popoverController: PopoverController,
+    private actionSheetController: ActionSheetController,
+    private alertController: AlertController) {}
 
   ngOnInit() {}
 
@@ -95,7 +102,11 @@ export class ExpensesPage implements OnInit {
       this.extractExpenses(expenses);
     });
 
-    const expArr = this.settingsService.settings.expenses;
+    let expArr = this.settingsService.settings.expenses;
+    if (!expArr) {
+      expArr = [];
+    }
+
     for (let exp of expArr) {
       const key = Object.keys(exp).toString();
       this.expensesArr.push({
@@ -128,7 +139,8 @@ export class ExpensesPage implements OnInit {
     }
 
     this.expensesService.getExpense(this.selectedMonth + 1, this.selectedYear, this.currentGroup.id).pipe(take(1)).subscribe((expenses: ExpensesModel[]) => {
-      this.extractExpenses(expenses);
+      this.allExpenses = expenses;
+      this.extractExpenses(this.allExpenses);
     });
   }
 
@@ -138,13 +150,18 @@ export class ExpensesPage implements OnInit {
     this.total = 0;
 
     if (expenses.length > 0) {
-
       let j = 0;
-      this.expenseDates.push(expenses[j].date.date);
+
+      // code to extract unique elements from the expenes array
+      this.expenseDates.push(expenses[j].date);
+
       for (let i = 1; i < expenses.length; i++) {
-        if (expenses[i].date.date !== this.expenseDates[j]) {
-          this.expenseDates.push(expenses[i].date.date);
-          j++;
+        let temp = expenses[i].date;
+        let flag = false;
+        for (let j = 0; j < expenses.length; j++) {
+          if(expenses[j].date === temp) {
+            flag = true;
+          }
         }
       }
 
@@ -156,23 +173,22 @@ export class ExpensesPage implements OnInit {
         let cost: number = 0;
 
         for (j; j < expenses.length; j++) {
-          if (expenses[j].date.date === date) {
+          if (expenses[j].date.date === date.date) {
             tempArr.push(expenses[j]);
-            cost += +expenses[j].cost * +expenses[j].units;
+            cost += +expenses[j].cost;
           } else {
             break;
           }
         }
-        this.expensesDateTotal[date] = cost;
+
+        this.expensesDateTotal[date.date] = cost;
         this.total += +cost;
-        this.expenses[date] = tempArr;
+        this.expenses[date.date] = tempArr;
         tempArr = [];
       }
     } else {
       this.expenses = {};
     }
-
-
   }
 
   presentExpenseAlert() {
@@ -191,10 +207,88 @@ export class ExpensesPage implements OnInit {
       role: string,
       data: ExpensesModel
     }) => {
-      if(popoverResult.role === 'create') {
+      if (popoverResult.role === 'create') {
         this.allExpenses.push(popoverResult.data);
         this.extractExpenses([...this.allExpenses]);
       }
+    })
+  }
+
+  presentExpenseActionSheet(expense: ExpensesModel, index: number) {
+    this.actionSheetController.create({
+      header: 'Options',
+      buttons: [{
+        text: 'Cancel',
+        role: 'destructive',
+        icon: 'close-outline'
+      }, {
+        text: 'Update',
+        icon: 'create-outline',
+        handler: () => {
+          this.popoverController.create({
+            component: EditExpenseComponent,
+            componentProps: {
+              type: 'edit',
+              expense
+            }
+          }).then((popoverEl: HTMLIonPopoverElement) => {
+            popoverEl.present();
+            return popoverEl.onDidDismiss();
+          }).then((popoverResult: {
+            data: ExpensesModel,
+            role: string
+          }) => {
+            if (popoverResult.role === 'edit') {
+              if (popoverResult.data.date.month === this.selectedMonth + 1 && popoverResult.data.date.year === this.selectedYear) {
+                this.allExpenses = [...this.allExpenses].filter(exp => {
+                  if (exp._id !== popoverResult.data._id) {
+                    return true;
+                  }
+                });
+                this.allExpenses.push(popoverResult.data);
+                this.extractExpenses(this.allExpenses);
+              } else {
+                this.allExpenses = [...this.allExpenses].filter(exp => {
+                  if (exp._id !== popoverResult.data._id) {
+                    return true;
+                  }
+                })
+                this.extractExpenses(this.allExpenses);
+              }
+            }
+          })
+        }
+      }, {
+        text: 'Delete',
+        icon: 'trash-outline',
+        handler: () => {
+          this.alertController.create({
+            header: 'Delete Expense',
+            buttons: [{
+              text: 'Cancel',
+              role: 'cancel'
+            }, {
+              text: 'Delete',
+              handler: () => {
+                this.expensesService.deleteExpense(expense._id).subscribe(
+                  () => {
+                    this.allExpenses = [...this.allExpenses].filter(exp => {
+                      if (exp._id !== expense._id) {
+                        return true;
+                      }
+                    })
+                    this.extractExpenses([...this.allExpenses]);
+                  }
+                );
+              }
+            }]
+          }).then((alertEl: HTMLIonAlertElement) => {
+            alertEl.present();
+          });
+        }
+      }]
+    }).then((actionSheeEl: HTMLIonActionSheetElement) => {
+      actionSheeEl.present();
     })
   }
 }

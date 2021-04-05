@@ -16,10 +16,15 @@ import {
 import {
   AddExpenseComponent
 } from "./modals/add-expense/add-expense.component";
-import { FormsModule } from "@angular/forms";
+import {
+  FormsModule
+} from "@angular/forms";
+import {
+  EditExpenseComponent
+} from "./modals/edit-expense/edit-expense.component";
 
 @NgModule({
-  declarations: [ExpensesPage, AddExpenseComponent],
+  declarations: [ExpensesPage, AddExpenseComponent, EditExpenseComponent],
   imports: [CommonModule, IonicModule, ExpensesRoutingModule, FormsModule]
 })
 export class ExpensesModule {

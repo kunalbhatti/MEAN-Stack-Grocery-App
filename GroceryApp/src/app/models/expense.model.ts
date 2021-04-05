@@ -4,6 +4,7 @@ export interface ExpensesModel {
   cid ? : string;
   gid: string;
   name: string;
+  brand?: string;
   units: number;
   cost: number;
   date ? : {

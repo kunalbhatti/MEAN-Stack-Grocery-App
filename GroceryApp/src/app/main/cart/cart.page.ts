@@ -44,6 +44,9 @@ import {
 import {
   ExpensesModel
 } from "src/app/models/expense.model";
+import {
+  AddToInventoryComponent
+} from "./modals/add-to-inventory/add-to-inventory.component";
 
 @Component({
   selector: 'app-cart',
@@ -211,6 +214,7 @@ export class CartPage implements OnInit {
   }
 
   presentFilterAlert() {
+
     let filter: any[] = [{
       name: 'all products',
       type: 'radio',
@@ -308,7 +312,7 @@ export class CartPage implements OnInit {
 
     const tempProducts: ProductModel[] = [...this.allProducts];
 
-    this.products = tempProducts.filter(prod => {
+    this.products = tempProducts.filter((prod: ProductModel) => {
       if (prod.cid === cid) {
         return true;
       }
@@ -322,7 +326,7 @@ export class CartPage implements OnInit {
 
     if (sortBy === 'none') {
       products = this.allProducts;
-      return;
+      return products;
     }
 
     if (sortBy === 'stockAsc') {
@@ -357,6 +361,7 @@ export class CartPage implements OnInit {
   }
 
   presentCartActionSheet(product: ProductModel) {
+
     this.actionSheetController.create({
       header: 'Options',
       buttons: [{
@@ -367,66 +372,64 @@ export class CartPage implements OnInit {
         text: 'Add To Inventory',
         icon: 'home-outline',
         handler: () => {
-          this.alertController.create({
-            header: 'Item Purchased?',
-            message: 'Please specify the following details.',
-            inputs: [{
-              name: 'count',
-              type: 'number',
-              min: 0,
-              placeholder: 'Units Purchased'
-            }, {
-              name: 'price',
-              type: 'number',
-              min: 0,
-              placeholder: 'Cost Per Unit'
-            }],
-            buttons: [{
-              text: 'Cancel',
-              role: 'cancel'
-            }, {
-              text: 'Ok',
-              handler: (data: {
-                count: number,
-                price: number
-              }) => {
-                if (data.count > 0 && data.price > 0) {
-                  this.cartService.updateCartCount(product._id, -product.cart[this.currentGroup.id], this.currentGroup.id).subscribe(
-                    () => {
-                      product.cart[this.currentGroup.id] -= product.cart[this.currentGroup.id];
-                      this.updateProducts(product);
-                      this.sortBy = 'none';
-                      this.updateLock = false;
-                      this.inventoryService.updateStockCount(product._id, data.count, this.currentGroup.id).subscribe(
-                        () => {
-                          if (product.stockCount[this.currentGroup.id] === 0) {
-                            this.inventoryService.updateStockStatus(product._id, 'full', this.currentGroup.id).subscribe(
-                              () => {}
-                            )
-                          }
-                          const expense: ExpensesModel = {
-                            pid: product._id,
-                            cid: product.cid,
-                            gid: this.currentGroup.id,
-                            cost: data.price,
-                            units: data.count,
-                            name: product.name
-                          }
-                          this.expensesService.addExpense(expense).subscribe(
-                            () => {
-
-                            }
-                          )
-                          this.toasterService.presentToast('', 'Inventory Updated', 500);
+          this.popoverController.create({
+            component: AddToInventoryComponent,
+            componentProps: {
+              product,
+              gid: this.currentGroup.id
+            }
+          }).then((popoverEl: HTMLIonPopoverElement) => {
+            popoverEl.present();
+            return popoverEl.onDidDismiss();
+          }).then((popoverResult: {
+            data: {
+              units: number,
+              cost: number
+            },
+            role: string
+          }) => {
+            if (popoverResult.role == 'create') {
+              if (popoverResult.data.units > 0 && popoverResult.data.cost > 0) {
+                this.cartService.updateCartCount(product._id, -product.cart[this.currentGroup.id], this.currentGroup.id).subscribe(
+                  () => {
+                    product.cart[this.currentGroup.id] -= product.cart[this.currentGroup.id];
+                    this.updateProducts(product);
+                    this.sortBy = 'none';
+                    this.updateLock = false;
+                    this.inventoryService.updateStockCount(product._id, popoverResult.data.units, this.currentGroup.id).subscribe(
+                      () => {
+                        if (product.stockCount[this.currentGroup.id] === 0) {
+                          this.inventoryService.updateStockStatus(product._id, 'full', this.currentGroup.id).subscribe(
+                            () => {}
+                          );
                         }
-                      );
-                    }
-                  );
-                }
+                        const expense: ExpensesModel = {
+                          pid: product._id,
+                          cid: product.cid,
+                          gid: this.currentGroup.id,
+                          cost: popoverResult.data.cost,
+                          units: popoverResult.data.units,
+                          name: product.name,
+                          brand: product.brand,
+                          date: {
+                            date: new Date().getDate(),
+                            month: new Date().getMonth() + 1,
+                            year: new Date().getFullYear()
+                          }
+                        }
+
+                        this.expensesService.addExpense(expense).subscribe(
+                          () => {
+
+                          }
+                        )
+                        this.toasterService.presentToast('', 'Inventory Updated', 500);
+                      }
+                    );
+                  }
+                );
               }
-            }]
-          }).then((alertEl: HTMLIonAlertElement) => {
-            alertEl.present();
+            }
           });
         }
       }, {
