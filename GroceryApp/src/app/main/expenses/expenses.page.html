@@ -3,13 +3,32 @@
     <ion-title>Expenses
       <ion-label *ngIf="currentGroup?.name"><small>({{currentGroup?.name|titlecase}})</small></ion-label>
     </ion-title>
-
     <ion-buttons slot="primary">
       <ion-button (click)="presentExpenseAlert()">
         <ion-icon name="add-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="presentCategoryPopover()">
+        <ion-icon name="filter-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-grid>
+      <ion-row class="ion-justify-content-center">
+        <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4"
+          class="ion-margin-start ion-margin-end ion-no-padding">
+          <ion-searchbar color="light" showCancelButton="focus" #searchStr (ionInput)="getProductList(searchStr.value)">
+          </ion-searchbar>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-buttons slot="primary">
+      <ion-button>
+        <ion-icon name="funnel-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -18,17 +37,9 @@
     <ion-row class="ion-justify-content-center">
       <ion-col size="12" size-sm="10" size-md="8" class="ion-text-center">
         <ion-toolbar size="12" class="ion-text-center" style="background-color: #1f1f1f;">
-          <ion-buttons slot="start">
-            <ion-button size="small" (click)="updateSelectMonth(-1)">
-              <ion-icon name="chevron-back-outline"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-          <ion-title>{{months[selectedMonth] | titlecase}} {{selectedYear}}</ion-title>
-          <ion-buttons slot="end">
-            <ion-button size="small" (click)="updateSelectMonth(1)">
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </ion-button>
-          </ion-buttons>
+
+          <ion-datetime [value]="selectedDate" displayFormat="MMMM YYYY" (ionChange)="updateSelectMonth($event)"
+            style="width: 100%;" class="ion-text-center"></ion-datetime>
         </ion-toolbar>
         <ion-list style="background-color: rgb(40, 41, 44);">
           <ion-card>
@@ -52,7 +63,7 @@
                     {{"(" + expense?.brand + ")" | titlecase }}</span></small></ion-label>
               <ion-text><small>{{expense?.units}} | {{expense?.cost}}</small></ion-text>
               <ion-button fill="clear" (click)="presentExpenseActionSheet(expense, i)" class="ion-no-padding">
-                <ion-icon name="ellipsis-vertical" color="dark" slot="end"></ion-icon>
+                <ion-icon name="ellipsis-vertical" color="dark"></ion-icon>
               </ion-button>
             </ion-item>
 

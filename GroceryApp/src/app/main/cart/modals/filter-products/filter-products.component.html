@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-toolbar class="ion-text-center">
+    <ion-title>Filter By:</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form #filterCategoryForm="ngForm" (ngSubmit)="onSubmit(filterCategoryForm)">
+    <ion-list>
+      <ion-radio-group name="category" [ngModel]="selectedCategory">
+        <ion-item *ngFor="let category of categories; let i = index;">
+          <ion-label> {{category[categoryKeys[i]] | titlecase}}</ion-label>
+          <ion-radio [value]="categoryKeys[i]"></ion-radio>
+        </ion-item>
+      </ion-radio-group>
+    </ion-list>
+    <ion-item>
+      <ion-row class="ion-text-center" style="display:flex; flex-flow: row">
+        <ion-button fill="clear" (click)="onDismiss()">Cancel</ion-button>
+        <ion-button type="submit" fill="clear" [disabled]="filterCategoryForm.invalid">
+          Add Product
+        </ion-button>
+      </ion-row>
+    </ion-item>
+  </form>
+</ion-content>

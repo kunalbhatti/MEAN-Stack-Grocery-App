@@ -16,12 +16,9 @@ import {
 import {
   CartPage
 } from "./cart.page";
-import {
-  AddToInventoryComponent
-} from "./modals/add-to-inventory/add-to-inventory.component";
 
 @NgModule({
-  declarations: [CartPage, AddToInventoryComponent],
+  declarations: [CartPage],
   imports: [CommonModule, IonicModule, CartRoutingModule, FormsModule]
 })
 export class CartModule {

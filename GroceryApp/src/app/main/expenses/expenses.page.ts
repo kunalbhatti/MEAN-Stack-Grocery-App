@@ -11,6 +11,9 @@ import {
   take
 } from "rxjs/operators";
 import {
+  ProductModel
+} from "./../../models/product.model";
+import {
   ExpensesModel
 } from "./../../models/expense.model";
 import {
@@ -20,11 +23,17 @@ import {
   SettingsService
 } from "./../../services/settings.service";
 import {
+  SearchBarService
+} from "./../../services/searchbar.service";
+import {
   AddExpenseComponent
 } from "./modals/add-expense/add-expense.component";
 import {
   EditExpenseComponent
 } from "./modals/edit-expense/edit-expense.component";
+import {
+  FilterProductsComponent
+} from "../cart/modals/filter-products/filter-products.component";
 
 @Component({
   selector: 'app-expenses',
@@ -55,8 +64,13 @@ export class ExpensesPage implements OnInit {
     name: ''
   };
 
+  selectedCategory: string = '';
+
+
   selectedMonth: number;
   selectedYear: number;
+
+  selectedDate: string;
 
   months: string[] = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   days: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -66,8 +80,14 @@ export class ExpensesPage implements OnInit {
     id: string
   } [] = [];
 
+  searchString: string;
+  filterStatus: string;
+  filtered: any[];
+  productError: string;
+
   constructor(private settingsService: SettingsService,
     private expensesService: ExpensesService,
+    private searchBarService: SearchBarService,
     private popoverController: PopoverController,
     private actionSheetController: ActionSheetController,
     private alertController: AlertController) {}
@@ -77,6 +97,8 @@ export class ExpensesPage implements OnInit {
   ionViewDidEnter() {
     this.selectedMonth = new Date().getMonth();
     this.selectedYear = new Date().getFullYear();
+
+    this.selectedDate = (`${this.selectedYear}-${this.selectedMonth + 1 > 10 ? (this.selectedMonth + 1) : '0' + (this.selectedMonth + 1)}`);
 
     this.currentGroup.id = this.settingsService.settings.currentGroup;
 
@@ -125,18 +147,10 @@ export class ExpensesPage implements OnInit {
     this.total = 0;
   }
 
-  updateSelectMonth(count: number) {
-    this.selectedMonth += count;
-
-    if (this.selectedMonth < 0) {
-      this.selectedMonth = 11;
-      this.selectedYear -= 1;
-    }
-
-    if (this.selectedMonth > 11) {
-      this.selectedMonth = 0;
-      this.selectedYear += 1;
-    }
+  updateSelectMonth(event: CustomEvent) {
+    const date = new Date(event.detail.value);
+    this.selectedMonth = date.getMonth();
+    this.selectedYear = date.getFullYear();
 
     this.expensesService.getExpense(this.selectedMonth + 1, this.selectedYear, this.currentGroup.id).pipe(take(1)).subscribe((expenses: ExpensesModel[]) => {
       this.allExpenses = expenses;
@@ -150,41 +164,40 @@ export class ExpensesPage implements OnInit {
     this.total = 0;
 
     if (expenses.length > 0) {
-      let j = 0;
 
-      // code to extract unique elements from the expenes array
-      this.expenseDates.push(expenses[j].date);
-
-      for (let i = 1; i < expenses.length; i++) {
-        let temp = expenses[i].date;
+      for (let i = 0; i < expenses.length; i++) {
         let flag = false;
-        for (let j = 0; j < expenses.length; j++) {
-          if(expenses[j].date === temp) {
+        for (let j = 0; j < this.expenseDates.length; j++) {
+          if (expenses[i].date.date === this.expenseDates[j].date) {
             flag = true;
+            break;
           }
+        }
+
+        if (!flag) {
+          this.expenseDates.push(expenses[i].date);
         }
       }
 
-      j = 0;
+      this.expenseDates.sort((a, b) => {
+        return a.date - b.date;
+      })
 
       for (let date of this.expenseDates) {
         let tempArr: ExpensesModel[] = [];
 
         let cost: number = 0;
 
-        for (j; j < expenses.length; j++) {
+        for (let j = 0; j < expenses.length; j++) {
           if (expenses[j].date.date === date.date) {
             tempArr.push(expenses[j]);
             cost += +expenses[j].cost;
-          } else {
-            break;
           }
         }
 
         this.expensesDateTotal[date.date] = cost;
         this.total += +cost;
         this.expenses[date.date] = tempArr;
-        tempArr = [];
       }
     } else {
       this.expenses = {};
@@ -291,4 +304,52 @@ export class ExpensesPage implements OnInit {
       actionSheeEl.present();
     })
   }
+
+  getProductList(searchStr: string) {
+    this.searchString = searchStr;
+    if (searchStr !== '') {
+      this.filterStatus = 'Searching Products'
+      this.filtered = [];
+
+      this.searchBarService.getProductList(searchStr, this.selectedCategory).pipe(take(1)).subscribe((data: ProductModel[]) => {
+        this.filtered = data;
+        if (this.filtered.length === 0) {
+          this.filterStatus = 'No Items Found';
+        }
+      }, (error: string) => {
+        this.productError = error;
+      });
+    }
+  }
+
+  presentCategoryPopover() {
+    let categories: {
+      [id: string]: string
+    } [] = [{
+      '': 'All Products'
+    }, ];
+
+    categories = categories.concat(this.settingsService.settings.categories);
+
+    this.popoverController.create({
+      component: FilterProductsComponent,
+      componentProps: {
+        gid: this.currentGroup.id,
+        categories,
+        selectedCategory: this.selectedCategory
+      }
+    }).then((popoverEl) => {
+      popoverEl.present();
+      return popoverEl.onDidDismiss();
+    }).then((popoverResult: {
+      data: string,
+      role: string
+    }) => {
+      if(popoverResult.role === 'filter') {
+       this.selectedCategory = popoverResult.data;
+
+      }
+    });
+  }
+
 }

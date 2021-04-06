@@ -35,4 +35,10 @@ export class SearchBarService {
     this.currentGroup = this.settingsService.settings.currentGroup;
     return this.http.get(`${config.url}/products/filter-products/?searchStr=${searchStr}&cid=${cid}&gid=${this.currentGroup}`).pipe(catchError(errorHandler));
   }
+
+  getExpenseList(searchStr: string, cid ? : string): Observable < any > {
+    this.currentGroup = this.settingsService.settings.currentGroup;
+    return this.http.get(`${config.url}/expenses/filter-expense/?searchStr=${searchStr}&cid=${cid}&gid=${this.currentGroup}`).pipe(catchError(errorHandler));
+  }
+
 }
