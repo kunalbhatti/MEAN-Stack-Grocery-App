@@ -1,3 +1,31 @@
-<p>
-  sort-products works!
-</p>
+<ion-header>
+  <ion-toolbar class="ion-text-center">
+    <ion-title>Expense View:</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form #sortExpenseForm="ngForm" (ngSubmit)="onSubmit(sortExpenseForm)">
+    <ion-list>
+      <ion-radio-group name="selectedView" [ngModel]="selectedView">
+        <ion-item>
+          <ion-label>Monthly</ion-label>
+          <ion-radio value="monthly"></ion-radio>
+        </ion-item>
+        <ion-item>
+          <ion-label>Yearly</ion-label>
+          <ion-radio value="yearly"></ion-radio>
+        </ion-item>
+
+      </ion-radio-group>
+    </ion-list>
+    <ion-item>
+      <ion-row class="ion-text-center" style="display:flex; flex-flow: row">
+        <ion-button fill="clear" (click)="onDismiss()">Cancel</ion-button>
+        <ion-button type="submit" fill="clear" [disabled]="sortExpenseForm.invalid">
+          Apply Filter
+        </ion-button>
+      </ion-row>
+    </ion-item>
+  </form>
+</ion-content>

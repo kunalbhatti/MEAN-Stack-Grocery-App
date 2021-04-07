@@ -13,6 +13,9 @@ import {
   take
 } from "rxjs/operators";
 import {
+  ExpensesModel
+} from "../models/expense.model";
+import {
   ProductModel
 } from "../models/product.model";
 
@@ -36,9 +39,9 @@ export class SearchBarService {
     return this.http.get(`${config.url}/products/filter-products/?searchStr=${searchStr}&cid=${cid}&gid=${this.currentGroup}`).pipe(catchError(errorHandler));
   }
 
-  getExpenseList(searchStr: string, cid ? : string): Observable < any > {
+  getProductExpense(searchStr: string, date: ExpensesModel['date'], cid: string, selectedView: string): Observable < any > {
     this.currentGroup = this.settingsService.settings.currentGroup;
-    return this.http.get(`${config.url}/expenses/filter-expense/?searchStr=${searchStr}&cid=${cid}&gid=${this.currentGroup}`).pipe(catchError(errorHandler));
+    return this.http.get(`${config.url}/expenses/get-product-expense/?searchStr=${searchStr}&date=${JSON.stringify(date)}&cid=${cid}&gid=${this.currentGroup}&view=${selectedView}`).pipe(catchError(errorHandler));
   }
 
 }

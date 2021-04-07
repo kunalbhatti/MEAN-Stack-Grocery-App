@@ -20,9 +20,9 @@ import * as config from './config.json';
 export class ExpensesService {
   constructor(private http: HttpClient) {}
 
-  getExpense(month: number, year: number, gid: string) {
+  getExpense(month: number, year: number, gid: string, cid: string, selectedView: string) {
     return this.http.get(
-      `${config.url}/expenses/get-expense/?month=${month}&year=${year}&gid=${gid}`
+      `${config.url}/expenses/get-expense/?month=${month}&year=${year}&gid=${gid}&cid=${cid}&view=${selectedView}`
     );
   }
 
@@ -39,8 +39,8 @@ export class ExpensesService {
       date: number,
       month: number,
       year: number
-    },    cost: number
-
+    },
+    cost: number
   }) {
     return this.http.patch(
       `${config.url}/expenses/update-expense/`, {

@@ -1,4 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit
+} from '@angular/core';
+import {
+  NgForm
+} from '@angular/forms';
+import {
+  PopoverController
+} from '@ionic/angular';
 
 @Component({
   selector: 'app-sort-products',
@@ -7,8 +17,20 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SortProductsComponent implements OnInit {
 
-  constructor() { }
+  @Input() selectedView: string;
 
-  ngOnInit() {}
+  constructor(private popoverController: PopoverController) {}
+
+  ngOnInit() {
+
+  }
+
+  onDismiss() {
+    this.popoverController.dismiss(null, 'cancel');
+  }
+
+  onSubmit(form: NgForm) {
+    this.popoverController.dismiss(form.value.selectedView, 'filter');
+  }
 
 }

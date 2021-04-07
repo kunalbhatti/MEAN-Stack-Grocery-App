@@ -19,14 +19,15 @@
       <ion-row class="ion-justify-content-center">
         <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4"
           class="ion-margin-start ion-margin-end ion-no-padding">
-          <ion-searchbar color="light" showCancelButton="focus" #searchStr (ionInput)="getProductList(searchStr.value)">
+          <ion-searchbar color="light" showCancelButton="focus" #searchStr
+            (ionInput)="getProductExpense(searchStr.value)">
           </ion-searchbar>
         </ion-col>
       </ion-row>
     </ion-grid>
     <ion-buttons slot="primary">
-      <ion-button>
-        <ion-icon name="funnel-outline"></ion-icon>
+      <ion-button (click)="presentViewFilterPopover()">
+        <ion-icon name="eye-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -37,9 +38,8 @@
     <ion-row class="ion-justify-content-center">
       <ion-col size="12" size-sm="10" size-md="8" class="ion-text-center">
         <ion-toolbar size="12" class="ion-text-center" style="background-color: #1f1f1f;">
-
-          <ion-datetime [value]="selectedDate" displayFormat="MMMM YYYY" (ionChange)="updateSelectMonth($event)"
-            style="width: 100%;" class="ion-text-center"></ion-datetime>
+          <ion-datetime [value]="selectedDate" [displayFormat]="viewFilter==='date'? 'MMMM YYYY' : 'YYYY'"
+            (ionChange)="updateSelectMonth($event)" style="width: 100%;" class="ion-text-center"></ion-datetime>
         </ion-toolbar>
         <ion-list style="background-color: rgb(40, 41, 44);">
           <ion-card>
@@ -51,14 +51,14 @@
           <ion-card *ngFor="let date of expenseDates">
             <ion-card-header>
               <ion-card-subtitle>
-                {{months[selectedMonth] | titlecase}}, {{date.date}}
+                {{months[date.month-1] | titlecase}}<span *ngIf="viewFilter==='date'">, {{date.date}}</span>
               </ion-card-subtitle>
             </ion-card-header>
             <ion-item style="font-size: 0.9rem;">
               <ion-label color="primary">Product(s)</ion-label>
               <ion-text color="primary">Units | Cost</ion-text>
             </ion-item>
-            <ion-item *ngFor="let expense of expenses[date.date]; let i = index;">
+            <ion-item *ngFor="let expense of expenses[date[viewFilter]]; let i = index;">
               <ion-label><small>{{expense?.name | titlecase}} <span *ngIf="expense?.brand">
                     {{"(" + expense?.brand + ")" | titlecase }}</span></small></ion-label>
               <ion-text><small>{{expense?.units}} | {{expense?.cost}}</small></ion-text>
@@ -69,7 +69,7 @@
 
             <ion-item style="font-size: 0.9rem;">
               <ion-label color="warning">Total</ion-label>
-              <ion-text>{{expensesDateTotal[date.date]}} /-</ion-text>
+              <ion-text>{{expensesDateTotal[date[viewFilter]]}} /-</ion-text>
             </ion-item>
           </ion-card>
 

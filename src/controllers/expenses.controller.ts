@@ -22,6 +22,7 @@ export class ExpensesController {
 
     constructor() {
         this.router.get('/get-expense', verifyToken, this.getExpense);
+        this.router.get('/get-product-expense', verifyToken, this.getProductExpense);
         this.router.post('/add-expense', verifyToken, this.addExpense);
         this.router.patch('/update-expense', verifyToken, this.updateExpense);
         this.router.delete('/delete-expense/:eid', verifyToken, this.deleteExpense);
@@ -32,25 +33,100 @@ export class ExpensesController {
         const month: number = +req.query.month.toString();
         const year: number = +req.query.year.toString();
         const gid: string = req.query.gid.toString();
+        const cid: string = req.query.cid.toString();
+        const view: string = req.query.view.toString();
 
-        const query = {
+        let monthlyFilter = {};
+        if (view === 'monthly') {
+            monthlyFilter = {
+                'date.month': month
+            };
+        }
+
+        const categoryFilter = {
             $and: [{
                     gid
                 }, {
-
-                    ['date.year']: year
+                    cid
+                }, {
+                    'date.year': year
                 },
-                {
-                    ['date.month']: month
-                }
+                monthlyFilter
             ]
         }
 
-        Expenses.getExpense(query).toArray().then(
+        const normalFilter = {
+            $and: [{
+                    gid
+                }, {
+                    'date.year': year
+                },
+                monthlyFilter
+            ]
+        }
+
+        Expenses.getExpense(cid ? categoryFilter : normalFilter).toArray().then(
             (expenses: ExpensesModel[]) => {
                 res.status(200).send(expenses);
             }
         );
+    }
+
+    getProductExpense(req: express.Request, res: express.Response) {
+        const gid: string = req.query.gid.toString();
+        const cid: string = req.query.cid.toString();
+        const searchStr: string = req.query.searchStr.toString();
+        const date: ExpensesModel['date'] = JSON.parse(req.query.date.toString());
+        const view: string = req.query.view.toString();
+
+        let monthlyFilter = {};
+        if (view === 'monthly') {
+            monthlyFilter = {
+                'date.month': date.month
+            };
+        }
+
+        const categoryFilter = {
+            $and: [{
+                gid
+            }, {
+                cid
+            }, monthlyFilter, {
+                'date.year': date.year
+            }, {
+                name: {
+                    $regex: `^.*${searchStr}.*$`,
+                    $options: 'i'
+                }
+            }]
+        }
+
+        const normalFilter = {
+            $and: [{
+                gid
+            }, monthlyFilter, {
+                'date.year': date.year,
+            }, {
+                name: {
+                    $regex: `^.*${searchStr}.*$`,
+                    $options: 'i'
+                }
+            }]
+        }
+
+        Expenses.getExpense(cid ? categoryFilter : normalFilter).toArray().then(
+            (expenses: ExpensesModel[]) => {
+                console.log(expenses)
+                res.status(200).send({
+                    expenses
+                });
+            }
+        ).catch((error: MongoError) => {
+            console.log(error);
+            res.status(500).send({
+                message: responseCode[500]
+            });
+        })
     }
 
     addExpense(req: express.Request, res: express.Response) {

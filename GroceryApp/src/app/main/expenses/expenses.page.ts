@@ -11,9 +11,6 @@ import {
   take
 } from "rxjs/operators";
 import {
-  ProductModel
-} from "./../../models/product.model";
-import {
   ExpensesModel
 } from "./../../models/expense.model";
 import {
@@ -34,6 +31,9 @@ import {
 import {
   FilterProductsComponent
 } from "../cart/modals/filter-products/filter-products.component";
+import {
+  SortProductsComponent
+} from "../cart/modals/sort-products/sort-products.component";
 
 @Component({
   selector: 'app-expenses',
@@ -65,7 +65,8 @@ export class ExpensesPage implements OnInit {
   };
 
   selectedCategory: string = '';
-
+  selectedView: string = 'monthly';
+  viewFilter: string = 'date';
 
   selectedMonth: number;
   selectedYear: number;
@@ -92,11 +93,12 @@ export class ExpensesPage implements OnInit {
     private actionSheetController: ActionSheetController,
     private alertController: AlertController) {}
 
-  ngOnInit() {}
-
-  ionViewDidEnter() {
+  ngOnInit() {
     this.selectedMonth = new Date().getMonth();
     this.selectedYear = new Date().getFullYear();
+  }
+
+  ionViewDidEnter() {
 
     this.selectedDate = (`${this.selectedYear}-${this.selectedMonth + 1 > 10 ? (this.selectedMonth + 1) : '0' + (this.selectedMonth + 1)}`);
 
@@ -119,10 +121,7 @@ export class ExpensesPage implements OnInit {
       };
     }
 
-    this.expensesService.getExpense(this.selectedMonth + 1, this.selectedYear, this.currentGroup.id).pipe(take(1)).subscribe((expenses: ExpensesModel[]) => {
-      this.allExpenses = expenses;
-      this.extractExpenses(expenses);
-    });
+    this.getExpenses();
 
     let expArr = this.settingsService.settings.expenses;
     if (!expArr) {
@@ -149,26 +148,31 @@ export class ExpensesPage implements OnInit {
 
   updateSelectMonth(event: CustomEvent) {
     const date = new Date(event.detail.value);
-    this.selectedMonth = date.getMonth();
-    this.selectedYear = date.getFullYear();
-
-    this.expensesService.getExpense(this.selectedMonth + 1, this.selectedYear, this.currentGroup.id).pipe(take(1)).subscribe((expenses: ExpensesModel[]) => {
-      this.allExpenses = expenses;
-      this.extractExpenses(this.allExpenses);
-    });
+    // condition stops execution of code when the page is loaded for the first time
+    if (this.selectedMonth !== date.getMonth() || this.selectedYear !== date.getFullYear()) {
+      this.selectedMonth = date.getMonth();
+      this.selectedYear = date.getFullYear();
+      this.getExpenses();
+    }
   }
 
   extractExpenses(expenses: ExpensesModel[]) {
+    this.expenses = [];
     this.expenseDates = [];
     this.expensesDateTotal = {};
     this.total = 0;
+
+    let view = 'date';
+    if (this.selectedView === 'yearly') {
+      view = 'month';
+    }
 
     if (expenses.length > 0) {
 
       for (let i = 0; i < expenses.length; i++) {
         let flag = false;
         for (let j = 0; j < this.expenseDates.length; j++) {
-          if (expenses[i].date.date === this.expenseDates[j].date) {
+          if (expenses[i].date[view] === this.expenseDates[j][view]) {
             flag = true;
             break;
           }
@@ -180,7 +184,7 @@ export class ExpensesPage implements OnInit {
       }
 
       this.expenseDates.sort((a, b) => {
-        return a.date - b.date;
+        return a[view] - b[view];
       })
 
       for (let date of this.expenseDates) {
@@ -189,20 +193,22 @@ export class ExpensesPage implements OnInit {
         let cost: number = 0;
 
         for (let j = 0; j < expenses.length; j++) {
-          if (expenses[j].date.date === date.date) {
+          if (expenses[j].date[view] === date[view]) {
             tempArr.push(expenses[j]);
             cost += +expenses[j].cost;
           }
         }
 
-        this.expensesDateTotal[date.date] = cost;
+        this.expensesDateTotal[date[view]] = cost;
         this.total += +cost;
-        this.expenses[date.date] = tempArr;
+        this.expenses[date[view]] = tempArr;
       }
     } else {
       this.expenses = {};
     }
+
   }
+
 
   presentExpenseAlert() {
     this.popoverController.create({
@@ -305,14 +311,39 @@ export class ExpensesPage implements OnInit {
     })
   }
 
-  getProductList(searchStr: string) {
+  getExpenses() {
+    this.expenses = {};
+    this.expenseDates = [];
+    this.expensesDateTotal = {};
+    this.expensesArr = [];
+    this.total = 0;
+
+    this.expensesService.getExpense(this.selectedMonth + 1, this.selectedYear, this.currentGroup.id, this.selectedCategory, this.selectedView).pipe(take(1)).subscribe((expenses: ExpensesModel[]) => {
+      this.allExpenses = expenses;
+      this.extractExpenses(expenses);
+    });
+  }
+
+  getProductExpense(searchStr: string) {
     this.searchString = searchStr;
+
+    if(searchStr === '') {
+      this.getExpenses();
+    }
     if (searchStr !== '') {
       this.filterStatus = 'Searching Products'
       this.filtered = [];
 
-      this.searchBarService.getProductList(searchStr, this.selectedCategory).pipe(take(1)).subscribe((data: ProductModel[]) => {
-        this.filtered = data;
+      this.searchBarService.getProductExpense(searchStr, {
+          date: 1,
+          month: this.selectedMonth + 1,
+          year: this.selectedYear
+        },
+        this.selectedCategory, this.selectedView).pipe(take(1)).subscribe((data: {
+        expenses: ExpensesModel[]
+      }) => {
+        this.extractExpenses(data.expenses);
+
         if (this.filtered.length === 0) {
           this.filterStatus = 'No Items Found';
         }
@@ -345,11 +376,37 @@ export class ExpensesPage implements OnInit {
       data: string,
       role: string
     }) => {
-      if(popoverResult.role === 'filter') {
-       this.selectedCategory = popoverResult.data;
-
+      if (popoverResult.role === 'filter') {
+        this.selectedCategory = popoverResult.data;
+        this.getExpenses();
       }
     });
+  }
+
+  presentViewFilterPopover() {
+    this.popoverController.create({
+      component: SortProductsComponent,
+      componentProps: {
+        selectedView: this.selectedView
+      }
+    }).then((popoverEl: HTMLIonPopoverElement) => {
+      popoverEl.present();
+      return popoverEl.onDidDismiss();
+    }).then((popoverResult: {
+      data: string,
+      role: string
+    }) => {
+      if (popoverResult.role === 'filter') {
+        this.selectedView = popoverResult.data;
+        if (this.selectedView === 'yearly') {
+          this.viewFilter = 'month';
+        } else {
+          this.viewFilter = 'date'
+        }
+        this.getExpenses();
+      }
+
+    })
   }
 
 }
