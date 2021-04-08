@@ -11,13 +11,13 @@ import {
 } from '@ionic/angular';
 
 @Component({
-  selector: 'app-sort-products',
-  templateUrl: './sort-products.component.html',
-  styleUrls: ['./sort-products.component.scss'],
+  selector: 'app-expense-view',
+  templateUrl: './expense-view.component.html',
+  styleUrls: ['./expense-view.component.scss'],
 })
-export class SortProductsComponent implements OnInit {
+export class ExpenseViewComponent implements OnInit {
 
-  @Input() sortBy: string;
+  @Input() selectedView: string;
 
   constructor(private popoverController: PopoverController) {}
 

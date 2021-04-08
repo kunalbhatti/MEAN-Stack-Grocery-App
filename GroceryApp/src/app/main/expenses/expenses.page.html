@@ -1,6 +1,7 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Expenses
+    <ion-title class="ion-padding-top">
+      Expenses
       <ion-label *ngIf="currentGroup?.name"><small>({{currentGroup?.name|titlecase}})</small></ion-label>
     </ion-title>
     <ion-buttons slot="primary">
@@ -19,15 +20,15 @@
       <ion-row class="ion-justify-content-center">
         <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4"
           class="ion-margin-start ion-margin-end ion-no-padding">
-          <ion-searchbar color="light" showCancelButton="focus" #searchStr
-            (ionInput)="getProductExpense(searchStr.value)">
+          <ion-searchbar color="light" showCancelButton="focus" #searchStr type="text"
+            (ionInput)="filterProductExpense(searchStr.value)">
           </ion-searchbar>
         </ion-col>
       </ion-row>
     </ion-grid>
     <ion-buttons slot="primary">
       <ion-button (click)="presentViewFilterPopover()">
-        <ion-icon name="eye-outline"></ion-icon>
+        <ion-icon name="funnel-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -72,10 +73,8 @@
               <ion-text>{{expensesDateTotal[date[viewFilter]]}} /-</ion-text>
             </ion-item>
           </ion-card>
-
         </ion-list>
       </ion-col>
     </ion-row>
   </ion-grid>
-
 </ion-content>

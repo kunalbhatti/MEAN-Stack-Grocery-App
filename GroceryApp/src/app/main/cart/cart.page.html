@@ -4,6 +4,13 @@
       Cart
       <ion-label *ngIf="currentGroup?.name"><small>({{currentGroup?.name|titlecase}})</small></ion-label>
     </ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-buttons slot="start" *ngIf="searchString === ''">
+      <ion-button (click)="presentFilterAlert()" size="small">
+        <ion-icon name="filter-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
     <ion-grid>
       <ion-row class="ion-justify-content-center">
         <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4"
@@ -13,6 +20,11 @@
         </ion-col>
       </ion-row>
     </ion-grid>
+    <ion-buttons slot="end" *ngIf="searchString === ''">
+      <ion-button (click)="presentSortAlert()" size="small">
+        <ion-icon name="funnel-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -22,16 +34,6 @@
       <ion-col size="12" size-sm="10" size-md="8" class="ion-text-center">
         <ion-toolbar size="12" class="ion-text-center" style="background-color: #1f1f1f;">
           <ion-title>{{selectedCategory.name | titlecase}}</ion-title>
-          <ion-buttons slot="start" *ngIf="searchString === ''">
-            <ion-button (click)="presentFilterAlert()" size="small">
-              <ion-icon name="filter-outline"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-          <ion-buttons slot="end" *ngIf="searchString === ''">
-            <ion-button (click)="presentSortAlert()" size="small">
-              <ion-icon name="funnel-outline"></ion-icon>
-            </ion-button>
-          </ion-buttons>
         </ion-toolbar>
         <ion-list style="background-color: rgb(40, 41, 44);" *ngIf="searchString === '' && products?.length > 0">
           <ion-card *ngFor="let product of products">

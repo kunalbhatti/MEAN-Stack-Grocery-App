@@ -31,9 +31,12 @@ export default class ProductsController {
     filterProducts(req: express.Request, res: express.Response) {
         const uid: ObjectId = new ObjectId(req.body._id);
 
-        const searchStr: string = req.query.searchStr.toString();
+        let searchStr: string = req.query.searchStr.toString();
+        searchStr = searchStr.replace(/[^a-zA-Z]/g, "");
+
         const gid: string = req.query.gid.toString();
         const cid: string = req.query.cid.toString();
+
 
         const categoryFilter = {
             $and: [{

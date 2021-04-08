@@ -19,11 +19,10 @@ export class FilterProductsComponent implements OnInit {
     id: string
   } [] = [];
 
-  categoryKeys: string[] = [];
-
   @Input() selectedCategory:string;
-
   @Input() gid: string;
+
+  categoryKeys: string[] = [];
 
   constructor(private popoverController: PopoverController) {}
 

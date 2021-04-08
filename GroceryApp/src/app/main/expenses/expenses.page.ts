@@ -32,8 +32,8 @@ import {
   FilterProductsComponent
 } from "../cart/modals/filter-products/filter-products.component";
 import {
-  SortProductsComponent
-} from "../cart/modals/sort-products/sort-products.component";
+  ExpenseViewComponent
+} from "../cart/modals/expense-view/expense-view.component";
 
 @Component({
   selector: 'app-expenses',
@@ -324,33 +324,22 @@ export class ExpensesPage implements OnInit {
     });
   }
 
-  getProductExpense(searchStr: string) {
+  filterProductExpense(searchStr: string) {
+
+    searchStr = searchStr.replace(/[^a-zA-Z]/g, "");
+
     this.searchString = searchStr;
+    let tempArr = [];
 
-    if(searchStr === '') {
-      this.getExpenses();
+    let regExp: RegExp = new RegExp(`^.*${searchStr}.*$`, 'i');
+
+    for (let expense of this.allExpenses) {
+      if (regExp.test(expense.name)) {
+        tempArr.push(expense);
+      }
     }
-    if (searchStr !== '') {
-      this.filterStatus = 'Searching Products'
-      this.filtered = [];
+    this.extractExpenses(tempArr);
 
-      this.searchBarService.getProductExpense(searchStr, {
-          date: 1,
-          month: this.selectedMonth + 1,
-          year: this.selectedYear
-        },
-        this.selectedCategory, this.selectedView).pipe(take(1)).subscribe((data: {
-        expenses: ExpensesModel[]
-      }) => {
-        this.extractExpenses(data.expenses);
-
-        if (this.filtered.length === 0) {
-          this.filterStatus = 'No Items Found';
-        }
-      }, (error: string) => {
-        this.productError = error;
-      });
-    }
   }
 
   presentCategoryPopover() {
@@ -385,7 +374,7 @@ export class ExpensesPage implements OnInit {
 
   presentViewFilterPopover() {
     this.popoverController.create({
-      component: SortProductsComponent,
+      component: ExpenseViewComponent,
       componentProps: {
         selectedView: this.selectedView
       }

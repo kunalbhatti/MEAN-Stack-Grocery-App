@@ -75,7 +75,8 @@ export class ExpensesController {
     getProductExpense(req: express.Request, res: express.Response) {
         const gid: string = req.query.gid.toString();
         const cid: string = req.query.cid.toString();
-        const searchStr: string = req.query.searchStr.toString();
+        let searchStr: string = req.query.searchStr.toString();
+        searchStr = searchStr.replace(/[^a-zA-Z]/g, "");
         const date: ExpensesModel['date'] = JSON.parse(req.query.date.toString());
         const view: string = req.query.view.toString();
 

@@ -4,13 +4,18 @@ import {
 import {
   NgModule
 } from "@angular/core";
-import { FormsModule } from "@angular/forms";
+import {
+  FormsModule
+} from "@angular/forms";
 import {
   IonicModule
 } from "@ionic/angular";
 import {
   AddToInventoryComponent
 } from "./cart/modals/add-to-inventory/add-to-inventory.component";
+import {
+  ExpenseViewComponent
+} from "./cart/modals/expense-view/expense-view.component";
 import {
   FilterProductsComponent
 } from "./cart/modals/filter-products/filter-products.component";
@@ -25,7 +30,7 @@ import {
 } from "./main.page";
 
 @NgModule({
-  declarations: [MainPage, AddToInventoryComponent, FilterProductsComponent, SortProductsComponent],
+  declarations: [MainPage, AddToInventoryComponent, FilterProductsComponent, SortProductsComponent, ExpenseViewComponent],
   imports: [CommonModule, IonicModule, MainRoutingModule, FormsModule],
 })
 export class MainModule {

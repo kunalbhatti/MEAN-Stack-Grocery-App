@@ -15,9 +15,7 @@ import {
 import {
   ExpensesModel
 } from "../models/expense.model";
-import {
-  ProductModel
-} from "../models/product.model";
+
 
 import * as config from './config.json';
 import errorHandler from './error.handler';

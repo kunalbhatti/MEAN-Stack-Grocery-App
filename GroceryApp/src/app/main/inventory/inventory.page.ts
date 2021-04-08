@@ -3,8 +3,15 @@ import {
   OnInit
 } from "@angular/core";
 import {
-  AlertController
+  AlertController,
+  PopoverController
 } from "@ionic/angular";
+import {
+  TitleCasePipe
+} from '@angular/common';
+import {
+  Router
+} from "@angular/router";
 import {
   ProductModel
 } from "./../../models/product.model";
@@ -28,11 +35,11 @@ import {
 } from "./../../services/toaster.service";
 
 import {
-  TitleCasePipe
-} from '@angular/common';
+  FilterProductsComponent
+} from "../cart/modals/filter-products/filter-products.component";
 import {
-  Router
-} from "@angular/router";
+  SortProductsComponent
+} from "../cart/modals/sort-products/sort-products.component";
 
 @Component({
   selector: 'app-inventory',
@@ -70,6 +77,7 @@ export class InventoryPage implements OnInit {
   constructor(private searchBarService: SearchBarService,
     private inventoryService: InventoryService,
     private alertController: AlertController,
+    private popoverController: PopoverController,
     private settingsService: SettingsService,
     private cartService: CartService,
     private toasterService: ToasterService,
@@ -119,6 +127,9 @@ export class InventoryPage implements OnInit {
   }
 
   getProductList(searchStr: string) {
+
+    searchStr = searchStr.replace(/[^a-zA-Z]/g, "");
+
     this.searchString = searchStr;
     if (searchStr !== '') {
       this.filterStatus = 'Searching Products'
@@ -295,92 +306,53 @@ export class InventoryPage implements OnInit {
   }
 
   presentFilterAlert() {
-    let filter: any[] = [{
-      name: 'all products',
-      type: 'radio',
-      label: 'All Products',
-      value: {
-        id: '',
-        name: 'All Products'
-      },
-      checked: this.selectedCategory.id === '' ? true : false
-    }];
+    let categories: {
+      [id: string]: string
+    } [] = [{
+      '': 'All Products'
+    }, ];
 
-    let categoryKeys: string[] = []
+    categories = categories.concat(this.settingsService.settings.categories);
 
-    const categories = this.settingsService.settings.categories;
-    categories.forEach(category => {
-      categoryKeys.push(Object.keys(category).toString());
-    })
+    this.popoverController.create({
+      component: FilterProductsComponent,
+      componentProps: {
+        categories,
+        selectedCategory: this.selectedCategory.id
+      }
+    }).then((popoverEl: HTMLIonPopoverElement) => {
+      popoverEl.present();
+      return popoverEl.onDidDismiss();
+    }).then((popoverResult: {
+      data: string,
+      role: string
+    }) => {
+      if (popoverResult.role === 'filter') {
+        this.selectedCategory.id = popoverResult.data;
+        this.applyProductCategoryFilter(this.selectedCategory.id);
 
-    for (let [i, category] of categories.entries()) {
-      filter.push({
-        name: category[categoryKeys[i]],
-        type: 'radio',
-        label: this.titleCasePipe.transform(category[categoryKeys[i]]),
-        value: {
-          id: categoryKeys[i],
-          name: category[categoryKeys[i]]
-        },
-        checked: this.selectedCategory.id === categoryKeys[i] ? true : false
-      });
-    }
-
-    this.alertController.create({
-      header: 'Filter By:',
-      inputs: filter,
-      buttons: [{
-        text: 'Cancel',
-        role: 'cancel'
-      }, {
-        text: 'Ok',
-        handler: (data) => {
-          this.selectedCategory = data;
-          this.applyProductCategoryFilter(this.selectedCategory.id);
-        }
-      }]
-    }).then((actionEl: HTMLIonAlertElement) => {
-      actionEl.present();
+      }
     });
   }
 
   presentSortAlert() {
-    let filter: any[] = [{
-      name: 'none',
-      type: 'radio',
-      label: 'None',
-      value: 'none',
-      checked: this.sortBy === 'none' ? true : false
-    }, {
-      name: 'stockAsc',
-      type: 'radio',
-      label: 'Ascending',
-      value: 'stockAsc',
-      checked: this.sortBy === 'stockAsc' ? true : false
-    }, {
-      name: 'stockDesc',
-      type: 'radio',
-      label: 'Descending',
-      value: 'stockDesc',
-      checked: this.sortBy === 'stockDesc' ? true : false
-    }];
-
-    this.alertController.create({
-      header: 'Sort By:',
-      inputs: filter,
-      buttons: [{
-        text: 'Cancel',
-        role: 'cancel'
-      }, {
-        text: 'Ok',
-        handler: (data) => {
-          this.sortBy = data;
-          this.products = this.applyProductSortFilter(data);
-        }
-      }]
-    }).then((actionEl: HTMLIonAlertElement) => {
-      actionEl.present();
-    })
+    this.popoverController.create({
+      component: SortProductsComponent,
+      componentProps: {
+        sortBy: this.sortBy
+      },
+    }).then((popoverEl: HTMLIonPopoverElement) => {
+      popoverEl.present();
+      return popoverEl.onDidDismiss();
+    }).then((popoverResult: {
+      data: string,
+      role: string
+    }) => {
+      if (popoverResult.role === 'filter') {
+        this.sortBy = popoverResult.data;
+        this.products = this.applyProductSortFilter(popoverResult.data)
+      }
+    });
   }
 
 
@@ -405,34 +377,20 @@ export class InventoryPage implements OnInit {
     let products: ProductModel[];
 
     if (sortBy === 'none') {
-      products = [...this.allProducts];
+      products = this.allProducts;
       return products;
     }
 
-    if (sortBy === 'stockAsc') {
+    if (sortBy === 'price') {
       products = tempProducts.sort((prod1: ProductModel, prod2: ProductModel) => {
+        return +prod1.price - +prod2.price;
+      });
+    }
 
+
+    if (sortBy === 'units') {
+      products = tempProducts.sort((prod1: ProductModel, prod2: ProductModel) => {
         return prod1.stockCount[this.currentGroup] - prod2.stockCount[this.currentGroup];
-      })
-    }
-
-
-    if (sortBy === 'stockDesc') {
-      products = tempProducts.sort((prod1: ProductModel, prod2: ProductModel) => {
-
-        return prod2.stockCount[this.currentGroup] - prod1.stockCount[this.currentGroup];
-      })
-    }
-
-    if (sortBy === 'name') {
-      products = tempProducts.sort((prod1: ProductModel, prod2: ProductModel) => {
-        if (prod1.name < prod2.name) {
-          return -1;
-        }
-        if (prod1.name > prod2.name) {
-          return 1;
-        }
-        return 0;
       });
     }
 

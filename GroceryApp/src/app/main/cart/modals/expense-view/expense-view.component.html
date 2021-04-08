@@ -1,24 +1,20 @@
 <ion-header>
   <ion-toolbar class="ion-text-center">
-    <ion-title>Sort Products:</ion-title>
+    <ion-title>Expense View:</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <form #sortExpenseForm="ngForm" (ngSubmit)="onSubmit(sortExpenseForm)">
     <ion-list>
-      <ion-radio-group name="selectedView" [ngModel]="sortBy">
+      <ion-radio-group name="selectedView" [ngModel]="selectedView">
         <ion-item>
-          <ion-label>None</ion-label>
-          <ion-radio value="none"></ion-radio>
+          <ion-label>Monthly</ion-label>
+          <ion-radio value="monthly"></ion-radio>
         </ion-item>
         <ion-item>
-          <ion-label>Price</ion-label>
-          <ion-radio value="price"></ion-radio>
-        </ion-item>
-        <ion-item>
-          <ion-label>Units</ion-label>
-          <ion-radio value="units"></ion-radio>
+          <ion-label>Yearly</ion-label>
+          <ion-radio value="yearly"></ion-radio>
         </ion-item>
 
       </ion-radio-group>
