@@ -1,27 +1,27 @@
 import {
   NgModule
-} from "@angular/core";
+} from '@angular/core';
 import {
   ExpensesPage
-} from "./expenses.page";
+} from './expenses.page';
 import {
   ExpensesRoutingModule
 } from './expenses-routing.module';
 import {
   CommonModule
-} from "@angular/common";
+} from '@angular/common';
 import {
   IonicModule
-} from "@ionic/angular";
+} from '@ionic/angular';
 import {
   AddExpenseComponent
-} from "./modals/add-expense/add-expense.component";
+} from './modals/add-expense/add-expense.component';
 import {
   FormsModule
-} from "@angular/forms";
+} from '@angular/forms';
 import {
   EditExpenseComponent
-} from "./modals/edit-expense/edit-expense.component";
+} from './modals/edit-expense/edit-expense.component';
 
 @NgModule({
   declarations: [ExpensesPage, AddExpenseComponent, EditExpenseComponent],

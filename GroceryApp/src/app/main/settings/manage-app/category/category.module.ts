@@ -1,21 +1,21 @@
 import {
   CommonModule
-} from "@angular/common";
+} from '@angular/common';
 import {
   NgModule
-} from "@angular/core";
+} from '@angular/core';
 import {
   FormsModule
-} from "@angular/forms";
+} from '@angular/forms';
 import {
   IonicModule
-} from "@ionic/angular";
+} from '@ionic/angular';
 import {
   CategoryRoutingModule
-} from "./category-routing.module";
+} from './category-routing.module';
 import {
   CategoryPage
-} from "./category.page";
+} from './category.page';
 
 @NgModule({
   declarations: [CategoryPage],

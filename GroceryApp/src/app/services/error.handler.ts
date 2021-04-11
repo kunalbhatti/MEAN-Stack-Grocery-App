@@ -1,10 +1,10 @@
 import {
   HttpErrorResponse
-} from "@angular/common/http";
+} from '@angular/common/http';
 import {
   Observable,
   throwError
-} from "rxjs";
+} from 'rxjs';
 
 const errorHandler = (errorRes: HttpErrorResponse): Observable < any > => {
   let errorMessage: string = 'An unknown error occured. Please try again later';

@@ -10,12 +10,17 @@ import {
 import {
   IonicModule
 } from "@ionic/angular";
+
+import {
+  MainPage
+} from "./main.page";
+
 import {
   AddToInventoryComponent
 } from "./cart/modals/add-to-inventory/add-to-inventory.component";
 import {
   ExpenseViewComponent
-} from "./cart/modals/expense-view/expense-view.component";
+} from "./expenses/modals/expense-view/expense-view.component";
 import {
   FilterProductsComponent
 } from "./cart/modals/filter-products/filter-products.component";
@@ -25,9 +30,7 @@ import {
 import {
   MainRoutingModule
 } from "./main-routing.module";
-import {
-  MainPage
-} from "./main.page";
+
 
 @NgModule({
   declarations: [MainPage, AddToInventoryComponent, FilterProductsComponent, SortProductsComponent, ExpenseViewComponent],

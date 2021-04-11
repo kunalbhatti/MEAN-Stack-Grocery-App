@@ -1,64 +1,70 @@
 import {
-  Component,
-  OnInit
-} from "@angular/core";
+  Component
+} from '@angular/core';
+import {
+  Router
+} from '@angular/router';
 import {
   AlertController,
   PopoverController
-} from "@ionic/angular";
-import {
-  TitleCasePipe
-} from '@angular/common';
-import {
-  Router
-} from "@angular/router";
-import {
-  ProductModel
-} from "./../../models/product.model";
-import {
-  CartService
-} from "./../../services/cart.service";
-import {
-  InventoryService
-} from "./../../services/inventory.service";
-import {
-  SettingsService
-} from "./../../services/settings.service";
-import {
-  SearchBarService,
-} from "./../../services/searchbar.service";
+} from '@ionic/angular';
 import {
   take
-} from "rxjs/operators";
-import {
-  ToasterService
-} from "./../../services/toaster.service";
+} from 'rxjs/operators';
 
+// components
 import {
   FilterProductsComponent
-} from "../cart/modals/filter-products/filter-products.component";
+} from '../cart/modals/filter-products/filter-products.component';
 import {
   SortProductsComponent
-} from "../cart/modals/sort-products/sort-products.component";
+} from '../cart/modals/sort-products/sort-products.component';
+
+// services
+import {
+  CartService
+} from './../../services/cart.service';
+import {
+  InventoryService
+} from './../../services/inventory.service';
+import {
+  SettingsService
+} from './../../services/settings.service';
+import {
+  SearchBarService,
+} from './../../services/searchbar.service';
+import {
+  ToasterService
+} from './../../services/toaster.service';
+
+// models
+import {
+  ProductModel
+} from './../../models/product.model';
+import {
+  SettingsModel
+} from './../../models/settings.model';
 
 @Component({
   selector: 'app-inventory',
   templateUrl: 'inventory.page.html',
   styleUrls: ['inventory.page.css']
 })
-export class InventoryPage implements OnInit {
+export class InventoryPage {
 
   allProducts: ProductModel[] = [];
+
+  // products array is used for rendering products with stockCount greater than zero
   products: ProductModel[];
+
+  // filtered array is used for rendering products filtered from searchbar
   filtered: ProductModel[];
-
-  productError: string = '';
-
-  searchString: string = '';
 
   currentGroup: string;
   groupName: string;
 
+  // stores filtered value for categories
+  // default is all products
   selectedCategory: {
     id: string
     name: string,
@@ -67,11 +73,16 @@ export class InventoryPage implements OnInit {
     name: 'all products'
   };
 
+  // sort filter
+  // sort by price or cart units
   sortBy: string = 'none';
 
+  productError: string = '';
+  searchString: string = '';
   searchStatus: string;
   filterStatus: string;
 
+  // all buttons are disabled when the update lock is true
   updateLock: boolean = false;
 
   constructor(private searchBarService: SearchBarService,
@@ -81,13 +92,12 @@ export class InventoryPage implements OnInit {
     private settingsService: SettingsService,
     private cartService: CartService,
     private toasterService: ToasterService,
-    private titleCasePipe: TitleCasePipe,
     private router: Router) {}
-
-  ngOnInit() {}
 
   ionViewDidEnter() {
     this.searchStatus = 'Loading Inventory';
+
+    // extracting the currentGroup name from the settings
     this.currentGroup = this.settingsService.settings.currentGroup;
 
     const groups = this.settingsService.settings.groups;
@@ -105,6 +115,8 @@ export class InventoryPage implements OnInit {
     }
 
     this.inventoryService.getInventory(this.selectedCategory.id).pipe(take(1)).subscribe((products: ProductModel[]) => {
+      // maintainig original copy of the data
+      // used to render products the searchbar is cleared
       this.allProducts = products;
       this.products = products;
       if (this.products.length === 0) {
@@ -126,9 +138,10 @@ export class InventoryPage implements OnInit {
     this.searchString = '';
   }
 
-  getProductList(searchStr: string) {
+  getProductList(searchStr: string): void {
 
-    searchStr = searchStr.replace(/[^a-zA-Z]/g, "");
+    // regex will remove special characters from the search string
+    searchStr = searchStr.replace(/[^a-zA-Z]/g, '');
 
     this.searchString = searchStr;
     if (searchStr !== '') {
@@ -146,40 +159,20 @@ export class InventoryPage implements OnInit {
     }
   }
 
-  updateProducts(product: ProductModel) {
-    const index: number = this.products.findIndex((prod: ProductModel) => {
-      if (prod._id === product._id) {
-        return true;
-      }
-    });
 
-    if (index !== -1) {
-      this.products[index] = product;
-    } else {
-      this.products = [product].concat(this.products);
-    }
-
-    this.products = this.products.filter(prod => {
-      if (prod.stockStatus[this.currentGroup] !== 'empty') {
-        return true;
-      }
-    });
-
-    this.allProducts = this.products;
-  }
-
-  updateProductStockCount(product: ProductModel, count: number) {
+  updateProductStockCount(product: ProductModel, count: number): void {
     if (this.currentGroup.length > 0) {
       this.updateLock = true;
       this.inventoryService.updateStockCount(product._id, count, this.currentGroup).pipe(take(1)).subscribe(
         () => {
           product.stockCount[this.currentGroup] += count;
           this.updateProducts(product);
+          // neutralize sort filter
           this.sortBy = 'none';
           this.updateLock = false;
           this.toasterService.presentToast('', 'Inventoy Updated', 500);
         }
-      )
+      );
 
       if (product.stockCount[this.currentGroup] + count > 0 && product.stockStatus[this.currentGroup] === 'empty' ||
         product.stockCount[this.currentGroup] + count > 0 && !product.stockStatus[this.currentGroup]) {
@@ -187,8 +180,10 @@ export class InventoryPage implements OnInit {
           () => {
             product.stockStatus[this.currentGroup] = 'full';
             this.updateProducts(product);
+          }, (error: string) => {
+            this.productError = error;
           }
-        )
+        );
       }
 
       if (product.stockCount[this.currentGroup] + count === 0) {
@@ -196,8 +191,10 @@ export class InventoryPage implements OnInit {
           () => {
             product.stockStatus[this.currentGroup] = 'empty';
             this.updateProducts(product);
+          }, (error: string) => {
+            this.productError = error;
           }
-        )
+        );
       }
     } else {
       this.alertController.create({
@@ -214,11 +211,11 @@ export class InventoryPage implements OnInit {
         }]
       }).then((alertEl: HTMLIonAlertElement) => {
         alertEl.present();
-      })
+      });
     }
   }
 
-  updateProductStockStatus(product: ProductModel, status: string) {
+  updateProductStockStatus(product: ProductModel, status: string): void {
     if (this.currentGroup.length > 0) {
       if (status === 'empty') {
 
@@ -256,8 +253,10 @@ export class InventoryPage implements OnInit {
                       }
                     }
                   );
+                }, (error: string) => {
+                  this.productError = error;
                 }
-              )
+              );
             }
           }]
         }).then(actionEl => {
@@ -280,11 +279,15 @@ export class InventoryPage implements OnInit {
                   this.updateProducts(product);
                   this.sortBy = 'none';
                   this.toasterService.presentToast('', 'Inventoy Updated', 500);
+                }, (error: string) => {
+                  this.productError = error;
                 }
-              )
+              );
             }
+          }, (error: string) => {
+            this.productError = error;
           }
-        )
+        );
       }
     } else {
       this.alertController.create({
@@ -301,14 +304,13 @@ export class InventoryPage implements OnInit {
         }]
       }).then((alertEl: HTMLIonAlertElement) => {
         alertEl.present();
-      })
+      });
     }
   }
 
-  presentFilterAlert() {
-    let categories: {
-      [id: string]: string
-    } [] = [{
+  // popover and alert functions
+  presentFilterAlert(): void {
+    let categories: SettingsModel['categories'] = [{
       '': 'All Products'
     }, ];
 
@@ -335,7 +337,7 @@ export class InventoryPage implements OnInit {
     });
   }
 
-  presentSortAlert() {
+  presentSortAlert(): void {
     this.popoverController.create({
       component: SortProductsComponent,
       componentProps: {
@@ -355,6 +357,29 @@ export class InventoryPage implements OnInit {
     });
   }
 
+  // utility functions
+
+  updateProducts(product: ProductModel): void {
+    const index: number = this.products.findIndex((prod: ProductModel) => {
+      if (prod._id === product._id) {
+        return true;
+      }
+    });
+
+    if (index !== -1) {
+      this.products[index] = product;
+    } else {
+      this.products = [product].concat(this.products);
+    }
+
+    this.products = this.products.filter(prod => {
+      if (prod.stockStatus[this.currentGroup] !== 'empty') {
+        return true;
+      }
+    });
+
+    this.allProducts = this.products;
+  }
 
   applyProductCategoryFilter(cid: string): void {
     if (cid === '') {
@@ -397,4 +422,5 @@ export class InventoryPage implements OnInit {
     return products;
 
   }
+
 }

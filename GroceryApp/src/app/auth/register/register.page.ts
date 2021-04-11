@@ -1,7 +1,7 @@
 import {
   Component,
   OnInit
-} from "@angular/core";
+} from '@angular/core';
 import {
   FormControl,
   Validators,
@@ -9,10 +9,10 @@ import {
   AbstractControl,
   ValidationErrors,
   FormBuilder
-} from "@angular/forms";
+} from '@angular/forms';
 import {
   AuthService
-} from "src/app/services/auth.service";
+} from './../../services/auth.service';
 
 const comparePassword: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
 

@@ -15,6 +15,7 @@ import {
 
 import * as uuid from 'uuid';
 
+// services
 import {
   SettingsService
 } from './../../../services/settings.service';
@@ -25,6 +26,7 @@ import {
   ConfirmDeleteComponent
 } from './modals/confirm-delete/confirm-delete.component';
 
+//models
 import {
   SettingsModel
 } from './../../../models/settings.model';
@@ -40,9 +42,7 @@ export class ManageAppPage implements OnInit {
 
   groupError: string = '';
   addGroupForm: boolean;
-  groups: {
-    [gid: string]: string
-  } [];
+  groups: SettingsModel['groups'];
   selectedGroup: {
     group: string,
     gid: string
@@ -52,9 +52,8 @@ export class ManageAppPage implements OnInit {
 
   categoryError: string = '';
   addCategoryForm: boolean;
-  categories: {
-    [cid: string]: string
-  } [];
+  categories: SettingsModel['categories'];
+
   selectedCategory: {
     category: string,
     cid: string
@@ -62,9 +61,7 @@ export class ManageAppPage implements OnInit {
 
   expenseError: string = '';
   addExpenseForm: boolean;
-  expenses: {
-    [eid: string]: string
-  } [];
+  expenses: SettingsModel['expenses'];
   selectedExpense: {
     expense: string,
     eid: string
@@ -187,10 +184,8 @@ export class ManageAppPage implements OnInit {
         if (this.groups.length === 1) {
           this.currentGroup = groupId;
         }
-      }, (error: {
-        message: string
-      }) => {
-        console.log(error);
+      }, (error: string) => {
+        this.toasterService.presentToast('Failure!!', error, 500, 'danger');
       }
     )
   }
@@ -276,7 +271,7 @@ export class ManageAppPage implements OnInit {
   }
 
 
-  addExpense(form: NgForm) {
+  addExpense(form: NgForm): void {
     const expenseName: string = form.value.expense.toLowerCase().trim();
 
     const index: number = this.expenses.findIndex((exp: {
@@ -313,7 +308,7 @@ export class ManageAppPage implements OnInit {
     );
   }
 
-  editExpense(form: NgForm) {
+  editExpense(form: NgForm): void {
     const expenseName: string = form.value.expense.toLowerCase().trim();
 
     if (this.selectedExpense.expense === expenseName) {
@@ -520,7 +515,7 @@ export class ManageAppPage implements OnInit {
             component: ConfirmDeleteComponent,
             componentProps: {
               type: 'Category',
-              message: 'Are data related to this category will be deleted. Proceed?'
+              message: 'All data related to this category will be deleted. Proceed?'
             }
           }).then(popoverEl => {
             popoverEl.present();
@@ -561,10 +556,7 @@ export class ManageAppPage implements OnInit {
   }
 
 
-
-
   // Utility functions
-
   getKeyVal(data: {
     [id: string]: string
   }): {
@@ -580,7 +572,7 @@ export class ManageAppPage implements OnInit {
     return value[0];
   }
 
-  updateSettings(type: string, data: any) {
+  updateSettings(type: string, data: any): void {
     this.settings[type] = data;
     this.settingsService.settings = this.settings;
   }

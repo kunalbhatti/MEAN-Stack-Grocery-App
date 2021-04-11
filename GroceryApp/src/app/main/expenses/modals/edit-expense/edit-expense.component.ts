@@ -1,8 +1,6 @@
 import {
   Component,
-  OnChanges,
   OnInit,
-  SimpleChanges
 } from '@angular/core';
 import {
   NgForm
@@ -10,12 +8,17 @@ import {
 import {
   PopoverController
 } from '@ionic/angular';
+
 import {
-  ExpensesModel
-} from 'src/app/models/expense.model';
+  ExpenseService
+} from './../../../../services/expense.service';
 import {
-  ExpensesService
-} from 'src/app/services/expenses.service';
+  ToasterService
+} from './../../../../services/toaster.service';
+
+import {
+  ExpenseModel
+} from './../../../../models/expense.model';
 
 @Component({
   selector: 'app-edit-expense',
@@ -24,12 +27,13 @@ import {
 })
 export class EditExpenseComponent implements OnInit {
 
-  expense: ExpensesModel;
+  expense: ExpenseModel;
 
   date: string;
 
   constructor(private popoverController: PopoverController,
-    private expensesService: ExpensesService) {}
+    private expensesService: ExpenseService,
+    private toasterService: ToasterService) {}
 
   ngOnInit() {
     this.date = new Date(this.expense.date.year, this.expense.date.month - 1, this.expense.date.date).toISOString();
@@ -42,15 +46,10 @@ export class EditExpenseComponent implements OnInit {
 
   onSubmit(form: NgForm): void {
 
-
-    const selectedDate = new Date(form.value.date);
+    const selectedDate: Date = new Date(form.value.date);
 
     const update: {
-      date: {
-        date: number,
-        month: number,
-        year: number
-      },
+      date: ExpenseModel['date'],
       cost: number
     } = {
       date: {
@@ -66,10 +65,8 @@ export class EditExpenseComponent implements OnInit {
         this.expense.cost = update.cost;
         this.expense.date = update.date;
         this.popoverController.dismiss(this.expense, 'edit');
-      }, (error: {
-        error: string
-      }) => {
-        console.log(error);
+      }, (error: string) => {
+        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       }
     );
 

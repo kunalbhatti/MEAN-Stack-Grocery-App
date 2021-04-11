@@ -1,13 +1,13 @@
 import {
   NgModule
-} from "@angular/core";
+} from '@angular/core';
 import {
   RouterModule,
   Routes
-} from "@angular/router";
+} from '@angular/router';
 import {
   RegisterPage
-} from "./register.page";
+} from './register.page';
 
 const routes: Routes = [{
   path: '',

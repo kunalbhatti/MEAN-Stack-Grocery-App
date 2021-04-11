@@ -1,16 +1,16 @@
 import {
   CommonModule
-} from "@angular/common";
+} from '@angular/common';
 import {
   NgModule
-} from "@angular/core";
-import { IonicModule } from "@ionic/angular";
+} from '@angular/core';
+import { IonicModule } from '@ionic/angular';
 import {
   AuthRoutingModule
-} from "./auth-routing.module";
+} from './auth-routing.module';
 import {
   AuthPage
-} from "./auth.page";
+} from './auth.page';
 
 @NgModule({
   declarations: [AuthPage],

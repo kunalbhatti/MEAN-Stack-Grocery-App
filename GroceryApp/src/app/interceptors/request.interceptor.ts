@@ -3,16 +3,16 @@ import {
   HttpHandler,
   HttpInterceptor,
   HttpRequest
-} from "@angular/common/http";
+} from '@angular/common/http';
 import {
   Injectable
-} from "@angular/core";
+} from '@angular/core';
 import {
   Observable
-} from "rxjs";
+} from 'rxjs';
 import {
   AuthService
-} from "../services/auth.service";
+} from '../services/auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +23,7 @@ export class RequestInterceptor implements HttpInterceptor {
 
 
   intercept(req: HttpRequest < any > , next: HttpHandler): Observable < HttpEvent < any >> {
-    
+
     const request = req.clone({
       setHeaders: {
         'content-type': 'application/json',

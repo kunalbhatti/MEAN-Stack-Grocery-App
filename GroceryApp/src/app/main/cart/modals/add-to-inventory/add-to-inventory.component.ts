@@ -21,6 +21,8 @@ import {
 export class AddToInventoryComponent implements OnInit {
 
   @Input() product: ProductModel;
+
+  // gid is added as a hidden field in the form
   @Input() gid: string;
 
   constructor(private popoverController: PopoverController) {}

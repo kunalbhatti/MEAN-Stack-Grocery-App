@@ -1,26 +1,26 @@
 import {
   HttpClient
-} from "@angular/common/http";
+} from '@angular/common/http';
 import {
   Injectable
-} from "@angular/core";
+} from '@angular/core';
 import {
   Observable
-} from "rxjs";
+} from 'rxjs';
 import {
   catchError,
   map,
   take
-} from "rxjs/operators";
+} from 'rxjs/operators';
 import {
   ProductModel
-} from "../models/product.model";
+} from '../models/product.model';
 
 import * as config from './config.json';
 import errorHandler from './error.handler';
 import {
   SettingsService
-} from "./settings.service";
+} from './settings.service';
 
 @Injectable({
   providedIn: 'root'

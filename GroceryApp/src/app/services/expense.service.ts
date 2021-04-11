@@ -1,45 +1,45 @@
 import {
   HttpClient
-} from "@angular/common/http";
+} from '@angular/common/http';
 import {
   Injectable
-} from "@angular/core";
+} from '@angular/core';
 import {
   Observable
-} from "rxjs";
+} from 'rxjs';
 import {
-  ExpensesModel
-} from "../models/expense.model";
+  catchError
+} from 'rxjs/operators';
+import {
+  ExpenseModel
+} from '../models/expense.model';
 
 import * as config from './config.json';
+import errorHandler from './error.handler';
 
 @Injectable({
   providedIn: 'root'
 })
 
-export class ExpensesService {
+export class ExpenseService {
   constructor(private http: HttpClient) {}
 
   getExpense(month: number, year: number, gid: string, cid: string, selectedView: string) {
     return this.http.get(
       `${config.url}/expenses/get-expense/?month=${month}&year=${year}&gid=${gid}&cid=${cid}&view=${selectedView}`
-    );
+    ).pipe(catchError(errorHandler));
   }
 
-  addExpense(expense: ExpensesModel): Observable < any > {
+  addExpense(expense: ExpenseModel): Observable < any > {
 
     return this.http.post(
       `${config.url}/expenses/add-expense`,
       expense
-    );
+    ).pipe(catchError(errorHandler));;
   }
 
   updateExpense(eid: string, update: {
-    date: {
-      date: number,
-      month: number,
-      year: number
-    },
+    date: ExpenseModel['date'],
     cost: number
   }) {
     return this.http.patch(
@@ -47,12 +47,12 @@ export class ExpensesService {
         eid,
         update
       }
-    );
+    ).pipe(catchError(errorHandler));;
   }
 
   deleteExpense(eid: string) {
     return this.http.delete(
       `${config.url}/expenses/delete-expense/${eid}`
-    );
+    ).pipe(catchError(errorHandler));;
   }
 }

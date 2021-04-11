@@ -1,21 +1,21 @@
 import {
   CommonModule
-} from "@angular/common";
+} from '@angular/common';
 import {
   NgModule
-} from "@angular/core";
+} from '@angular/core';
 import {
   ReactiveFormsModule
-} from "@angular/forms";
+} from '@angular/forms';
 import {
   IonicModule
-} from "@ionic/angular";
+} from '@ionic/angular';
 import {
   RegisterRoutingModule
-} from "./register-routing.module";
+} from './register-routing.module';
 import {
   RegisterPage
-} from "./register.page";
+} from './register.page';
 
 @NgModule({
   declarations: [RegisterPage],

@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit } from '@angular/core';
 
 @Component({
     selector: 'app-auth',
@@ -8,7 +8,7 @@ import { Component, OnInit } from "@angular/core";
 export class AuthPage implements OnInit{
 
     ngOnInit(){
-        
+
     }
 
 }

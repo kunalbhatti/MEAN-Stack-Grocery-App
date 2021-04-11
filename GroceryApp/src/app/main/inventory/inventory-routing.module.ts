@@ -1,19 +1,18 @@
 import {
   NgModule
-} from "@angular/core";
+} from '@angular/core';
 import {
   RouterModule,
   Routes
-} from "@angular/router";
+} from '@angular/router';
 import {
   InventoryPage
-} from "./inventory.page";
+} from './inventory.page';
 
 const routes: Routes = [{
   path: '',
   component: InventoryPage
 }]
-
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

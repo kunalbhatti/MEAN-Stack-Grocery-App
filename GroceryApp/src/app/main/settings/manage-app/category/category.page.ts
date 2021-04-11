@@ -14,6 +14,8 @@ import {
   ActivatedRoute,
   ParamMap
 } from '@angular/router';
+
+// components
 import {
   CreateProductComponent
 } from './../modals/create-product/create-product.component';
@@ -21,6 +23,7 @@ import {
   ConfirmDeleteComponent
 } from './../modals/confirm-delete/confirm-delete.component';
 
+// services
 import {
   ToasterService
 } from '../../../../services/toaster.service';
@@ -28,6 +31,7 @@ import {
   SettingsService
 } from '../../../../services/settings.service';
 
+// models
 import {
   ProductModel
 } from '../../../../models/product.model';
@@ -87,7 +91,6 @@ export class CategoryPage implements OnInit {
     this.modalController.dismiss(null, 'cancel');
   }
 
-
   presentProductActionSheet(product: ProductModel): void {
     this.actionSheetController.create({
       header: 'Options',
@@ -138,7 +141,7 @@ export class CategoryPage implements OnInit {
       }]
     }).then((actionEl: HTMLIonActionSheetElement) => {
       actionEl.present();
-    })
+    });
   }
 
   presentProductModal(product ? : ProductModel): void {

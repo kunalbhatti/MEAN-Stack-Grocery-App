@@ -3,10 +3,15 @@ import {
   Input,
   OnInit
 } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import {
+  NgForm
+} from '@angular/forms';
 import {
   PopoverController
 } from '@ionic/angular';
+import {
+  SettingsModel
+} from './../../../../models/settings.model';
 
 @Component({
   selector: 'app-filter-products',
@@ -15,12 +20,9 @@ import {
 })
 export class FilterProductsComponent implements OnInit {
 
-  @Input() categories: {
-    id: string
-  } [] = [];
+  @Input() categories: SettingsModel['categories'] = [];
 
-  @Input() selectedCategory:string;
-  @Input() gid: string;
+  @Input() selectedCategory: string;
 
   categoryKeys: string[] = [];
 

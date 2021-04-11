@@ -1,15 +1,15 @@
 import {
   HttpClient
-} from "@angular/common/http";
+} from '@angular/common/http';
 import {
   Injectable
-} from "@angular/core";
+} from '@angular/core';
 import {
   Observable
-} from "rxjs";
+} from 'rxjs';
 import {
   catchError
-} from "rxjs/operators";
+} from 'rxjs/operators';
 
 import * as config from './config.json';
 import errorHandler from './error.handler';

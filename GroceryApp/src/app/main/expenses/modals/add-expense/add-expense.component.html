@@ -9,10 +9,10 @@
   <form #createExpenseForm="ngForm" (ngSubmit)="onSubmit(createExpenseForm)">
     <ion-item>
       <ion-label position="floating">Date</ion-label>
-      <ion-datetime type="date" [ngModel]="todaysDate" name="date"></ion-datetime>
+      <ion-datetime type="date" [ngModel]="todaysDate" name="date" required></ion-datetime>
     </ion-item>
     <ion-item>
-      <ion-label position="floating">Expense <small>(Required)</small></ion-label>
+      <ion-label position="floating">Expense</ion-label>
       <ion-select ngModel name="expense" required>
         <ion-select-option [value]="expense" *ngFor="let expense of expenses">{{expense?.name | titlecase}}
         </ion-select-option>
@@ -20,10 +20,10 @@
     </ion-item>
     <ion-item>
       <ion-label position="floating">Units</ion-label>
-      <ion-input type="number" ngModel="1" name="units" min="1"></ion-input>
+      <ion-input type="number" ngModel="1" name="units" min="1" required></ion-input>
     </ion-item>
     <ion-item>
-      <ion-label position="floating">Total Cost <small>(Required)</small></ion-label>
+      <ion-label position="floating">Total Cost</ion-label>
       <ion-input type="number" ngModel name="cost" required></ion-input>
     </ion-item>
     <ion-item>

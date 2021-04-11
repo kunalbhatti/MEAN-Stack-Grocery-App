@@ -1,4 +1,4 @@
-export interface ExpensesModel {
+export interface ExpenseModel {
   _id ? : string;
   pid ? : string;
   cid ? : string;

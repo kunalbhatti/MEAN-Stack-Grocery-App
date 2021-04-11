@@ -5,9 +5,7 @@ import {
 import {
   ActivatedRoute
 } from "@angular/router";
-import {
-  SettingsModel
-} from "../models/settings.model";
+
 import {
   SettingsService
 } from "../services/settings.service";

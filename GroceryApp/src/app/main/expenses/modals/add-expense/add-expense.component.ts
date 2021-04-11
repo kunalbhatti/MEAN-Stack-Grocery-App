@@ -1,7 +1,6 @@
 import {
   Component,
-  Input,
-  OnInit
+  Input
 } from '@angular/core';
 import {
   NgForm
@@ -10,31 +9,40 @@ import {
   PopoverController
 } from '@ionic/angular';
 import {
-  ExpensesModel
-} from './../../../../models/expense.model';
+  take
+} from 'rxjs/operators';
+
+// services
 import {
-  ExpensesService
-} from './../../../../services/expenses.service';
+  ExpenseService
+} from '../../../../services/expense.service';
+import {
+  ToasterService
+} from './../../../../services/toaster.service';
+
+// models
+import {
+  SettingsModel
+} from './../../../../models/settings.model';
+import {
+  ExpenseModel
+} from './../../../../models/expense.model';
 
 @Component({
   selector: 'app-add-expense',
   templateUrl: './add-expense.component.html',
   styleUrls: ['./add-expense.component.scss'],
 })
-export class AddExpenseComponent implements OnInit {
+export class AddExpenseComponent {
 
-  @Input() expenses: {
-    id: string,
-    name: string
-  } [] = [];
+  @Input() expenses: SettingsModel['expenses'] = [];
   @Input() gid: string;
 
   todaysDate: string = new Date().toISOString();
 
   constructor(private popoverController: PopoverController,
-    private expensesService: ExpensesService) {}
-
-  ngOnInit() {}
+    private expenseService: ExpenseService,
+    private toasterService: ToasterService) {}
 
   onDismiss(): void {
     this.popoverController.dismiss(null, 'cancel');
@@ -42,9 +50,9 @@ export class AddExpenseComponent implements OnInit {
 
   onSubmit(form: NgForm): void {
 
-    const selectedDate = new Date(form.value.date);
+    const selectedDate: Date = new Date(form.value.date);
 
-    const expense: ExpensesModel = {
+    const expense: ExpenseModel = {
       name: form.value.expense.name,
       units: form.value.units > 0 ? form.value.units : 1,
       cost: form.value.cost,
@@ -57,8 +65,12 @@ export class AddExpenseComponent implements OnInit {
       }
     };
 
-    this.expensesService.addExpense(expense).subscribe((result: {expense: ExpensesModel}) => {
+    this.expenseService.addExpense(expense).pipe(take(1)).subscribe((result: {
+      expense: ExpenseModel
+    }) => {
       this.popoverController.dismiss(result.expense, 'create');
+    }, (error: string) => {
+      this.toasterService.presentToast('Failure!!', error, 200, 'danger');
     });
 
   }

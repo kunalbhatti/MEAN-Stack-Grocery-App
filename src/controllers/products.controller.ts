@@ -28,10 +28,11 @@ export default class ProductsController {
         this.router.patch('/update-cart-count/:pid', verifyToken, this.updateCartCount);
     }
 
-    filterProducts(req: express.Request, res: express.Response) {
+    filterProducts(req: express.Request, res: express.Response): void {
         const uid: ObjectId = new ObjectId(req.body._id);
 
         let searchStr: string = req.query.searchStr.toString();
+        // removing special characters from the string
         searchStr = searchStr.replace(/[^a-zA-Z]/g, "");
 
         const gid: string = req.query.gid.toString();
@@ -68,12 +69,12 @@ export default class ProductsController {
                 products.map((product: ProductsModel) => {
                     if (product.stockCount) {
                         if (!product.stockCount[gid]) {
-
                             product.stockCount = {
                                 [gid]: 0
                             };
                         }
                     }
+                    // newly added products will not have stockCount field
                     if (!product.stockCount) {
                         product.stockCount = {
                             [gid]: 0
@@ -87,7 +88,7 @@ export default class ProductsController {
                             };
                         }
                     }
-
+                    // newly added products will not have cart field
                     if (!product.cart) {
                         product.cart = {
                             [gid]: 0
@@ -102,7 +103,7 @@ export default class ProductsController {
                             };
                         }
                     }
-
+                    // newly added products will not have stockStatus field
                     if (!product.stockStatus) {
                         product.stockStatus = {
                             [gid]: ''
@@ -111,10 +112,13 @@ export default class ProductsController {
                 })
                 res.status(200).send(products)
             }
-        );
+        ).catch((error: MongoError) => {
+            console.log(error);
+            res.status(500).send(responseCode[500]);
+        });
     }
 
-    getInventory(req: express.Request, res: express.Response) {
+    getInventory(req: express.Request, res: express.Response): void {
         const uid: ObjectId = new ObjectId(req.body._id);
         const gid: string = req.query.gid.toString();
         const cid: string = req.query.cid.toString();
@@ -191,7 +195,7 @@ export default class ProductsController {
         });
     }
 
-    getCart(req: express.Request, res: express.Response) {
+    getCart(req: express.Request, res: express.Response): void {
         const uid: ObjectId = new ObjectId(req.body._id);
         const gid: string = req.query.gid.toString();
         const cid: string = req.query.cid.toString();
@@ -261,16 +265,16 @@ export default class ProductsController {
 
     }
 
-    updateStockCount(req: express.Request, res: express.Response) {
+    updateStockCount(req: express.Request, res: express.Response): void {
         const pid: ObjectId = new ObjectId(req.params.pid);
         const count: number = +req.body.count;
         const gid: string = req.body.gid;
 
-        const query = {
+        const filter = {
             _id: pid
         }
 
-        Products.updateStockCount(query, count, gid).then(() => {
+        Products.updateStockCount(filter, count, gid).then(() => {
             res.status(200).send({
                 updated: true
             });
@@ -280,16 +284,16 @@ export default class ProductsController {
         });
     }
 
-    updateStockStatus(req: express.Request, res: express.Response) {
+    updateStockStatus(req: express.Request, res: express.Response): void {
         const pid: ObjectId = new ObjectId(req.params.pid);
         const status: string = req.body.status;
         const gid: string = req.body.gid;
 
-        const query = {
+        const filter = {
             _id: pid
         }
 
-        Products.updateStockStatus(query, status, gid).then(() => {
+        Products.updateStockStatus(filter, status, gid).then(() => {
             res.status(200).send({
                 updated: true
             });
@@ -299,16 +303,16 @@ export default class ProductsController {
         });
     }
 
-    updateCartCount(req: express.Request, res: express.Response) {
+    updateCartCount(req: express.Request, res: express.Response): void {
         const pid: ObjectId = new ObjectId(req.params.pid);
         const count: number = +req.body.count;
         const gid: string = req.body.gid;
 
-        const query = {
+        const filter = {
             _id: pid
         }
 
-        Products.updateCartCount(query, count, gid).then(() => {
+        Products.updateCartCount(filter, count, gid).then(() => {
             res.status(200).send({
                 updated: true
             });
@@ -317,7 +321,5 @@ export default class ProductsController {
             res.status(500).send(responseCode[500]);
         });
     }
-
-
 
 }

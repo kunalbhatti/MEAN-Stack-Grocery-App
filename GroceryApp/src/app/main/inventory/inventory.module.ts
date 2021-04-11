@@ -1,15 +1,18 @@
 import {
   CommonModule
-} from "@angular/common";
+} from '@angular/common';
 import {
   NgModule
-} from "@angular/core";
+} from '@angular/core';
+import {
+  FormsModule
+} from '@angular/forms';
 import {
   IonicModule
-} from "@ionic/angular";
+} from '@ionic/angular';
 import {
   InventoryPage
-} from "./inventory.page";
+} from './inventory.page';
 
 import {
   InventoryRoutingModule
@@ -17,6 +20,6 @@ import {
 
 @NgModule({
   declarations: [InventoryPage],
-  imports: [CommonModule, IonicModule, InventoryRoutingModule]
+  imports: [CommonModule, IonicModule, InventoryRoutingModule, FormsModule]
 })
 export class InventoryModule {}

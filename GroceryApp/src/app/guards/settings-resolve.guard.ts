@@ -1,21 +1,21 @@
 import {
   Injectable
-} from "@angular/core";
+} from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   Resolve,
   RouterStateSnapshot
-} from "@angular/router";
+} from '@angular/router';
 import {
   Observable
-} from "rxjs";
+} from 'rxjs';
 
 import {
   SettingsService
 } from '../services/settings.service';
 import {
   SettingsModel
-} from "../models/settings.model";
+} from '../models/settings.model';
 
 @Injectable({
   providedIn: 'root'

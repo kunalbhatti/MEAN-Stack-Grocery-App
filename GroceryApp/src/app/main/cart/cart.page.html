@@ -7,7 +7,7 @@
   </ion-toolbar>
   <ion-toolbar>
     <ion-buttons slot="start" *ngIf="searchString === ''">
-      <ion-button (click)="presentFilterAlert()" size="small">
+      <ion-button (click)="presentFilterPopover()" size="small">
         <ion-icon name="filter-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -15,13 +15,14 @@
       <ion-row class="ion-justify-content-center">
         <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4"
           class="ion-margin-start ion-margin-end ion-no-padding">
-          <ion-searchbar color="light" showCancelButton="focus" #searchStr (ionInput)="getProductList(searchStr.value)">
+          <ion-searchbar color="light" showCancelButton="focus" [ngModel]="searchString" #searchStr
+            (ionInput)="getProductList(searchStr.value)">
           </ion-searchbar>
         </ion-col>
       </ion-row>
     </ion-grid>
     <ion-buttons slot="end" *ngIf="searchString === ''">
-      <ion-button (click)="presentSortAlert()" size="small">
+      <ion-button (click)="presentSortPopover()" size="small">
         <ion-icon name="funnel-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -35,6 +36,7 @@
         <ion-toolbar size="12" class="ion-text-center" style="background-color: #1f1f1f;">
           <ion-title>{{selectedCategory.name | titlecase}}</ion-title>
         </ion-toolbar>
+
         <ion-list style="background-color: rgb(40, 41, 44);" *ngIf="searchString === '' && products?.length > 0">
           <ion-card *ngFor="let product of products">
             <ion-card-header>
@@ -70,6 +72,7 @@
             </ion-row>
           </ion-card>
         </ion-list>
+
         <ion-list style="background-color: rgb(40, 41, 44);" class="ion-padding" *ngIf="searchString === ''">
           <ion-text *ngIf="productError === '' && products?.length === 0">{{searchStatus}}</ion-text>
           <ion-text *ngIf="productError !== ''">{{productError}}</ion-text>

@@ -4,14 +4,12 @@ import cors from 'cors';
 
 import AuthController from '../controllers/auth.controller';
 import SettingsController from '../controllers/settings.controller';
+import ProductsController from '../controllers/products.controller';
+import ExpensesController from '../controllers/expenses.controller';
 
 import {
     connectToMongo
 } from './../util/db.util';
-import ProductsController from '../controllers/products.controller';
-import {
-    ExpensesController
-} from '../controllers/expenses.controller';
 
 const port: string | number = process.env.PORT || 3000;
 
@@ -38,7 +36,6 @@ class Server {
         this.app.use('/products', new ProductsController().router);
         this.app.use('/expenses', new ExpensesController().router);
     }
-
 
     startServer(): void {
         connectToMongo(() => {

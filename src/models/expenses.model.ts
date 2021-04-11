@@ -2,6 +2,7 @@ import {
     ObjectId
 } from 'bson';
 import {
+    Cursor,
     Db,
     DeleteWriteOpResultObject,
     InsertOneWriteOpResult
@@ -10,13 +11,13 @@ import {
     getDb
 } from './../util/db.util';
 
-export interface ExpensesModel {
+export interface ExpenseModel {
     uid: ObjectId;
     pid ? : ObjectId | string;
     cid ? : string;
     gid: string;
     name: string;
-    brand?: string;
+    brand ? : string;
     units: number;
     cost: number;
     date: {
@@ -27,11 +28,8 @@ export interface ExpensesModel {
 }
 
 export class Expenses {
-    constructor() {
 
-    }
-
-    static addExpense(expense: ExpensesModel): Promise < InsertOneWriteOpResult < any > > {
+    static addExpense(expense: ExpenseModel): Promise < InsertOneWriteOpResult < any > > {
         const db: Db = getDb();
 
         return db.collection('user_expenses').insertOne(expense);
@@ -40,15 +38,15 @@ export class Expenses {
     static updateExpense(filter: {
         _id: ObjectId
     }, update: {
-        date: ExpensesModel['date'],
-        cost: ExpensesModel['cost']
+        date: ExpenseModel['date'],
+        cost: ExpenseModel['cost']
     }) {
         const db: Db = getDb();
 
         return db.collection('user_expenses').updateOne(filter, {
             $set: {
-               date: update.date,
-               cost: update.cost
+                date: update.date,
+                cost: update.cost
             }
         });
     }
@@ -62,7 +60,7 @@ export class Expenses {
         });
     }
 
-    static getExpense(filter: any) {
+    static getExpense(filter: any): Cursor < any > {
         const db: Db = getDb();
 
         return db.collection('user_expenses').find(filter).sort({

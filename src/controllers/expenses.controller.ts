@@ -1,19 +1,20 @@
 import * as express from 'express';
-
-import {
-    Expenses,
-    ExpensesModel
-} from './../models/expenses.model';
-
-import verifyToken from './../middlewares/validate-token.middleware';
-import responseCode from './../json/response-code.json';
 import {
     InsertOneWriteOpResult,
     MongoError,
     ObjectId
 } from 'mongodb';
 
-export class ExpensesController {
+import {
+    Expenses,
+    ExpenseModel
+} from './../models/expenses.model';
+
+import verifyToken from './../middlewares/validate-token.middleware';
+import responseCode from './../json/response-code.json';
+
+
+export default class ExpensesController {
     private _router: express.Router = express.Router();
 
     get router(): express.Router {
@@ -28,7 +29,7 @@ export class ExpensesController {
         this.router.delete('/delete-expense/:eid', verifyToken, this.deleteExpense);
     }
 
-    getExpense(req: express.Request, res: express.Response) {
+    getExpense(req: express.Request, res: express.Response): void {
 
         const month: number = +req.query.month.toString();
         const year: number = +req.query.year.toString();
@@ -66,18 +67,26 @@ export class ExpensesController {
         }
 
         Expenses.getExpense(cid ? categoryFilter : normalFilter).toArray().then(
-            (expenses: ExpensesModel[]) => {
+            (expenses: ExpenseModel[]) => {
                 res.status(200).send(expenses);
             }
-        );
+        ).catch((error: MongoError) => {
+            console.log(error);
+            res.status(500).send({
+                message: responseCode[500]
+            });
+        });
     }
 
-    getProductExpense(req: express.Request, res: express.Response) {
+    getProductExpense(req: express.Request, res: express.Response): void {
         const gid: string = req.query.gid.toString();
         const cid: string = req.query.cid.toString();
+
         let searchStr: string = req.query.searchStr.toString();
+        // removing special characters from the string
         searchStr = searchStr.replace(/[^a-zA-Z]/g, "");
-        const date: ExpensesModel['date'] = JSON.parse(req.query.date.toString());
+
+        const date: ExpenseModel['date'] = JSON.parse(req.query.date.toString());
         const view: string = req.query.view.toString();
 
         let monthlyFilter = {};
@@ -116,7 +125,7 @@ export class ExpensesController {
         }
 
         Expenses.getExpense(cid ? categoryFilter : normalFilter).toArray().then(
-            (expenses: ExpensesModel[]) => {
+            (expenses: ExpenseModel[]) => {
                 console.log(expenses)
                 res.status(200).send({
                     expenses
@@ -130,7 +139,7 @@ export class ExpensesController {
         })
     }
 
-    addExpense(req: express.Request, res: express.Response) {
+    addExpense(req: express.Request, res: express.Response): void {
 
         const uid: ObjectId = new ObjectId(req.body._id);
         const cid: string = req.body.cid;
@@ -139,8 +148,9 @@ export class ExpensesController {
         const brand: string = req.body.brand;
         const cost: number = +req.body.cost;
         const units: number = +req.body.units;
-        const date: ExpensesModel['date'] = req.body.date;
+        const date: ExpenseModel['date'] = req.body.date;
 
+        // pid will be string in case of other expenses
         let pid: ObjectId | string;
 
         try {
@@ -149,7 +159,7 @@ export class ExpensesController {
             pid = req.body.pid;
         }
 
-        const expense: ExpensesModel = {
+        const expense: ExpenseModel = {
             uid,
             pid,
             cid,
@@ -177,15 +187,13 @@ export class ExpensesController {
     }
 
 
-    updateExpense(req: express.Request, res: express.Response) {
+    updateExpense(req: express.Request, res: express.Response): void {
 
         const eid: ObjectId = new ObjectId(req.body.eid);
         const update: {
-            date: ExpensesModel['date'],
-            cost: ExpensesModel['cost']
+            date: ExpenseModel['date'],
+            cost: ExpenseModel['cost']
         } = req.body.update;
-
-
 
         Expenses.updateExpense({
             _id: eid
@@ -204,7 +212,7 @@ export class ExpensesController {
 
     }
 
-    deleteExpense(req: express.Request, res: express.Response) {
+    deleteExpense(req: express.Request, res: express.Response): void {
         const eid: ObjectId = new ObjectId(req.params.eid);
 
         Expenses.deleteExpense(eid).then(
@@ -219,8 +227,6 @@ export class ExpensesController {
                 res.status(500).send({
                     message: responseCode[500]
                 });
-            }
-        )
-
+            });
     }
 }

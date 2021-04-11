@@ -1,13 +1,13 @@
 import {
   NgModule
-} from "@angular/core";
+} from '@angular/core';
 import {
   RouterModule,
   Routes
 } from '@angular/router';
 import {
   CategoryPage
-} from "./category.page";
+} from './category.page';
 
 const routes: Routes = [{
   path: '',

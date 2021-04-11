@@ -5,7 +5,7 @@
       <ion-label *ngIf="currentGroup?.name"><small>({{currentGroup?.name|titlecase}})</small></ion-label>
     </ion-title>
     <ion-buttons slot="primary">
-      <ion-button (click)="presentExpenseAlert()">
+      <ion-button (click)="presentAddExpensePopover()" class="ion-padding-top">
         <ion-icon name="add-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -20,8 +20,8 @@
       <ion-row class="ion-justify-content-center">
         <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4"
           class="ion-margin-start ion-margin-end ion-no-padding">
-          <ion-searchbar color="light" showCancelButton="focus" #searchStr type="text"
-            (ionInput)="filterProductExpense(searchStr.value)">
+          <ion-searchbar color="light" showCancelButton="focus" [ngModel]="searchString" #searchStr
+            (ionInput)="filterProductExpenses(searchStr.value)">
           </ion-searchbar>
         </ion-col>
       </ion-row>
@@ -59,11 +59,11 @@
               <ion-label color="primary">Product(s)</ion-label>
               <ion-text color="primary">Units | Cost</ion-text>
             </ion-item>
-            <ion-item *ngFor="let expense of expenses[date[viewFilter]]; let i = index;">
+            <ion-item *ngFor="let expense of expenses[date[viewFilter]]">
               <ion-label><small>{{expense?.name | titlecase}} <span *ngIf="expense?.brand">
                     {{"(" + expense?.brand + ")" | titlecase }}</span></small></ion-label>
               <ion-text><small>{{expense?.units}} | {{expense?.cost}}</small></ion-text>
-              <ion-button fill="clear" (click)="presentExpenseActionSheet(expense, i)" class="ion-no-padding">
+              <ion-button fill="clear" (click)="presentExpenseActionSheet(expense)" class="ion-no-padding">
                 <ion-icon name="ellipsis-vertical" color="dark"></ion-icon>
               </ion-button>
             </ion-item>
