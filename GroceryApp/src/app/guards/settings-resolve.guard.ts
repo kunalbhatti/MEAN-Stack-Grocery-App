@@ -23,10 +23,10 @@ import {
 
 export class SettingsResolveGuard implements Resolve < SettingsModel > {
 
-  constructor(private SettingsService: SettingsService) { }
+  constructor(private settingsService: SettingsService) { }
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): SettingsModel | Observable < SettingsModel > | Promise < SettingsModel > {
-    return this.SettingsService.getSettings();
+    return this.settingsService.getSettings();
   }
 
 }

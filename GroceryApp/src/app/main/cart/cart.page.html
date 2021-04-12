@@ -15,7 +15,7 @@
       <ion-row class="ion-justify-content-center">
         <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4"
           class="ion-margin-start ion-margin-end ion-no-padding">
-          <ion-searchbar color="light" showCancelButton="focus" [ngModel]="searchString" #searchStr
+          <ion-searchbar color="light" showCancelButton="focus" [(ngModel)]="searchString" #searchStr
             (ionInput)="getProductList(searchStr.value)">
           </ion-searchbar>
         </ion-col>
@@ -38,6 +38,12 @@
         </ion-toolbar>
 
         <ion-list style="background-color: rgb(40, 41, 44);" *ngIf="searchString === '' && products?.length > 0">
+          <ion-card>
+            <ion-item style="font-size: 0.9rem;">
+              <ion-label color="primary">Estimated Cost</ion-label>
+              <ion-text color="success">{{cartCost}} /-</ion-text>
+            </ion-item>
+          </ion-card>
           <ion-card *ngFor="let product of products">
             <ion-card-header>
               <ion-card-title>
@@ -78,6 +84,12 @@
           <ion-text *ngIf="productError !== ''">{{productError}}</ion-text>
         </ion-list>
         <ion-list style="background-color: rgb(40, 41, 44);" *ngIf="searchString !== '' && filtered.length > 0">
+          <ion-card>
+            <ion-item style="font-size: 0.9rem;">
+              <ion-label color="primary">Estimated Cost</ion-label>
+              <ion-text color="success">{{filteredCost}} /-</ion-text>
+            </ion-item>
+          </ion-card>
           <ion-card *ngFor="let product of filtered">
             <ion-card-header>
               <ion-card-title>

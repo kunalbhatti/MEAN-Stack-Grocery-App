@@ -23,6 +23,7 @@ export interface SettingsModel {
     expenses: {
         [id: string]: string
     } [];
+    getProductsView: string;
     _id ? : string;
 }
 
@@ -105,6 +106,20 @@ export class Settings {
             $set: {
                 expenses
             },
+        }, {
+            upsert: true
+        })
+    }
+
+    static updateGetProductsView(getProductsView: string, _id: ObjectId) {
+        const db: Db = getDb();
+
+        return db.collection('user_settings').updateOne({
+            _id
+        },{
+            $set: {
+                getProductsView
+            }
         }, {
             upsert: true
         })

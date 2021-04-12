@@ -5,6 +5,7 @@ import {
 import {
   Injectable
 } from '@angular/core';
+import { NavController } from '@ionic/angular';
 import {
   Observable,
   of
@@ -18,6 +19,9 @@ import {
 
 import * as config from './config.json';
 import errorHandler from './error.handler';
+import {
+  SettingsService
+} from './settings.service';
 
 
 interface User {
@@ -34,7 +38,7 @@ interface User {
 
 export class AuthService {
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private navController: NavController) {}
 
   login(body: {
     email: string,
@@ -94,6 +98,8 @@ export class AuthService {
 
   logout(): boolean {
     localStorage.removeItem('groceryApp-token');
+    // temporary solution to avoid caching of pages on logout
+    window.location.reload();
     return true;
   }
 }

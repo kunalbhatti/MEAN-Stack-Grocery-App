@@ -43,6 +43,12 @@ export class SettingsService {
     return this.http.get(`${config.url}/settings/get-settings`).pipe(take(1), catchError(errorHandler));
   }
 
+  updateGetProductsView(getProductsView: string): Observable < any > {
+    return this.http.patch(`${config.url}/settings/update-get-products-view`, {
+      getProductsView
+    }).pipe(take(1), catchError(errorHandler));
+  }
+
   updateCurrentGroup(gid: string): Observable < any > {
     return this.http.patch(`${config.url}/settings/update-current-group`, {
       gid

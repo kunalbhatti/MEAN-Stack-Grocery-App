@@ -38,7 +38,6 @@ export default class ProductsController {
         const gid: string = req.query.gid.toString();
         const cid: string = req.query.cid.toString();
 
-
         const categoryFilter = {
             $and: [{
                 uid
@@ -122,13 +121,12 @@ export default class ProductsController {
         const uid: ObjectId = new ObjectId(req.body._id);
         const gid: string = req.query.gid.toString();
         const cid: string = req.query.cid.toString();
+        const getProductView: string = req.query.getProductsView.toString();
 
-        const categoryFilter = {
-            $and: [{
-                uid
-            }, {
-                cid
-            }, {
+        let productViewFilter: any = {};
+
+        if (getProductView === 'partial') {
+            productViewFilter = {
                 $and: [{
                     [`stockCount.${gid}`]: {
                         $gt: 0
@@ -138,23 +136,21 @@ export default class ProductsController {
                         $ne: 'empty'
                     }
                 }]
-            }]
+            }
+        }
+
+        const categoryFilter = {
+            $and: [{
+                uid
+            }, productViewFilter, {
+                cid
+            }, ]
         }
 
         const normalFilter = {
             $and: [{
                 uid
-            }, {
-                $and: [{
-                    [`stockCount.${gid}`]: {
-                        $gt: 0
-                    },
-                }, {
-                    [`stockStatus.${gid}`]: {
-                        $ne: 'empty'
-                    }
-                }]
-            }]
+            }, productViewFilter]
         }
 
         Products.getInventory(cid ? categoryFilter : normalFilter).toArray().then((products: ProductsModel[]) => {

@@ -94,7 +94,7 @@ export class ProfilePage implements OnInit {
     )
   }
 
-  updateName(form: NgForm) {
+  updateName(form: NgForm): void {
     const name: string = form.value.name;
 
     this.authService.updateUserName(name).subscribe(
@@ -112,7 +112,7 @@ export class ProfilePage implements OnInit {
     )
   }
 
-  updatePassword(form: NgForm) {
+  updatePassword(form: NgForm): void {
     const newPassword: string = form.value.newPassword.trim();
     const oldPassword: string = form.value.oldPassword.trim();
 

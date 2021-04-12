@@ -15,7 +15,8 @@
       <ion-row class="ion-justify-content-center">
         <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4"
           class="ion-margin-start ion-margin-end ion-no-padding">
-          <ion-searchbar color="light" showCancelButton="focus" [ngModel]="searchString" #searchStr (ionInput)="getProductList(searchStr.value)">
+          <ion-searchbar color="light" showCancelButton="focus" [(ngModel)]="searchString" #searchStr
+            (ionInput)="getProductList(searchStr.value)">
           </ion-searchbar>
         </ion-col>
       </ion-row>
@@ -60,13 +61,20 @@
               <ion-item *ngIf="product?.price">
                 <ion-label>Price: {{product?.price}}</ion-label>
               </ion-item>
-              <ion-item *ngIf="product?.stockCount[currentGroup] !== 0">
+              <ion-item>
                 <ion-label>Stock: {{product?.stockCount[currentGroup]}}</ion-label>
               </ion-item>
-              <ion-item *ngIf="product?.stockStatus[currentGroup] !== ''">
-                <ion-label>Status: {{product?.stockStatus[currentGroup] | titlecase}}</ion-label>
+              <ion-item>
+                <ion-label>Status:
+                  {{product?.stockStatus[currentGroup] !== '' ? product?.stockStatus[currentGroup]: 'empty' | titlecase}}
+                </ion-label>
               </ion-item>
             </ion-card-content>
+            <ion-row class="ion-justify-content-center">
+              <ion-button fill="clear" color="dark" (click)="presentInventoryActionSheet(product)">
+                <ion-icon name="ellipsis-horizontal"></ion-icon>
+              </ion-button>
+            </ion-row>
           </ion-card>
         </ion-list>
 
@@ -102,7 +110,7 @@
               <ion-item>
                 <ion-label>Status:</ion-label>
                 <ion-select okText="Okay" cancelText="Dismiss"
-                  [value]="product?.stockStatus[currentGroup] !== '' ? product?.stockStatus[currentGroup]: 'empty' "
+                  [value]="product?.stockStatus[currentGroup] !== '' ? product?.stockStatus[currentGroup]: 'empty'"
                   #stockStatus (ionChange)="updateProductStockStatus(product, stockStatus.value)"
                   [disabled]="updateLock">
                   <ion-select-option value="full">Full</ion-select-option>

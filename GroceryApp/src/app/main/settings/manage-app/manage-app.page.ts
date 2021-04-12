@@ -80,6 +80,7 @@ export class ManageAppPage implements OnInit {
     this.addExpenseForm = false;
 
     this.settings = this.settingsService.settings
+
     if (this.settings) {
       const userData: SettingsModel = this.settings;
       this.currentGroup = userData.currentGroup;
@@ -340,6 +341,16 @@ export class ManageAppPage implements OnInit {
         this.toasterService.presentToast('Failure!!', error, 500, 'danger');
       }
     );
+  }
+
+  updateGetProductView(viewValue: string): void {
+    this.settingsService.updateGetProductsView(viewValue).subscribe(
+      () => {
+        this.updateSettings('getProductsView', viewValue);
+      }, (error: string) => {
+        this.toasterService.presentToast('Failure!!', error, 500, 'danger');
+      }
+    )
   }
 
   presentGroupActionSheet(group: string, gid: string): void {

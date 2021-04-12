@@ -101,6 +101,9 @@ export class CartPage {
   searchStatus: string;
   filterStatus: string;
 
+  cartCost: number = 0;
+  filteredCost: number = 0;
+
   // all buttons are disabled when the update lock is true
   updateLock: boolean = false;
 
@@ -119,38 +122,49 @@ export class CartPage {
     this.searchStatus = 'Loading Inventory';
 
     // extracting the currentGroup name from the settings
-    this.currentGroup.id = this.settingsService.settings.currentGroup;
+    try {
+      this.currentGroup.id = this.settingsService.settings.currentGroup;
+    } catch (error) {
+      this.currentGroup.id = '';
+    }
 
-    const groups = this.settingsService.settings.groups;
+    if (this.currentGroup.id) {
 
-    if (groups) {
-      groups.forEach(group => {
-        if (group[this.currentGroup.id]) {
-          this.currentGroup.name = group[this.currentGroup.id];
-          return;
+
+      const groups = this.settingsService.settings.groups;
+
+      if (groups) {
+        groups.forEach(group => {
+          if (group[this.currentGroup.id]) {
+            this.currentGroup.name = group[this.currentGroup.id];
+            return;
+          }
+        });
+      }
+      if (!groups) {
+        this.currentGroup = {
+          id: '',
+          name: ''
+        };
+      }
+
+      this.cartService.getCart(this.currentGroup.id, this.selectedCategory.id).pipe(take(1)).subscribe((products: ProductModel[]) => {
+        // maintainig original copy of the data
+        // used to render products the searchbar is cleared
+        this.allProducts = [...products];
+
+        this.products = products;
+
+        if (this.products.length === 0) {
+          this.searchStatus = 'No Items Found';
+        } else {
+          this.cartCost = 0;
+          this.cartCost = this.calculateCartCost(this.products);
         }
+      }, (error: string) => {
+        this.productError = error;
       });
     }
-    if (!groups) {
-      this.currentGroup = {
-        id: '',
-        name: ''
-      };
-    }
-
-    this.cartService.getCart(this.currentGroup.id, this.selectedCategory.id).pipe(take(1)).subscribe((products: ProductModel[]) => {
-      // maintainig original copy of the data
-      // used to render products the searchbar is cleared
-      this.allProducts = [...products];
-
-      this.products = products;
-
-      if (this.products.length === 0) {
-        this.searchStatus = 'No Items Found';
-      }
-    }, (error: string) => {
-      this.productError = error;
-    });
   }
 
   ionViewDidLeave() {
@@ -165,6 +179,7 @@ export class CartPage {
   }
 
   getProductList(searchStr: string): void {
+
     // regex will remove special characters from the search string
     searchStr = searchStr.replace(/[^a-zA-Z]/g, '');
 
@@ -178,6 +193,9 @@ export class CartPage {
         this.filtered = data;
         if (this.filtered.length === 0) {
           this.filterStatus = 'No Items Found';
+        } else {
+          this.filteredCost = 0;
+          this.filteredCost = this.calculateCartCost(this.filtered);
         }
       }, (error: string) => {
         this.productError = error;
@@ -274,10 +292,10 @@ export class CartPage {
         text: 'Cancel',
         icon: 'close-outline',
         role: 'destructive'
-      },{
+      }, {
         text: 'Manage Product',
         icon: 'create-outline',
-        handler: () =>{
+        handler: () => {
           this.getProductList(product.name);
           this.searchString = product.name;
         }
@@ -418,7 +436,8 @@ export class CartPage {
 
   applyProductCategoryFilter(cid: string): void {
     if (cid === '') {
-      this.products = [...this.allProducts];
+      this.cartCost = 0;
+      this.cartCost = this.calculateCartCost(this.products);
       return;
     }
 
@@ -429,6 +448,10 @@ export class CartPage {
         return true;
       }
     });
+
+    this.cartCost = 0;
+    this.cartCost = this.calculateCartCost(this.products);
+
   }
 
   applyProductSortFilter(sortBy: string): ProductModel[] {
@@ -456,4 +479,13 @@ export class CartPage {
 
     return products;
   }
+
+  calculateCartCost(products: ProductModel[]): number {
+    let cost = 0
+    products.forEach((prod: ProductModel) => {
+      cost += +prod.cart[this.currentGroup.id] * +prod.price;
+    });
+    return cost;
+  }
+
 }

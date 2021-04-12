@@ -5,6 +5,7 @@ import {
   Router
 } from '@angular/router';
 import {
+  ActionSheetController,
   AlertController,
   PopoverController
 } from '@ionic/angular';
@@ -81,6 +82,7 @@ export class InventoryPage {
   searchString: string = '';
   searchStatus: string;
   filterStatus: string;
+  getProductsView: string;
 
   // all buttons are disabled when the update lock is true
   updateLock: boolean = false;
@@ -88,6 +90,7 @@ export class InventoryPage {
   constructor(private searchBarService: SearchBarService,
     private inventoryService: InventoryService,
     private alertController: AlertController,
+    private actionSheetController: ActionSheetController,
     private popoverController: PopoverController,
     private settingsService: SettingsService,
     private cartService: CartService,
@@ -97,10 +100,21 @@ export class InventoryPage {
   ionViewDidEnter() {
     this.searchStatus = 'Loading Inventory';
 
-    // extracting the currentGroup name from the settings
-    this.currentGroup = this.settingsService.settings.currentGroup;
+    this.getProductsView = this.settingsService.settings.getProductsView;
 
-    const groups = this.settingsService.settings.groups;
+    // extracting the currentGroup name from the settings
+    try {
+      this.currentGroup = this.settingsService.settings.currentGroup;
+    } catch (error) {
+      this.currentGroup = '';
+    }
+    let groups = [];
+
+    try {
+      groups = this.settingsService.settings.groups;
+    } catch (error) {
+      groups = [];
+    }
 
     if (groups) {
       groups.forEach(group => {
@@ -114,17 +128,19 @@ export class InventoryPage {
       this.groupName = '';
     }
 
-    this.inventoryService.getInventory(this.selectedCategory.id).pipe(take(1)).subscribe((products: ProductModel[]) => {
-      // maintainig original copy of the data
-      // used to render products the searchbar is cleared
-      this.allProducts = products;
-      this.products = products;
-      if (this.products.length === 0) {
-        this.searchStatus = 'No Items Found';
-      }
-    }, (error: string) => {
-      this.productError = error;
-    });
+    if (this.currentGroup) {
+      this.inventoryService.getInventory(this.getProductsView, this.selectedCategory.id).pipe(take(1)).subscribe((products: ProductModel[]) => {
+        // maintainig original copy of the data
+        // used to render products the searchbar is cleared
+        this.allProducts = products;
+        this.products = products;
+        if (this.products.length === 0) {
+          this.searchStatus = 'No Items Found';
+        }
+      }, (error: string) => {
+        this.productError = error;
+      });
+    }
   }
 
   ionViewDidLeave() {
@@ -357,8 +373,27 @@ export class InventoryPage {
     });
   }
 
-  // utility functions
+  presentInventoryActionSheet(product: ProductModel) {
+    this.actionSheetController.create({
+      header: 'Options',
+      buttons: [{
+        text: 'Cancel',
+        icon: 'close-outline',
+        role: 'desctructive'
+      }, {
+        text: 'Manage Product',
+        icon: 'create-outline',
+        handler: () => {
+          this.getProductList(product.name);
+          this.searchString = product.name;
+        }
+      }]
+    }).then((actionEl: HTMLIonActionSheetElement) => {
+      actionEl.present();
+    })
+  }
 
+  // utility functions
   updateProducts(product: ProductModel): void {
     const index: number = this.products.findIndex((prod: ProductModel) => {
       if (prod._id === product._id) {
@@ -382,6 +417,7 @@ export class InventoryPage {
   }
 
   applyProductCategoryFilter(cid: string): void {
+
     if (cid === '') {
       this.products = this.allProducts;
       return;

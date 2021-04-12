@@ -20,7 +20,7 @@
       <ion-row class="ion-justify-content-center">
         <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4"
           class="ion-margin-start ion-margin-end ion-no-padding">
-          <ion-searchbar color="light" showCancelButton="focus" [ngModel]="searchString" #searchStr
+          <ion-searchbar color="light" showCancelButton="focus" [(ngModel)]="searchString" #searchStr
             (ionInput)="filterProductExpenses(searchStr.value)">
           </ion-searchbar>
         </ion-col>

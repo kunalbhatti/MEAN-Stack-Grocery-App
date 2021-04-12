@@ -106,7 +106,6 @@ export class ExpensesPage implements OnInit {
 
   searchString: string = '';
 
-
   constructor(private settingsService: SettingsService,
     private expenseService: ExpenseService,
     private toasterService: ToasterService,
@@ -121,7 +120,6 @@ export class ExpensesPage implements OnInit {
   }
 
   ionViewDidEnter(): void {
-    this.searchString = '';
     this.selectedDate = (`${this.selectedYear}-${this.selectedMonth + 1 > 10 ? (this.selectedMonth + 1) : '0' + (this.selectedMonth + 1)}`);
 
     // extracting the currentGroup name from the settings
@@ -151,7 +149,7 @@ export class ExpensesPage implements OnInit {
   }
 
   ionViewDidLeave() {
-    this.resetExpenseData();
+    this.searchString = '';
   }
 
   // for getting expenses from the backend.
@@ -413,7 +411,6 @@ export class ExpensesPage implements OnInit {
 
   // unitlity functions
   resetExpenseData() {
-    this.searchString = '';
     this.expenses = {};
     this.expenseDates = [];
     this.expensesDateTotal = {};
@@ -438,6 +435,10 @@ export class ExpensesPage implements OnInit {
         }
       }
       this.extractExpenses(tempArr);
+    }
+
+    if (searchStr === '') {
+      this.extractExpenses(this.allExpenses);
     }
   }
 }

@@ -29,9 +29,9 @@ export class InventoryService {
   currentGroup: string;
   constructor(private http: HttpClient, private settingsService: SettingsService) {}
 
-  getInventory(cid ? : string): Observable < any > {
+  getInventory(getProductView: string, cid ? : string): Observable < any > {
     this.currentGroup = this.settingsService.settings.currentGroup;
-    return this.http.get(`${config.url}/products/get-inventory/?cid=${cid}&gid=${this.currentGroup}`).pipe(take(1), map(
+    return this.http.get(`${config.url}/products/get-inventory/?cid=${cid}&gid=${this.currentGroup}&getProductsView=${getProductView}`).pipe(take(1), map(
       (products: ProductModel[]) => {
 
         for (let product of products) {

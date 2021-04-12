@@ -8,6 +8,10 @@ import User, {
     UserModel
 } from './../models/user.model';
 
+import {
+    Settings
+} from './../models/settings.model';
+
 import HelperUtil from './../util/helper.util';
 
 import responseCode from './../json/response-code.json';
@@ -59,10 +63,17 @@ export default class AuthController {
                         userData.password = hash;
 
                         User.register(userData).then(
-                            () => {
-                                res.status(200).send({
-                                    registered: true,
-                                    message: 'User registered successfully'
+                            (user: InsertOneWriteOpResult < any > ) => {
+                                Settings.updateGetProductsView('partial', new ObjectId(user.insertedId)).then(
+                                    () => {
+                                        res.status(200).send({
+                                            registered: true,
+                                            message: 'User registered successfully'
+                                        })
+                                    }
+                                ).catch((error: MongoError) => {
+                                    console.log(error);
+                                    res.status(500).send(responseCode[500]);
                                 })
                             }
                         ).catch((error: MongoError) => {

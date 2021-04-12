@@ -21,7 +21,6 @@
             </ion-button>
           </ion-buttons>
         </ion-toolbar>
-
         <ion-row style="background-color: rgb(40, 41, 44);">
           <ion-col size="12" *ngIf="addGroupForm">
             <form (ngSubmit)="addGroup(createGroupForm)" #createGroupForm="ngForm" *ngIf="!selectedGroup">
@@ -153,6 +152,26 @@
             <ion-text *ngIf="expenseError !== ''">{{expenseError}}</ion-text>
           </ion-col>
         </ion-row>
+
+        <ion-toolbar size="12" class="ion-text-center ion-margin-top" style="background-color: #1f1f1f;">
+          <ion-title>Inventory View</ion-title>
+        </ion-toolbar>
+
+        <ion-row style="background-color: rgb(40, 41, 44);">
+          <ion-col size="12">
+            <ion-radio-group name="getProductView" [value] = "settings.getProductsView" (ionChange)="updateGetProductView(productView.value)" #productView>
+              <ion-item>
+                <ion-label>View all products</ion-label>
+                <ion-radio slot="start" value="all"></ion-radio>
+              </ion-item>
+              <ion-item>
+                <ion-label>View products in stock</ion-label>
+                <ion-radio slot="start" value="partial"></ion-radio>
+              </ion-item>
+            </ion-radio-group>
+          </ion-col>
+        </ion-row>
+
       </ion-col>
     </ion-row>
   </ion-grid>

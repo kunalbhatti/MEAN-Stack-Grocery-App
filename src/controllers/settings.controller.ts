@@ -32,6 +32,7 @@ export default class SettingsController {
 
     constructor() {
         this.router.get('/get-settings', verifyToken, this.getSettings);
+        this.router.patch('/update-get-products-view', verifyToken, this.updateGetProductsView);
         this.router.patch('/update-current-group', verifyToken, this.updateCurrentGroup);
         this.router.patch('/update-group', verifyToken, this.updateGroup);
         this.router.patch('/update-category', verifyToken, this.updateCategory);
@@ -45,6 +46,7 @@ export default class SettingsController {
     getSettings(req: express.Request, res: express.Response): void {
         Settings.getUserSettings(new ObjectId(req.body._id)).then(
             (settings: SettingsModel) => {
+                
                 if (settings) {
                     delete settings._id;
                 }
@@ -227,5 +229,25 @@ export default class SettingsController {
                 message: responseCode[500]
             });
         })
+    }
+
+    updateGetProductsView(req: express.Request, res: express.Response): void {
+        const _id: ObjectId = new ObjectId(req.body._id);
+        const getProductsView: string = req.body.getProductsView;
+
+        Settings.updateGetProductsView(getProductsView, _id).then(
+            () => {
+                res.status(200).send({
+                    message: 'getProducts updated'
+                });
+            }
+        ).catch(
+            (error: MongoError) => {
+                console.log(error);
+                res.status(500).send({
+                    message: responseCode[500]
+                });
+            }
+        );
     }
 }

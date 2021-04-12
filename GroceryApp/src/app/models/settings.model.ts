@@ -9,4 +9,5 @@ export interface SettingsModel {
   expenses: {
     [id: string]: string
   } [];
+  getProductsView: string;
 }
