@@ -357,72 +357,74 @@ export class ManageAppPage implements OnInit {
     this.actionSheetController.create({
       header: 'Options',
       buttons: [{
-        text: 'Close',
-        icon: 'close-outline',
-        role: 'destructive'
-      }, {
-        text: 'Edit',
-        icon: 'create-outline',
-        handler: () => {
-          this.addGroupForm = true;
-          this.selectedGroup = {
-            group,
-            gid
-          };
-        }
+          text: 'Close',
+          icon: 'close-outline',
+          role: 'destructive'
+        }, {
+          text: 'Edit',
+          icon: 'create-outline',
+          handler: () => {
+            this.addGroupForm = true;
+            this.selectedGroup = {
+              group,
+              gid
+            };
+          }
 
-      }, {
-        text: 'Delete',
-        icon: 'trash-outline',
-        handler: () => {
-          this.popoverController.create({
-            component: ConfirmDeleteComponent,
-            componentProps: {
-              type: 'Group',
-              message: 'Are you sure you want to delete this group?'
-            }
-          }).then(popoverEl => {
-            popoverEl.present();
-            return popoverEl.onDidDismiss();
-          }).then(
-            popoverResult => {
-              if (popoverResult.role === 'delete') {
-                const groupArr = this.groups.filter((grp: {
-                  [gid: string]: string
-                }) => {
-                  if (grp[gid] !== group) {
-                    return true;
-                  }
-                });
+        },
+        // {
+        //   text: 'Delete',
+        //   icon: 'trash-outline',
+        //   handler: () => {
+        //     this.popoverController.create({
+        //       component: ConfirmDeleteComponent,
+        //       componentProps: {
+        //         type: 'Group',
+        //         message: 'Are you sure you want to delete this group?'
+        //       }
+        //     }).then(popoverEl => {
+        //       popoverEl.present();
+        //       return popoverEl.onDidDismiss();
+        //     }).then(
+        //       popoverResult => {
+        //         if (popoverResult.role === 'delete') {
+        //           const groupArr = this.groups.filter((grp: {
+        //             [gid: string]: string
+        //           }) => {
+        //             if (grp[gid] !== group) {
+        //               return true;
+        //             }
+        //           });
 
-                this.settingsService.updateGroup(groupArr).subscribe(
-                  (result: {
-                    groups: {
-                      [gid: string]: string
-                    } []
-                  }) => {
-                    this.toasterService.presentToast('Success!!', 'Group was deleted successfully', 2000);
-                    this.groups = result.groups;
-                    this.updateSettings('groups', this.groups);
+        //           this.settingsService.updateGroup(groupArr).subscribe(
+        //             (result: {
+        //               groups: {
+        //                 [gid: string]: string
+        //               } []
+        //             }) => {
+        //               this.toasterService.presentToast('Success!!', 'Group was deleted successfully', 2000);
+        //               this.groups = result.groups;
+        //               this.updateSettings('groups', this.groups);
 
-                    if (gid === this.currentGroup && this.groups.length > 0) {
-                      const cgid = Object.keys(this.groups[0]).toString();
-                      this.setCurrentGroup(cgid);
-                      this.currentGroup = cgid;
-                    }
+        //               if (gid === this.currentGroup && this.groups.length > 0) {
+        //                 const cgid = Object.keys(this.groups[0]).toString();
+        //                 this.setCurrentGroup(cgid);
+        //                 this.currentGroup = cgid;
+        //               }
 
-                    if (this.groups.length === 0) {
-                      this.setCurrentGroup('');
-                      this.currentGroup = '';
-                    }
-                  }, (error: string) => {
-                    this.toasterService.presentToast('Failure!!', error, 500, 'danger');
-                  }
-                );
-              }
-            });
-        }
-      }]
+        //               if (this.groups.length === 0) {
+        //                 this.setCurrentGroup('');
+        //                 this.currentGroup = '';
+        //               }
+        //             }, (error: string) => {
+        //               this.toasterService.presentToast('Failure!!', error, 500, 'danger');
+        //             }
+        //           );
+        //         }
+        //       });
+        //   }
+        // }
+      ]
     }).then((actionEl: HTMLIonActionSheetElement) => {
       actionEl.present();
     })

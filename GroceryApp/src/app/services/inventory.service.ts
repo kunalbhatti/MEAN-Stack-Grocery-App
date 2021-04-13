@@ -56,13 +56,13 @@ export class InventoryService {
     return this.http.patch(`${config.url}/products/update-stock-count/${productId}`, {
       count,
       gid
-    });
+    }).pipe(catchError(errorHandler));
   }
 
   updateStockStatus(productId: string, status: string, gid: string) {
     return this.http.patch(`${config.url}/products/update-stock-status/${productId}`, {
       status,
       gid
-    });
+    }).pipe(catchError(errorHandler));
   }
 }

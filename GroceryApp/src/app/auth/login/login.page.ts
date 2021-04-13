@@ -45,7 +45,6 @@ export class LoginPage implements OnInit {
       }) => {
         if (user.auth) {
           localStorage.setItem('groceryApp-token', user.token);
-          console.log(localStorage.getItem('groceryApp-token'))
           this.router.navigate(['/', 'app']);
         }
       }, (error: string) => {

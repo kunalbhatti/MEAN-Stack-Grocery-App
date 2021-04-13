@@ -7,7 +7,7 @@
   </ion-toolbar>
   <ion-toolbar>
     <ion-buttons slot="start" *ngIf="searchString === ''">
-      <ion-button (click)="presentFilterAlert()" size="small">
+      <ion-button (click)="presentCategoryFilterAlert()" size="small">
         <ion-icon name="filter-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -66,7 +66,7 @@
               </ion-item>
               <ion-item>
                 <ion-label>Status:
-                  {{product?.stockStatus[currentGroup] !== '' ? product?.stockStatus[currentGroup]: 'empty' | titlecase}}
+                  {{product?.stockStatus[currentGroup] === '' ? 'Empty': product?.stockStatus[currentGroup] | titlecase}}
                 </ion-label>
               </ion-item>
             </ion-card-content>
@@ -117,6 +117,11 @@
                   <ion-select-option value="half">Half</ion-select-option>
                   <ion-select-option value="empty" disabled>Empty</ion-select-option>
                 </ion-select>
+              </ion-item>
+              <ion-item lines="none" *ngIf="showDoneButton">
+                <ion-col class="ion-text-center ion-padding-top">
+                  <ion-button fill="clear" (click)="showDoneButton = false; searchString = ''">Done</ion-button>
+                </ion-col>
               </ion-item>
             </ion-card-content>
           </ion-card>

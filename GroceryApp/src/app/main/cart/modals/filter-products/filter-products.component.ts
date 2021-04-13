@@ -39,6 +39,10 @@ export class FilterProductsComponent implements OnInit {
   }
 
   onSubmit(form: NgForm) {
-    this.popoverController.dismiss(form.value.category, 'filter');
+    for(let category of this.categories) {
+      if(category[form.value.category]){
+        this.popoverController.dismiss({id: form.value.category, name: category[form.value.category]}, 'filter');
+      }
+    }
   }
 }

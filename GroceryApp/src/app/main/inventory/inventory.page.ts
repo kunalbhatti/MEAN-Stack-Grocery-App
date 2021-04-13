@@ -59,7 +59,7 @@ export class InventoryPage {
   products: ProductModel[];
 
   // filtered array is used for rendering products filtered from searchbar
-  filtered: ProductModel[];
+  filtered: ProductModel[] = [];
 
   currentGroup: string;
   groupName: string;
@@ -80,9 +80,10 @@ export class InventoryPage {
 
   productError: string = '';
   searchString: string = '';
-  searchStatus: string;
+  searchStatus: string = 'No Items Found';
   filterStatus: string;
   getProductsView: string;
+  showDoneButton: boolean = false;
 
   // all buttons are disabled when the update lock is true
   updateLock: boolean = false;
@@ -98,6 +99,7 @@ export class InventoryPage {
     private router: Router) {}
 
   ionViewDidEnter() {
+
     this.searchStatus = 'Loading Inventory';
 
     this.getProductsView = this.settingsService.settings.getProductsView;
@@ -108,6 +110,11 @@ export class InventoryPage {
     } catch (error) {
       this.currentGroup = '';
     }
+
+    if (!this.currentGroup) {
+      this.presentAddGroupAlert();
+    }
+
     let groups = [];
 
     try {
@@ -137,8 +144,9 @@ export class InventoryPage {
         if (this.products.length === 0) {
           this.searchStatus = 'No Items Found';
         }
-      }, (error: string) => {
+      }, (error: any) => {
         this.productError = error;
+        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       });
     }
   }
@@ -155,7 +163,7 @@ export class InventoryPage {
   }
 
   getProductList(searchStr: string): void {
-
+    this.filtered = [];
     // regex will remove special characters from the search string
     searchStr = searchStr.replace(/[^a-zA-Z]/g, '');
 
@@ -171,7 +179,12 @@ export class InventoryPage {
         }
       }, (error: string) => {
         this.productError = error;
+        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       });
+    }
+
+    if (searchStr !== '') {
+      this.showDoneButton = false;
     }
   }
 
@@ -187,6 +200,9 @@ export class InventoryPage {
           this.sortBy = 'none';
           this.updateLock = false;
           this.toasterService.presentToast('', 'Inventoy Updated', 500);
+        }, (error: string) => {
+          this.updateLock = false;
+          this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
         }
       );
 
@@ -197,7 +213,7 @@ export class InventoryPage {
             product.stockStatus[this.currentGroup] = 'full';
             this.updateProducts(product);
           }, (error: string) => {
-            this.productError = error;
+            this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
           }
         );
       }
@@ -208,7 +224,7 @@ export class InventoryPage {
             product.stockStatus[this.currentGroup] = 'empty';
             this.updateProducts(product);
           }, (error: string) => {
-            this.productError = error;
+            this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
           }
         );
       }
@@ -247,11 +263,13 @@ export class InventoryPage {
             text: 'Cancel',
             role: 'cancel',
             handler: () => {
-              this.products = this.products.filter(prod => {
-                if (prod._id !== product._id) {
-                  return true;
-                }
-              })
+              if (this.getProductsView === 'partial') {
+                this.products = this.products.filter(prod => {
+                  if (prod._id !== product._id) {
+                    return true;
+                  }
+                });
+              }
             }
           }, {
             text: 'Okay',
@@ -270,13 +288,13 @@ export class InventoryPage {
                     }
                   );
                 }, (error: string) => {
-                  this.productError = error;
+                  this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
                 }
               );
             }
           }]
-        }).then(actionEl => {
-          actionEl.present();
+        }).then((alertEl: HTMLIonAlertElement) => {
+          alertEl.present();
         });
 
       } else {
@@ -296,36 +314,22 @@ export class InventoryPage {
                   this.sortBy = 'none';
                   this.toasterService.presentToast('', 'Inventoy Updated', 500);
                 }, (error: string) => {
-                  this.productError = error;
+                  this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
                 }
               );
             }
           }, (error: string) => {
-            this.productError = error;
+            this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
           }
         );
       }
     } else {
-      this.alertController.create({
-        header: 'No Group Selected',
-        message: 'Please go to settings and select a group.',
-        buttons: [{
-          text: 'Cancel',
-          role: 'cancel'
-        }, {
-          text: 'Ok',
-          handler: () => {
-            this.router.navigate(['/', 'app', 'settings', 'manage-app'])
-          }
-        }]
-      }).then((alertEl: HTMLIonAlertElement) => {
-        alertEl.present();
-      });
+      this.presentAddGroupAlert();
     }
   }
 
   // popover and alert functions
-  presentFilterAlert(): void {
+  presentCategoryFilterAlert(): void {
     let categories: SettingsModel['categories'] = [{
       '': 'All Products'
     }, ];
@@ -342,13 +346,16 @@ export class InventoryPage {
       popoverEl.present();
       return popoverEl.onDidDismiss();
     }).then((popoverResult: {
-      data: string,
+      data: {
+        id: string,
+        name: string
+      },
       role: string
     }) => {
       if (popoverResult.role === 'filter') {
-        this.selectedCategory.id = popoverResult.data;
+        this.selectedCategory.id = popoverResult.data.id;
+        this.selectedCategory.name = popoverResult.data.name;
         this.applyProductCategoryFilter(this.selectedCategory.id);
-
       }
     });
   }
@@ -384,13 +391,30 @@ export class InventoryPage {
         text: 'Manage Product',
         icon: 'create-outline',
         handler: () => {
-          this.getProductList(product.name);
+          this.filtered.push(product);
+          this.showDoneButton = true;
           this.searchString = product.name;
         }
       }]
     }).then((actionEl: HTMLIonActionSheetElement) => {
       actionEl.present();
     })
+  }
+
+  presentAddGroupAlert() {
+    this.alertController.create({
+      header: 'No Group Selected',
+      message: 'Please go to settings and select a group.',
+      buttons: [{
+        text: 'Ok',
+        handler: () => {
+          this.router.navigate(['/', 'app', 'settings', 'manage-app'])
+        }
+      }]
+    }).then((alertEl: HTMLIonAlertElement) => {
+      alertEl.present();
+    });
+
   }
 
   // utility functions
@@ -407,11 +431,13 @@ export class InventoryPage {
       this.products = [product].concat(this.products);
     }
 
-    this.products = this.products.filter(prod => {
-      if (prod.stockStatus[this.currentGroup] !== 'empty') {
-        return true;
-      }
-    });
+    if (this.getProductsView === 'partial') {
+      this.products = this.products.filter((prod: ProductModel) => {
+        if (prod.stockStatus[this.currentGroup] !== 'empty') {
+          return true;
+        }
+      });
+    }
 
     this.allProducts = this.products;
   }

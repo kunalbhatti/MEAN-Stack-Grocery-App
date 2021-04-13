@@ -118,6 +118,7 @@ export default class ProductsController {
     }
 
     getInventory(req: express.Request, res: express.Response): void {
+
         const uid: ObjectId = new ObjectId(req.body._id);
         const gid: string = req.query.gid.toString();
         const cid: string = req.query.cid.toString();

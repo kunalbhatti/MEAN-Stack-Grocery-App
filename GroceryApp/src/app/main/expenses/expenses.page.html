@@ -4,11 +4,6 @@
       Expenses
       <ion-label *ngIf="currentGroup?.name"><small>({{currentGroup?.name|titlecase}})</small></ion-label>
     </ion-title>
-    <ion-buttons slot="primary">
-      <ion-button (click)="presentAddExpensePopover()" class="ion-padding-top">
-        <ion-icon name="add-outline" slot="icon-only"></ion-icon>
-      </ion-button>
-    </ion-buttons>
   </ion-toolbar>
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -40,8 +35,15 @@
       <ion-col size="12" size-sm="10" size-md="8" class="ion-text-center">
         <ion-toolbar size="12" class="ion-text-center" style="background-color: #1f1f1f;">
           <ion-datetime [value]="selectedDate" [displayFormat]="viewFilter==='date'? 'MMMM YYYY' : 'YYYY'"
-            (ionChange)="updateSelectMonth($event)" style="width: 100%;" class="ion-text-center"></ion-datetime>
+            (ionChange)="updateSelectMonth($event)" style="width: 100%; padding-left: 50px;"></ion-datetime>
+
+            <ion-buttons slot="primary">
+            <ion-button (click)="presentAddExpensePopover()">
+              <ion-icon name="add-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-buttons>
         </ion-toolbar>
+
         <ion-list style="background-color: rgb(40, 41, 44);">
           <ion-card>
             <ion-item style="font-size: 0.9rem;">

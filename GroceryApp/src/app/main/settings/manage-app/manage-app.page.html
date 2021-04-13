@@ -13,7 +13,7 @@
       <ion-col size="12" size-sm="10" size-md="8">
 
         <ion-toolbar size="12" class="ion-text-center ion-margin-top" style="background-color: #1f1f1f;">
-          <ion-title>Groups</ion-title>
+          <ion-title class="title-center">Groups</ion-title>
           <ion-buttons slot="primary">
             <ion-button (click)="addGroupForm = !addGroupForm; selectedGroup = ''" [disabled]="groups?.length === 3">
               <ion-icon name="add-outline" *ngIf="!addGroupForm" slot="icon-only"></ion-icon>
@@ -62,7 +62,7 @@
         </ion-row>
 
         <ion-toolbar size="12" class="ion-text-center ion-margin-top" style="background-color: #1f1f1f;">
-          <ion-title>Categories</ion-title>
+          <ion-title class="title-center">Categories</ion-title>
           <ion-buttons slot="primary">
             <ion-button (click)="addCategoryForm = !addCategoryForm; selectedCategory = ''">
               <ion-icon name="add-outline" *ngIf="!addCategoryForm" slot="icon-only"></ion-icon>
@@ -108,7 +108,7 @@
         </ion-row>
 
         <ion-toolbar size="12" class="ion-text-center ion-margin-top" style="background-color: #1f1f1f;">
-          <ion-title>Expenses</ion-title>
+          <ion-title class="title-center">Expenses</ion-title>
           <ion-buttons slot="primary">
             <ion-button (click)="addExpenseForm = !addExpenseForm; selectedExpense = ''">
               <ion-icon name="add-outline" *ngIf="!addExpenseForm" slot="icon-only"></ion-icon>

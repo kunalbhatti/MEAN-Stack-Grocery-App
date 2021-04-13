@@ -71,7 +71,7 @@ export class CartPage {
   products: ProductModel[];
 
   // filtered array is used for rendering products filtered from searchbar
-  filtered: ProductModel[];
+  filtered: ProductModel[] = [];
 
   currentGroup: {
     id: string,
@@ -98,9 +98,9 @@ export class CartPage {
 
   productError: string = '';
   searchString: string = '';
-  searchStatus: string;
+  searchStatus: string = 'No Items Found';
   filterStatus: string;
-
+  showDoneButton: boolean = false;
   cartCost: number = 0;
   filteredCost: number = 0;
 
@@ -128,8 +128,11 @@ export class CartPage {
       this.currentGroup.id = '';
     }
 
-    if (this.currentGroup.id) {
+    if (!this.currentGroup.id) {
+      this.presentAddGroupAlert();
+    }
 
+    if (this.currentGroup.id) {
 
       const groups = this.settingsService.settings.groups;
 
@@ -163,6 +166,7 @@ export class CartPage {
         }
       }, (error: string) => {
         this.productError = error;
+        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       });
     }
   }
@@ -179,7 +183,7 @@ export class CartPage {
   }
 
   getProductList(searchStr: string): void {
-
+    this.filtered = [];
     // regex will remove special characters from the search string
     searchStr = searchStr.replace(/[^a-zA-Z]/g, '');
 
@@ -199,7 +203,10 @@ export class CartPage {
         }
       }, (error: string) => {
         this.productError = error;
+        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       });
+    } else {
+      this.showDoneButton = false;
     }
   }
 
@@ -216,31 +223,17 @@ export class CartPage {
           this.updateLock = false;
           this.toasterService.presentToast('', 'Cart Updated', 500);
         }, (error: string) => {
-          this.productError = error;
+          this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
         }
       );
     } else {
-      this.alertController.create({
-        header: 'No Group Selected',
-        message: 'Please go to settings and select a group.',
-        buttons: [{
-          text: 'Cancel',
-          role: 'cancel'
-        }, {
-          text: 'Ok',
-          handler: () => {
-            this.router.navigate(['/', 'app', 'settings', 'manage-app']);
-          }
-        }]
-      }).then((alertEl: HTMLIonAlertElement) => {
-        alertEl.present();
-      });
+      this.presentAddGroupAlert();
     }
   }
 
   // popover and alert functions
 
-  presentFilterPopover(): void {
+  presentCategoryFilterPopover(): void {
     let categories: SettingsModel['categories'] = [{
       '': 'All Products'
     }, ];
@@ -255,11 +248,15 @@ export class CartPage {
       popoverEl.present();
       return popoverEl.onDidDismiss();
     }).then((popoverResult: {
-      data: string,
+      data: {
+        id: string,
+        name: string
+      },
       role: string
     }) => {
       if (popoverResult.role === 'filter') {
-        this.selectedCategory.id = popoverResult.data;
+        this.selectedCategory.id = popoverResult.data.id;
+        this.selectedCategory.name = popoverResult.data.name;
         this.applyProductCategoryFilter(this.selectedCategory.id);
       }
     });
@@ -296,7 +293,9 @@ export class CartPage {
         text: 'Manage Product',
         icon: 'create-outline',
         handler: () => {
-          this.getProductList(product.name);
+          this.filtered.push(product);
+          this.filteredCost = +product.price * +product.cart[this.currentGroup.id];
+          this.showDoneButton = true;
           this.searchString = product.name;
         }
       }, {
@@ -338,11 +337,10 @@ export class CartPage {
                         if (product.stockCount[this.currentGroup.id] === 0) {
                           this.inventoryService.updateStockStatus(product._id, 'full', this.currentGroup.id).subscribe(
                             () => {}, (error: string) => {
-                              this.productError = error;
+                              this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
                             }
                           );
                         }
-
                         const expense: ExpenseModel = {
                           pid: product._id,
                           cid: product.cid,
@@ -363,14 +361,14 @@ export class CartPage {
                           () => {
 
                           }, (error: string) => {
-                            this.productError = error;
+                            this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
                           }
                         );
                         this.toasterService.presentToast('', 'Inventory Updated', 500);
                       }
                     );
                   }, (error: string) => {
-                    this.productError = error;
+                    this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
                   }
                 );
               }
@@ -410,6 +408,23 @@ export class CartPage {
     })
   }
 
+  presentAddGroupAlert() {
+    this.alertController.create({
+      header: 'No Group Selected',
+      message: 'Please go to settings and select a group.',
+      buttons: [{
+        text: 'Ok',
+        handler: () => {
+          this.router.navigate(['/', 'app', 'settings', 'manage-app'])
+        }
+      }]
+    }).then((alertEl: HTMLIonAlertElement) => {
+      alertEl.present();
+    });
+
+  }
+
+
   // utility functions
 
   updateProducts(product: ProductModel): void {
@@ -430,6 +445,16 @@ export class CartPage {
         return true;
       }
     });
+
+    this.cartCost = 0;
+
+    this.products.forEach((prod: ProductModel) => {
+      this.cartCost += +prod.price * +prod.cart[this.currentGroup.id];
+    })
+
+    this.filteredCost = 0;
+
+    this.filteredCost += +product.price * +product.cart[this.currentGroup.id];
 
     this.allProducts = [...this.products];
   }
