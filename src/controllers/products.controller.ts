@@ -113,12 +113,11 @@ export default class ProductsController {
             }
         ).catch((error: MongoError) => {
             console.log(error);
-            res.status(500).send(responseCode[500]);
+            res.status(500).send({message: responseCode[500]});
         });
     }
 
     getInventory(req: express.Request, res: express.Response): void {
-
         const uid: ObjectId = new ObjectId(req.body._id);
         const gid: string = req.query.gid.toString();
         const cid: string = req.query.cid.toString();
@@ -188,7 +187,7 @@ export default class ProductsController {
             res.status(200).send(products);
         }).catch((error: MongoError) => {
             console.log(error);
-            res.status(500).send(responseCode[500]);
+            res.status(500).send({message: responseCode[500]});
         });
     }
 

@@ -97,6 +97,7 @@ export class CartPage {
 
 
   productError: string = '';
+  filterError: string = '';
   searchString: string = '';
   searchStatus: string = 'No Items Found';
   filterStatus: string;
@@ -119,7 +120,7 @@ export class CartPage {
     private router: Router) {}
 
   ionViewDidEnter() {
-    this.searchStatus = 'Loading Inventory';
+    this.searchStatus = 'Loading Cart';
 
     // extracting the currentGroup name from the settings
     try {
@@ -202,7 +203,7 @@ export class CartPage {
           this.filteredCost = this.calculateCartCost(this.filtered);
         }
       }, (error: string) => {
-        this.productError = error;
+        this.filterError = error;
         this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       });
     } else {
@@ -462,6 +463,7 @@ export class CartPage {
   applyProductCategoryFilter(cid: string): void {
     if (cid === '') {
       this.cartCost = 0;
+      this.products = this.allProducts;
       this.cartCost = this.calculateCartCost(this.products);
       return;
     }

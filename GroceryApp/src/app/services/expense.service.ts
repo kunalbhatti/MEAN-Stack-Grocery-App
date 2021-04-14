@@ -24,9 +24,9 @@ import errorHandler from './error.handler';
 export class ExpenseService {
   constructor(private http: HttpClient) {}
 
-  getExpense(month: number, year: number, gid: string, cid: string, selectedView: string) {
+  getExpense(month: number, year: number, gid: string, selectedView: string) {
     return this.http.get(
-      `${config.url}/expenses/get-expense/?month=${month}&year=${year}&gid=${gid}&cid=${cid}&view=${selectedView}`
+      `${config.url}/expenses/get-expense/?month=${month}&year=${year}&gid=${gid}&view=${selectedView}`
     ).pipe(catchError(errorHandler));
   }
 

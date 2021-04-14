@@ -156,11 +156,12 @@ export class ExpensesPage implements OnInit {
   getExpenses(): void {
     this.resetExpenseData();
 
-    this.expenseService.getExpense(this.selectedMonth + 1, this.selectedYear, this.currentGroup.id, this.selectedCategory, this.selectedView).
+    this.expenseService.getExpense(this.selectedMonth + 1, this.selectedYear, this.currentGroup.id, this.selectedView).
     pipe(take(1)).subscribe((expenses: ExpenseModel[]) => {
       // maintainig original copy of the data
       // used by searchbar for filtering data based of input characters
       this.allExpenses = [...expenses];
+      expenses = this.applyCategoryFilter(expenses, this.selectedCategory);
       this.extractExpenses(expenses);
     }, (error: string) => {
       this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
@@ -362,6 +363,14 @@ export class ExpensesPage implements OnInit {
 
     categories = categories.concat(this.settingsService.settings.categories);
 
+    let otherExpenses: {
+      others: string
+    } = {
+      others: 'Others'
+    }
+
+    categories.push(otherExpenses);
+
     this.popoverController.create({
       component: FilterProductsComponent,
       componentProps: {
@@ -373,12 +382,19 @@ export class ExpensesPage implements OnInit {
       popoverEl.present();
       return popoverEl.onDidDismiss();
     }).then((popoverResult: {
-      data: string,
+      data: {
+        id: string,
+        name: string
+      },
       role: string
     }) => {
       if (popoverResult.role === 'filter') {
-        this.selectedCategory = popoverResult.data;
-        this.getExpenses();
+        this.selectedCategory = popoverResult.data.id;
+        let tempArr = [...this.allExpenses];
+
+        tempArr = this.applyCategoryFilter(tempArr, popoverResult.data.id);
+
+        this.extractExpenses(tempArr)
       }
     });
   }
@@ -440,5 +456,23 @@ export class ExpensesPage implements OnInit {
     if (searchStr === '') {
       this.extractExpenses(this.allExpenses);
     }
+  }
+
+  applyCategoryFilter(expenses: ExpenseModel[], cid: string): ExpenseModel[] {
+
+    if(cid === '') {
+      return expenses;
+    }
+
+    if (cid === 'others') {
+      cid = null;
+    }
+
+    return expenses.filter((exp: ExpenseModel) => {
+      if (exp.cid === cid) {
+        return true;
+      }
+    });
+
   }
 }

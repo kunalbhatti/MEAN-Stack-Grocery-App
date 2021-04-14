@@ -34,7 +34,12 @@
     <ion-row class="ion-justify-content-center">
       <ion-col size="12" size-sm="10" size-md="8" class="ion-text-center">
         <ion-toolbar size="12" class="ion-text-center" style="background-color: #1f1f1f;">
-          <ion-title>{{selectedCategory.name | titlecase}}</ion-title>
+          <ion-title *ngIf="(productError === '' && searchString === '') ||
+          (filterError === '' && searchString !== ''); else errorCondition">{{selectedCategory.name | titlecase}}
+          </ion-title>
+          <ng-template #errorCondition>
+            <ion-title>Operation Failed</ion-title>
+          </ng-template>
         </ion-toolbar>
 
         <ion-list style="background-color: rgb(40, 41, 44);" *ngIf="searchString === '' && products?.length > 0">
@@ -83,6 +88,7 @@
           <ion-text *ngIf="productError === '' && products?.length === 0">{{searchStatus}}</ion-text>
           <ion-text *ngIf="productError !== ''">{{productError}}</ion-text>
         </ion-list>
+
         <ion-list style="background-color: rgb(40, 41, 44);" *ngIf="searchString !== '' && filtered.length > 0">
           <ion-card>
             <ion-item style="font-size: 0.9rem;">
@@ -129,9 +135,9 @@
           </ion-card>
         </ion-list>
         <ion-list style="background-color: rgb(40, 41, 44);" class="ion-padding" *ngIf="searchString !== ''">
-          <ion-text *ngIf="searchString !== '' && productError === '' && filtered?.length === 0">{{filterStatus}}
+          <ion-text *ngIf="searchString !== '' && filterError === '' && filtered?.length === 0">{{filterStatus}}
           </ion-text>
-          <ion-text *ngIf="searchString !== '' && productError !== ''">{{productError}}</ion-text>
+          <ion-text *ngIf="searchString !== '' && filterError !== ''">{{filterError}}</ion-text>
         </ion-list>
       </ion-col>
     </ion-row>

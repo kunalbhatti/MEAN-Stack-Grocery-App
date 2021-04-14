@@ -79,6 +79,7 @@ export class InventoryPage {
   sortBy: string = 'none';
 
   productError: string = '';
+  filterError: string = '';
   searchString: string = '';
   searchStatus: string = 'No Items Found';
   filterStatus: string;
@@ -163,28 +164,32 @@ export class InventoryPage {
   }
 
   getProductList(searchStr: string): void {
-    this.filtered = [];
-    // regex will remove special characters from the search string
-    searchStr = searchStr.replace(/[^a-zA-Z]/g, '');
-
-    this.searchString = searchStr;
-    if (searchStr !== '') {
-      this.filterStatus = 'Searching Products'
+    if (this.getProductsView === 'all') {
+      this.filterProducts(searchStr);
+    } else {
       this.filtered = [];
+      // regex will remove special characters from the search string
+      searchStr = searchStr.replace(/[^a-zA-Z]/g, '');
 
-      this.searchBarService.getProductList(searchStr, this.selectedCategory.id).pipe(take(1)).subscribe((data: ProductModel[]) => {
-        this.filtered = data;
-        if (this.filtered.length === 0) {
-          this.filterStatus = 'No Items Found';
-        }
-      }, (error: string) => {
-        this.productError = error;
-        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
-      });
-    }
+      this.searchString = searchStr;
+      if (searchStr !== '') {
+        this.filterStatus = 'Searching Products'
+        this.filtered = [];
 
-    if (searchStr !== '') {
-      this.showDoneButton = false;
+        this.searchBarService.getProductList(searchStr, this.selectedCategory.id).pipe(take(1)).subscribe((data: ProductModel[]) => {
+          this.filtered = data;
+          if (this.filtered.length === 0) {
+            this.filterStatus = 'No Items Found';
+          }
+        }, (error: string) => {
+          this.filterError = error;
+          this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
+        });
+      }
+
+      if (searchStr !== '') {
+        this.showDoneButton = false;
+      }
     }
   }
 
@@ -391,6 +396,7 @@ export class InventoryPage {
         text: 'Manage Product',
         icon: 'create-outline',
         handler: () => {
+          this.filtered = [];
           this.filtered.push(product);
           this.showDoneButton = true;
           this.searchString = product.name;
@@ -483,6 +489,31 @@ export class InventoryPage {
 
     return products;
 
+  }
+
+
+  filterProducts(searchStr: string): void {
+    // regex will remove special characters from the search string
+    searchStr = searchStr.replace(/[^a-zA-Z]/g, '');
+
+    if (searchStr !== '') {
+      this.searchString = searchStr;
+      let tempArr = [];
+
+      let regExp: RegExp = new RegExp(`^.*${searchStr}.*$`, 'i');
+
+      for (let product of this.allProducts) {
+        if (regExp.test(product.name)) {
+          tempArr.push(product);
+        }
+      }
+
+      this.filtered = tempArr;
+    }
+
+    if (searchStr === '') {
+      this.filtered = [];
+    }
   }
 
 }

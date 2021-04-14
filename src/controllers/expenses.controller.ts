@@ -34,7 +34,6 @@ export default class ExpensesController {
         const month: number = +req.query.month.toString();
         const year: number = +req.query.year.toString();
         const gid: string = req.query.gid.toString();
-        const cid: string = req.query.cid.toString();
         const view: string = req.query.view.toString();
 
         let monthlyFilter = {};
@@ -42,18 +41,6 @@ export default class ExpensesController {
             monthlyFilter = {
                 'date.month': month
             };
-        }
-
-        const categoryFilter = {
-            $and: [{
-                    gid
-                }, {
-                    cid
-                }, {
-                    'date.year': year
-                },
-                monthlyFilter
-            ]
         }
 
         const normalFilter = {
@@ -66,7 +53,7 @@ export default class ExpensesController {
             ]
         }
 
-        Expenses.getExpense(cid ? categoryFilter : normalFilter).toArray().then(
+        Expenses.getExpense(normalFilter).toArray().then(
             (expenses: ExpenseModel[]) => {
                 res.status(200).send(expenses);
             }
@@ -78,6 +65,8 @@ export default class ExpensesController {
         });
     }
 
+    // filters expenses on the server
+    // not in use
     getProductExpense(req: express.Request, res: express.Response): void {
         const gid: string = req.query.gid.toString();
         const cid: string = req.query.cid.toString();
