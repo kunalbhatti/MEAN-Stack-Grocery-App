@@ -28,6 +28,9 @@ export default class AuthController {
     constructor() {
         this.router.post('/register', this.register);
         this.router.post('/login', this.login);
+        this.router.get('/get-password-recover-link/:email', this.recoverPassword);
+        this.router.get('/get-activation-link/:email', this.getActivationLink);
+        this.router.post('/activate-account', this.activateAccount);
         this.router.get('/check-auth-status', validateToken, this.checkAuthStatus);
         this.router.get('/get-user-details', validateToken, this.getUserDetails);
         this.router.patch('/update-user-name', validateToken, this.updateUserName);
@@ -146,13 +149,13 @@ export default class AuthController {
         });
     }
 
-    checkAuthStatus(req: express.Request, res: express.Response): void {
+    private checkAuthStatus(req: express.Request, res: express.Response): void {
         res.status(200).send({
             auth: true
         });
     }
 
-    getUserDetails(req: express.Request, res: express.Response): void {
+    private getUserDetails(req: express.Request, res: express.Response): void {
         User.findUser({
             _id: new ObjectId(req.body._id)
         }).then((user: UserModel) => {
@@ -168,7 +171,7 @@ export default class AuthController {
         })
     }
 
-    updateUserName(req: express.Request, res: express.Response): void {
+    private updateUserName(req: express.Request, res: express.Response): void {
         const name = req.body.name;
 
         User.updateUserData({
@@ -188,7 +191,7 @@ export default class AuthController {
         });
     }
 
-    updateUserPassword(req: express.Request, res: express.Response): void {
+    private updateUserPassword(req: express.Request, res: express.Response): void {
 
         const _id: ObjectId = new ObjectId(req.body._id);
         const oldPassword: string = req.body.oldPassword;
@@ -245,4 +248,45 @@ export default class AuthController {
         )
 
     }
+
+    private recoverPassword(req: express.Request, res: express.Response) {
+        const email: string = req.params.email;
+
+        User.findUser({
+            email
+        }).then(
+            (user: UserModel) => {
+                if (user) {
+                    HelperUtil.signToken({
+                        _id: user._id
+                    }, 86400, (error: Error, token: string) => {
+                        if (error) {
+                            res.status(500).send({
+                                message: responseCode[500]
+                            });
+                            return;
+                        }
+                        res.status(200).send({
+                            message: 'Reset link mailed to the email address. Please follow the link to reset your password.'
+                        });
+                        HelperUtil.sendMail(email, 'Password Reset Link', `${token}`);
+                    });
+
+                } else {
+                    res.status(404).send({
+                        message: responseCode[404]
+                    });
+                }
+            }
+        );
+    }
+
+    private getActivationLink(req: express.Request, res: express.Response) {
+
+    }
+
+    private activateAccount(req: express.Request, res: express.Response) {
+
+    }
+
 }

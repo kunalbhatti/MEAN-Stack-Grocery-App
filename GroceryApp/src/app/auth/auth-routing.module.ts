@@ -22,7 +22,13 @@ const routes: Routes = [{
     },
     {
       path: 'register',
-      loadChildren: () => import('./register/register.module').then(m => m.RegisterModule)
+      loadChildren: () => import('./register/register.module').then(m => m.RegisterModule),
+    }, {
+      path: 'recover-password',
+      loadChildren: () => import('./recover-password/recover-password.module').then(m => m.RecoverPasswordPageModule)
+    }, {
+      path: 'activate-account',
+      loadChildren: () => import('./activate-account/activate-account.module').then(m => m.ActivateAccountPageModule)
     }
   ]
 }];

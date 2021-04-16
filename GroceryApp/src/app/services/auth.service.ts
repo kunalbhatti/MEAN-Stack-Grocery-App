@@ -5,7 +5,12 @@ import {
 import {
   Injectable
 } from '@angular/core';
-import { NavController } from '@ionic/angular';
+import {
+  NavController
+} from '@ionic/angular';
+import {
+  response
+} from 'express';
 import {
   Observable,
   of
@@ -87,6 +92,10 @@ export class AuthService {
     }));
   }
 
+  recoverPassword(email: string): Observable < any > {
+    return this.http.get(`${config.url}/auth/get-password-recover-link/${email}`).pipe(take(1), catchError(errorHandler));
+  }
+
   getAccessToken(): string {
     let token = localStorage.getItem('groceryApp-token');
 
@@ -102,4 +111,5 @@ export class AuthService {
     window.location.reload();
     return true;
   }
+
 }

@@ -11,6 +11,7 @@
   "author": "kunal bhatti",
   "license": "ISC",
   "dependencies": {
+    "@sendgrid/mail": "^7.4.2",
     "@types/bcrypt": "^3.0.0",
     "@types/cors": "^2.8.10",
     "@types/jsonwebtoken": "^8.5.0",

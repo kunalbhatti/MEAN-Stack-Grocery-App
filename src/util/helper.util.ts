@@ -1,6 +1,9 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import sgMail from '@sendgrid/mail';
 import config from './../json/config.json';
+
+import fs from 'fs';
 
 export default class HelpeUtil {
 
@@ -28,5 +31,19 @@ export default class HelpeUtil {
         jwt.verify(token, config.jwt_key, (error: Error, decoded: any) => {
             cb(error, decoded);
         })
+    }
+
+    static sendMail(to: string, subject: string, html: string) {
+
+        sgMail.setApiKey(config.api_key);
+
+        const msg = {
+            to,
+            from: config.from,
+            subject,
+            html
+        }
+
+        return sgMail.send(msg);
     }
 }
