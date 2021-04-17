@@ -4,6 +4,9 @@ import {
     MongoError,
     ObjectId,
 } from 'mongodb';
+
+import path from 'path';
+
 import User, {
     UserModel
 } from './../models/user.model';
@@ -16,6 +19,7 @@ import HelperUtil from './../util/helper.util';
 
 import responseCode from './../json/response-code.json';
 import validateToken from '../middlewares/validate-token.middleware';
+import decodeToken from '../middlewares/decode-token.middleware';
 
 export default class AuthController {
 
@@ -28,7 +32,9 @@ export default class AuthController {
     constructor() {
         this.router.post('/register', this.register);
         this.router.post('/login', this.login);
-        this.router.get('/get-password-recover-link/:email', this.recoverPassword);
+        this.router.get('/get-password-recover-link/:email', this.getPasswordRecoveryLink);
+        this.router.get('/password-recovery-page/:token', decodeToken, this.getPasswordRecoveryPage);
+        this.router.post('/reset-password/:token', decodeToken, this.resetPassword);
         this.router.get('/get-activation-link/:email', this.getActivationLink);
         this.router.post('/activate-account', this.activateAccount);
         this.router.get('/check-auth-status', validateToken, this.checkAuthStatus);
@@ -245,40 +251,164 @@ export default class AuthController {
                     });
                 }
             }
-        )
+        ).catch((error: MongoError) => {
+            console.log(error);
+            res.status(500).send({
+                message: responseCode[500]
+            });
+        });
 
     }
 
-    private recoverPassword(req: express.Request, res: express.Response) {
+    private getPasswordRecoveryLink(req: express.Request, res: express.Response) {
         const email: string = req.params.email;
 
+        // First check if the email is registered
         User.findUser({
             email
         }).then(
-            (user: UserModel) => {
+            user => {
                 if (user) {
+                    // we are setting type as reset here. Since we are using the same procedure to generate a login token,
+                    // we need to set type as reset to make sure the user has not provided login token to reset password
                     HelperUtil.signToken({
-                        _id: user._id
-                    }, 86400, (error: Error, token: string) => {
-                        if (error) {
-                            res.status(500).send({
+                        _id: user._id,
+                        time: Date.now(),
+                        type: 'reset',
+                        expired: false
+                    }, 86400, (err, token) => {
+                        if (err) {
+                            return res.status(500).send({
                                 message: responseCode[500]
                             });
-                            return;
                         }
-                        res.status(200).send({
-                            message: 'Reset link mailed to the email address. Please follow the link to reset your password.'
-                        });
-                        HelperUtil.sendMail(email, 'Password Reset Link', `${token}`);
+                        // lastReset token is the token provided and we are making it valid.
+                        // after a user resets his password, the token will be made invalid and cant be used again
+                        User.updateUserData({
+                            email
+                        }, {
+                            lastResetToken: token,
+                            resetTokenValid: true
+                        }).then(
+                            updated => {
+                                if (updated) {
+                                    res.status(200).send({
+                                        message: 'Reset link mailed to the email address. Please follow the link to reset your password.'
+                                    });
+                                    HelperUtil.sendMail(email, 'Password Reset Link', `http://localhost:3000/auth/password-recovery-page/${token}`);
+                                }
+                            }, error => {
+                                console.log(error);
+                                res.status(500).send({
+                                    message: responseCode[500]
+                                });
+                            }
+                        )
                     });
-
                 } else {
                     res.status(404).send({
-                        message: responseCode[404]
+                        message: 'Email address not found.'
                     });
                 }
+            }, error => {
+                console.log(error)
+                res.status(404).send({
+                    message: 'Email address not found.'
+                });
             }
-        );
+        )
+    }
+
+    private getPasswordRecoveryPage(req: express.Request, res: express.Response) {
+        const decoded: {
+            type: string,
+            _id: string,
+            time: Date
+        } = req.body.decoded;
+        if (decoded.type === 'reset') {
+            res.render(path.join(__dirname, './../', 'html', 'recovery-page'), {
+                token: req.params.token
+            });
+        }
+    }
+
+    private resetPassword(req: express.Request, res: express.Response) {
+        const newPassword = req.body.newPassword.trim();
+        const confirmPassword = req.body.confirmPassword.trim();
+        const decoded: {
+            type: string,
+            _id: string,
+            time: Date
+        } = req.body.decoded;
+
+        if (newPassword === confirmPassword) {
+            // allow reset only if the token is of the type reset
+            if (decoded.type !== 'reset') {
+                return res.status(400).send({
+                    message: 'Invalid token provided'
+                });
+            }
+
+            User.findUser({
+                _id: new ObjectId(decoded._id)
+            }).then(
+                user => {
+                    HelperUtil.verifyToken(user['lastResetToken'], (err, lastTokenDecoded) => {
+                        if (err) {
+                            return res.status(500).send({
+                                message: responseCode[500]
+                            });
+                        }
+
+                        // The token provided should have timestamp equal to the lastToken sent.
+                        // If the the time is less, it means that a new token was issued after this provided token
+                        // which will make this token invalid.
+                        if (decoded.time < lastTokenDecoded.time) {
+                            return res.status(400).send({
+                                message: 'The password reset link has expired.',
+                                expired: true
+                            });
+                        }
+
+                        //If the user tries to use same link to reset password more than once, send link expired.
+                        if ((req.params.token === user['lastResetToken']) && !user['resetTokenValid']) {
+                            return res.status(400).send({
+                                message: 'The password reset link has expired.',
+                                expired: true
+                            });
+                        }
+
+                        HelperUtil.genrateHash(newPassword, (err: Error, hash: string) => {
+                            if (err) {
+                                console.log(err)
+                                return res.status(500).send({
+                                    message: responseCode[500]
+                                });
+                            }
+                            // set the token as invalid after the token has been used for password reset
+                            User.updateUserData({
+                                email: user.email
+                            }, {
+                                password: hash,
+                                resetTokenValid: false
+                            }).then(
+                                result => {
+                                    res.status(200).send({
+                                        message: 'Password reset successfully.'
+                                    });
+                                }
+                            ).catch(err => {
+                                console.log(err);
+                                res.status(500).send({
+                                    message: responseCode[500]
+                                });
+                            });
+                        })
+                    })
+                }
+            )
+        }
+
     }
 
     private getActivationLink(req: express.Request, res: express.Response) {
@@ -286,7 +416,8 @@ export default class AuthController {
     }
 
     private activateAccount(req: express.Request, res: express.Response) {
-
+        return res.status(200).sendFile(path.join(__dirname, './../', 'html', 'activation-page.html'));
     }
+
 
 }

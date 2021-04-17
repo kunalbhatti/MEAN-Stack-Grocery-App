@@ -1,7 +1,6 @@
 import {
     Db,
     InsertOneWriteOpResult,
-    ObjectId,
     UpdateWriteOpResult,
 } from 'mongodb';
 import {
@@ -14,6 +13,8 @@ export interface UserModel {
     name: string;
     password: string;
     _id ? : string;
+    lastResetToken ? : string;
+    resetTokenValid ? : boolean
 }
 
 export default class User {
@@ -29,14 +30,14 @@ export default class User {
         return db.collection('users').findOne(options);
     }
 
-    static updateUserData(options: {
-        _id: ObjectId
-    }, data: any): Promise < UpdateWriteOpResult > {
+    static updateUserData(options: any, data: any): Promise < UpdateWriteOpResult > {
         const db: Db = getDb();
 
         return db.collection('users').updateOne(options, {
             $set: data
         });
     }
+
+
 
 }

@@ -19,6 +19,7 @@ class Server {
 
     constructor(private port: string | number) {
         this.app = express();
+        this.app.set('view engine', 'ejs');
         this.http = http.createServer(this.app);
     }
 
