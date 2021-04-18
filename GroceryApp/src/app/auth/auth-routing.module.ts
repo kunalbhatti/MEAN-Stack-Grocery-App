@@ -27,7 +27,7 @@ const routes: Routes = [{
       path: 'recover-password',
       loadChildren: () => import('./recover-password/recover-password.module').then(m => m.RecoverPasswordPageModule)
     }, {
-      path: 'activate-account',
+      path: 'activate-account/:email',
       loadChildren: () => import('./activate-account/activate-account.module').then(m => m.ActivateAccountPageModule)
     }
   ]

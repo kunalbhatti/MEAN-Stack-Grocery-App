@@ -14,7 +14,8 @@ export interface UserModel {
     password: string;
     _id ? : string;
     lastResetToken ? : string;
-    resetTokenValid ? : boolean
+    resetTokenValid ? : boolean;
+    activated? : boolean;
 }
 
 export default class User {

@@ -11,6 +11,15 @@ import {
   FormBuilder
 } from '@angular/forms';
 import {
+  Router
+} from '@angular/router';
+import {
+  AlertController
+} from '@ionic/angular';
+import {
+  ToasterService
+} from 'src/app/services/toaster.service';
+import {
   AuthService
 } from './../../services/auth.service';
 
@@ -52,7 +61,11 @@ export class RegisterPage implements OnInit {
     validators: [comparePassword]
   });
 
-  constructor(private fb: FormBuilder, private authService: AuthService) {}
+  constructor(private fb: FormBuilder,
+    private authService: AuthService,
+    private alertController: AlertController,
+    private router: Router,
+    private toasterService: ToasterService) {}
 
   ngOnInit() {
     this.showPasswordHint = false;
@@ -60,10 +73,31 @@ export class RegisterPage implements OnInit {
 
   onSubmit() {
     this.authService.register(this.registrationForm.value).subscribe(
-      user=>{
-        console.log(user);
+      () => {
+        this.authService.getActivationLink(this.registrationForm.value.email).subscribe(
+          () => {
+            this.alertController.create({
+              header: 'Success',
+              message: 'Activation link mailed to the email address. Please click on the link to activate the account',
+              buttons: [{
+                text: 'Ok',
+                handler: () => {
+                  this.router.navigate(['/', 'auth', 'login']);
+                }
+              }]
+            }).then(
+              (alertEl: HTMLIonAlertElement) => {
+                alertEl.present();
+              }
+            );
+          }, (error: string) => {
+            this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
+          }
+        );
+      }, (error: string) => {
+        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       }
-    );
+    )
   }
 
 }

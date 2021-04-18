@@ -96,6 +96,10 @@ export class AuthService {
     return this.http.get(`${config.url}/auth/get-password-recover-link/${email}`).pipe(take(1), catchError(errorHandler));
   }
 
+  getActivationLink(email: string): Observable < any > {
+    return this.http.get(`${config.url}/auth/get-activation-link/${email}`).pipe(take(1), catchError(errorHandler));
+  }
+
   getAccessToken(): string {
     let token = localStorage.getItem('groceryApp-token');
 

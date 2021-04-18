@@ -1,9 +1,31 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>activate-account</ion-title>
+    <ion-title>Grocery App</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-
+<ion-content class="ion-padding">
+  <ion-grid style="height: 100%;">
+    <ion-row class="ion-justify-content-center" style="height: 100%; align-content: center;">
+      <ion-col size="12" size-sm="10" size-md="8" size-lg="6" size-xl="4" class="ion-no-padding">
+        <ion-toolbar>
+          <ion-title class="ion-text-center ion-padding" style="border-bottom: 1px solid;">Activate Account</ion-title>
+        </ion-toolbar>
+        <form (ngSubmit)="getActvationLink(activationForm)" #activationForm="ngForm">
+          <ion-item>
+            <ion-label position="floating">Registered Email</ion-label>
+            <ion-input [ngModel]="email" type="email" name="email" ngModel required></ion-input>
+          </ion-item>
+          <ion-button type="submit" expand="full" [disabled]="activationForm.invalid" class="ion-no-margin">
+            Get Link</ion-button>
+        </form>
+      </ion-col>
+      <ion-col size="12" class="ion-text-center">
+        <ion-button fill="clear" color="primary" [routerLink]="['/', 'auth', 'login']"><small>Login</small>
+        </ion-button>
+        <ion-button fill="clear" color="primary" [routerLink]="['/', 'auth', 'register']"><small>Register</small>
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

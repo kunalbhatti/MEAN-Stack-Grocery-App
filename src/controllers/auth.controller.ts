@@ -1,4 +1,6 @@
-import express from 'express';
+import express, {
+    response
+} from 'express';
 import {
     InsertOneWriteOpResult,
     MongoError,
@@ -36,7 +38,7 @@ export default class AuthController {
         this.router.get('/password-recovery-page/:token', decodeToken, this.getPasswordRecoveryPage);
         this.router.post('/reset-password/:token', decodeToken, this.resetPassword);
         this.router.get('/get-activation-link/:email', this.getActivationLink);
-        this.router.post('/activate-account', this.activateAccount);
+        this.router.get('/activate-account/:token', this.activateAccount);
         this.router.get('/check-auth-status', validateToken, this.checkAuthStatus);
         this.router.get('/get-user-details', validateToken, this.getUserDetails);
         this.router.patch('/update-user-name', validateToken, this.updateUserName);
@@ -70,20 +72,21 @@ export default class AuthController {
                         }
 
                         userData.password = hash;
+                        userData.activated = false;
 
                         User.register(userData).then(
                             (user: InsertOneWriteOpResult < any > ) => {
-                                Settings.updateGetProductsView('partial', new ObjectId(user.insertedId)).then(
+                                Settings.updateGetProductsView('all', new ObjectId(user.insertedId)).then(
                                     () => {
                                         res.status(200).send({
                                             registered: true,
                                             message: 'User registered successfully'
-                                        })
+                                        });
                                     }
                                 ).catch((error: MongoError) => {
                                     console.log(error);
                                     res.status(500).send(responseCode[500]);
-                                })
+                                });
                             }
                         ).catch((error: MongoError) => {
                             console.log(error);
@@ -111,40 +114,49 @@ export default class AuthController {
             email: userData.email
         }).then(
             (user: UserModel) => {
-                HelperUtil.compareHash(userData.password, user.password, (error: Error, same: boolean) => {
-                    if (error) {
-                        console.log(error);
-                        res.status(500).send({
-                            auth: false,
-                            message: responseCode[500]
-                        });
-                        return;
-                    }
-                    if (same) {
-                        HelperUtil.signToken({
-                            _id: user._id,
-                            type: 'login'
-                        }, 86400, (error: Error, token: string) => {
-                            if (error) {
-                                console.log(error);
-                                res.status(500).send({
-                                    auth: false,
-                                    message: responseCode[500]
+                if (user.activated) {
+                    HelperUtil.compareHash(userData.password, user.password, (error: Error, same: boolean) => {
+                        if (error) {
+                            console.log(error);
+                            res.status(500).send({
+                                auth: false,
+                                message: responseCode[500]
+                            });
+                            return;
+                        }
+                        if (same) {
+                            HelperUtil.signToken({
+                                _id: user._id,
+                                type: 'login'
+                            }, 86400, (error: Error, token: string) => {
+                                if (error) {
+                                    console.log(error);
+                                    res.status(500).send({
+                                        auth: false,
+                                        message: responseCode[500]
+                                    });
+                                }
+                                res.status(200).send({
+                                    auth: true,
+                                    activated: true,
+                                    token
                                 });
-                            }
-                            res.status(200).send({
-                                auth: true,
-                                token
-                            })
-                        })
-                    } else {
-                        res.status(401).send({
-                            auth: false,
-                            message: responseCode[401]
-                        });
-                        return;
-                    }
-                });
+                            });
+                        } else {
+                            res.status(401).send({
+                                auth: false,
+                                message: responseCode[401]
+                            });
+                            return;
+                        }
+                    });
+                } else {
+                    res.status(200).send({
+                        auth: false,
+                        activated: false,
+                        message: 'Account Not Activated'
+                    });
+                }
             }
         ).catch(error => {
             console.log(error);
@@ -174,7 +186,7 @@ export default class AuthController {
             res.status(500).send({
                 message: responseCode[500]
             });
-        })
+        });
     }
 
     private updateUserName(req: express.Request, res: express.Response): void {
@@ -189,7 +201,7 @@ export default class AuthController {
                 res.status(200).send({
                     name,
                     message: 'Name udpated successfully'
-                })
+                });
             }
         ).catch((error: MongoError) => {
             console.log(error);
@@ -241,8 +253,8 @@ export default class AuthController {
                                     res.status(500).send({
                                         messsage: responseCode[500]
                                     });
-                                })
-                            })
+                                });
+                            });
                         } else {
                             res.status(401).send({
                                 message: 'The old password provided was invalid.'
@@ -392,7 +404,7 @@ export default class AuthController {
                                 password: hash,
                                 resetTokenValid: false
                             }).then(
-                                result => {
+                                () => {
                                     res.status(200).send({
                                         message: 'Password reset successfully.'
                                     });
@@ -412,12 +424,87 @@ export default class AuthController {
     }
 
     private getActivationLink(req: express.Request, res: express.Response) {
+        const email = req.params.email;
 
+        User.findUser({
+            email
+        }).then(
+            (user: UserModel) => {
+                if (!user.activated) {
+                    HelperUtil.signToken({
+                        _id: user._id,
+                        type: 'activation'
+                    }, 86400, (err, token) => {
+                        if (err) {
+                            console.log(err)
+                            return res.status(500).send({
+                                message: responseCode[500]
+                            });
+                        }
+                        if (token) {
+                            res.status(200).send({
+                                activated: false,
+                                created: true,
+                                token
+                            });
+
+                            HelperUtil.sendMail(email, `GroceryManager: Account Activation`, `<a href="http://localhost:3000/auth/activate-account/${token}">Click to authenticate</a>`).then(
+                                () => {
+                                    console.log('Email sent successfully to: ' + email);
+                                }
+                            ).catch(err => {
+                                console.log(err);
+                                return res.status(500).send({
+                                    created: false,
+                                    message: responseCode[500]
+                                });
+                            });
+                        }
+                    });
+                } else {
+                    return res.status(200).send({
+                        activated: true,
+                        message: 'Your account is already active.'
+                    });
+                }
+            }
+        ).catch(error => {
+            console.log(error)
+            return res.status(500).send({
+                message: responseCode[500]
+            });
+        });
     }
 
     private activateAccount(req: express.Request, res: express.Response) {
-        return res.status(200).sendFile(path.join(__dirname, './../', 'html', 'activation-page.html'));
-    }
+        HelperUtil.verifyToken(req.params.token, (err: Error, decoded: {
+            _id: string,
+            type: string
+        }) => {
+            if (err) {
+                return res.status(500).send({
+                    message: responseCode[500]
+                });
+            }
 
+            if (decoded.type === 'activation') {
+                User.updateUserData({
+                    _id: new ObjectId(decoded._id)
+                }, {
+                    activated: true
+                }).then(
+                    () => {
+                        return res.render(path.join(__dirname, './../', 'html', 'activation-page.ejs'));
+                    }
+                ).catch(
+                    err => {
+                        console.log(err);
+                        res.status(500).send({
+                            message: responseCode[500]
+                        });
+                    })
+            }
+        });
+    }
 
 }
