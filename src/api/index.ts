@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
+import path from 'path';
 
 import AuthController from '../controllers/auth.controller';
 import SettingsController from '../controllers/settings.controller';
@@ -21,6 +22,7 @@ class Server {
         this.app = express();
         this.app.set('view engine', 'ejs');
         this.http = http.createServer(this.app);
+
     }
 
     initializeMiddlewares(): void {
@@ -32,10 +34,14 @@ class Server {
     }
 
     initializeControllers(): void {
+        this.app.use(express.static(path.join(__dirname, 'www')));
         this.app.use('/auth', new AuthController().router);
         this.app.use('/settings', new SettingsController().router);
         this.app.use('/products', new ProductsController().router);
         this.app.use('/expenses', new ExpensesController().router);
+        this.app.get('/*', (req, res) => {
+            res.sendFile(path.join(__dirname, 'www/index.html'));
+        });
     }
 
     startServer(): void {

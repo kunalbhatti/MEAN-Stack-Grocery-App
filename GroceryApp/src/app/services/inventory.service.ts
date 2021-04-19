@@ -31,7 +31,7 @@ export class InventoryService {
 
   getInventory(getProductView: string, cid ? : string): Observable < any > {
     this.currentGroup = this.settingsService.settings.currentGroup;
-    return this.http.get(`${config.url}/products/get-inventory/?cid=${cid}&gid=${this.currentGroup}&getProductsView=${getProductView}`).pipe(take(1), map(
+    return this.http.get(`${config.url}products/get-inventory/?cid=${cid}&gid=${this.currentGroup}&getProductsView=${getProductView}`).pipe(take(1), map(
       (products: ProductModel[]) => {
 
         for (let product of products) {
@@ -53,14 +53,14 @@ export class InventoryService {
   }
 
   updateStockCount(productId: string, count: number, gid: string) {
-    return this.http.patch(`${config.url}/products/update-stock-count/${productId}`, {
+    return this.http.patch(`${config.url}products/update-stock-count/${productId}`, {
       count,
       gid
     }).pipe(catchError(errorHandler));
   }
 
   updateStockStatus(productId: string, status: string, gid: string) {
-    return this.http.patch(`${config.url}/products/update-stock-status/${productId}`, {
+    return this.http.patch(`${config.url}products/update-stock-status/${productId}`, {
       status,
       gid
     }).pipe(catchError(errorHandler));

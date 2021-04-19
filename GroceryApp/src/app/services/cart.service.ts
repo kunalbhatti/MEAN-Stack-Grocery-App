@@ -22,11 +22,11 @@ export class CartService {
 
 
   getCart(gid: string, cid ? : string): Observable < any > {
-    return this.http.get(`${config.url}/products/get-cart/?gid=${gid}&cid=${cid}`).pipe(catchError(errorHandler));
+    return this.http.get(`${config.url}products/get-cart/?gid=${gid}&cid=${cid}`).pipe(catchError(errorHandler));
   }
 
   updateCartCount(productId: string, count: number, gid: string) {
-    return this.http.patch(`${config.url}/products/update-cart-count/${productId}`, {
+    return this.http.patch(`${config.url}products/update-cart-count/${productId}`, {
       count,
       gid
     }).pipe(catchError(errorHandler));

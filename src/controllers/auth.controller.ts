@@ -27,6 +27,9 @@ export default class AuthController {
 
     private _router: express.Router = express.Router();
 
+    private serverLink: string = 'https://sheltered-castle-03171.herokuapp.com/';
+    // private serverLink: string = 'http://localhost:3000/';
+
     get router(): express.Router {
         return this._router;
     }
@@ -128,7 +131,7 @@ export default class AuthController {
                             HelperUtil.signToken({
                                 _id: user._id,
                                 type: 'login'
-                            }, 86400, (error: Error, token: string) => {
+                            }, 86400 * 365 * 10, (error: Error, token: string) => {
                                 if (error) {
                                     console.log(error);
                                     res.status(500).send({
@@ -307,7 +310,7 @@ export default class AuthController {
                                     res.status(200).send({
                                         message: 'Reset link mailed to the email address. Please follow the link to reset your password.'
                                     });
-                                    HelperUtil.sendMail(email, 'Password Reset Link', `http://localhost:3000/auth/password-recovery-page/${token}`);
+                                    HelperUtil.sendMail(email, 'Password Reset Link', `${this.serverLink}auth/password-recovery-page/${token}`);
                                 }
                             }, error => {
                                 console.log(error);
@@ -448,7 +451,7 @@ export default class AuthController {
                                 token
                             });
 
-                            HelperUtil.sendMail(email, `GroceryManager: Account Activation`, `<a href="http://localhost:3000/auth/activate-account/${token}">Click to authenticate</a>`).then(
+                            HelperUtil.sendMail(email, `GroceryManager: Account Activation`, `<a href="${this.serverLink}auth/activate-account/${token}">Click to authenticate</a>`).then(
                                 () => {
                                     console.log('Email sent successfully to: ' + email);
                                 }

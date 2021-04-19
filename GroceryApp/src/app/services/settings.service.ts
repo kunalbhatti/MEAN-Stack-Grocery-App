@@ -40,17 +40,17 @@ export class SettingsService {
   constructor(private http: HttpClient) {}
 
   getSettings(): Observable < any > {
-    return this.http.get(`${config.url}/settings/get-settings`).pipe(take(1), catchError(errorHandler));
+    return this.http.get(`${config.url}settings/get-settings`).pipe(take(1), catchError(errorHandler));
   }
 
   updateGetProductsView(getProductsView: string): Observable < any > {
-    return this.http.patch(`${config.url}/settings/update-get-products-view`, {
+    return this.http.patch(`${config.url}settings/update-get-products-view`, {
       getProductsView
     }).pipe(take(1), catchError(errorHandler));
   }
 
   updateCurrentGroup(gid: string): Observable < any > {
-    return this.http.patch(`${config.url}/settings/update-current-group`, {
+    return this.http.patch(`${config.url}settings/update-current-group`, {
       gid
     }).pipe(take(1), catchError(errorHandler));
   }
@@ -60,7 +60,7 @@ export class SettingsService {
       [id: string]: string
     } []
   ): Observable < any > {
-    return this.http.patch(`${config.url}/settings/update-group`, {
+    return this.http.patch(`${config.url}settings/update-group`, {
       groups
     }).pipe(take(1), catchError(errorHandler));
   }
@@ -70,7 +70,7 @@ export class SettingsService {
       [id: string]: string
     } [], deletedId ? : string
   ): Observable < any > {
-    return this.http.patch(`${config.url}/settings/update-category`, {
+    return this.http.patch(`${config.url}settings/update-category`, {
       categories,
       deletedId
     }).pipe(take(1), catchError(errorHandler));
@@ -81,30 +81,30 @@ export class SettingsService {
       [id: string]: string
     } [], deletedId ? : string
   ): Observable < any > {
-    return this.http.patch(`${config.url}/settings/update-expense`, {
+    return this.http.patch(`${config.url}settings/update-expense`, {
       expenses,
       deletedId
     }).pipe(take(1), catchError(errorHandler));
   }
 
   getProducts(cid: string) {
-    return this.http.get(`${config.url}/settings/get-products/${cid}`).pipe(take(1), catchError(errorHandler));
+    return this.http.get(`${config.url}settings/get-products/${cid}`).pipe(take(1), catchError(errorHandler));
   }
 
   addProduct(product: ProductModel): Observable < any > {
-    return this.http.post(`${config.url}/settings/add-product`, {
+    return this.http.post(`${config.url}settings/add-product`, {
       product
     }).pipe(take(1), catchError(errorHandler));
   }
 
   editProduct(product: ProductModel): Observable < any > {
-    return this.http.patch(`${config.url}/settings/edit-product`, {
+    return this.http.patch(`${config.url}settings/edit-product`, {
       product
     }).pipe(take(1), catchError(errorHandler));
   }
 
   deleteProduct(productId: string): Observable < any > {
-    return this.http.delete(`${config.url}/settings/delete-product/${productId}`)
+    return this.http.delete(`${config.url}settings/delete-product/${productId}`)
   }
 
   getCurrentGroup(): string {

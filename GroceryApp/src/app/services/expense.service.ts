@@ -26,14 +26,14 @@ export class ExpenseService {
 
   getExpense(month: number, year: number, gid: string, selectedView: string) {
     return this.http.get(
-      `${config.url}/expenses/get-expense/?month=${month}&year=${year}&gid=${gid}&view=${selectedView}`
+      `${config.url}expenses/get-expense/?month=${month}&year=${year}&gid=${gid}&view=${selectedView}`
     ).pipe(catchError(errorHandler));
   }
 
   addExpense(expense: ExpenseModel): Observable < any > {
 
     return this.http.post(
-      `${config.url}/expenses/add-expense`,
+      `${config.url}expenses/add-expense`,
       expense
     ).pipe(catchError(errorHandler));;
   }
@@ -43,7 +43,7 @@ export class ExpenseService {
     cost: number
   }) {
     return this.http.patch(
-      `${config.url}/expenses/update-expense/`, {
+      `${config.url}expenses/update-expense/`, {
         eid,
         update
       }
@@ -52,7 +52,7 @@ export class ExpenseService {
 
   deleteExpense(eid: string) {
     return this.http.delete(
-      `${config.url}/expenses/delete-expense/${eid}`
+      `${config.url}expenses/delete-expense/${eid}`
     ).pipe(catchError(errorHandler));;
   }
 }

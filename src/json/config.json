@@ -1,0 +1,7 @@
+{
+    "encrypt_key": "secret-key",
+    "jwt_key": "secret-key",
+    "mongoDbUri": "mongodb+srv://kunal-bhatti:uSsAJ0EGeEdeuDM1@cluster0.3o6sp.mongodb.net/groceryApp?retryWrites=true&w=majority",
+    "api_key": "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",
+    "from": "admin@howtogizmo.com"
+}

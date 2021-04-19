@@ -32,12 +32,12 @@ export class SearchBarService {
 
   getProductList(searchStr: string, cid ? : string): Observable < any > {
     this.currentGroup = this.settingsService.settings.currentGroup;
-    return this.http.get(`${config.url}/products/filter-products/?searchStr=${searchStr}&cid=${cid}&gid=${this.currentGroup}`).pipe(catchError(errorHandler));
+    return this.http.get(`${config.url}products/filter-products/?searchStr=${searchStr}&cid=${cid}&gid=${this.currentGroup}`).pipe(catchError(errorHandler));
   }
 
   getProductExpense(searchStr: string, date: ExpenseModel['date'], cid: string, selectedView: string): Observable < any > {
     this.currentGroup = this.settingsService.settings.currentGroup;
-    return this.http.get(`${config.url}/expenses/get-product-expense/?searchStr=${searchStr}&date=${JSON.stringify(date)}&cid=${cid}&gid=${this.currentGroup}&view=${selectedView}`).pipe(catchError(errorHandler));
+    return this.http.get(`${config.url}expenses/get-product-expense/?searchStr=${searchStr}&date=${JSON.stringify(date)}&cid=${cid}&gid=${this.currentGroup}&view=${selectedView}`).pipe(catchError(errorHandler));
   }
 
 }

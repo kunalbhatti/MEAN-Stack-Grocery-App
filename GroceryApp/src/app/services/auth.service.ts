@@ -24,9 +24,6 @@ import {
 
 import * as config from './config.json';
 import errorHandler from './error.handler';
-import {
-  SettingsService
-} from './settings.service';
 
 
 interface User {
@@ -49,32 +46,32 @@ export class AuthService {
     email: string,
     password: string
   }): Observable < any > {
-    return this.http.post(`${config.url}/auth/login`, body).pipe(take(1), catchError(errorHandler));
+    return this.http.post(`${config.url}auth/login`, body).pipe(take(1), catchError(errorHandler));
   }
 
   register(body: User): Observable < any > {
-    return this.http.post(`${config.url}/auth/register`, body).pipe(take(1), catchError(errorHandler));
+    return this.http.post(`${config.url}auth/register`, body).pipe(take(1), catchError(errorHandler));
   }
 
   getUserDetails(): Observable < any > {
-    return this.http.get(`${config.url}/auth/get-user-details`).pipe(take(1), catchError(errorHandler));
+    return this.http.get(`${config.url}auth/get-user-details`).pipe(take(1), catchError(errorHandler));
   }
 
   updateUserName(name: string): Observable < any > {
-    return this.http.patch(`${config.url}/auth/update-user-name`, {
+    return this.http.patch(`${config.url}auth/update-user-name`, {
       name
     }).pipe(take(1), catchError(errorHandler));
   }
 
   updateUserPassword(newPassword: string, oldPassword: string): Observable < any > {
-    return this.http.patch(`${config.url}/auth/update-user-password`, {
+    return this.http.patch(`${config.url}auth/update-user-password`, {
       newPassword,
       oldPassword
     }).pipe(take(1), catchError(errorHandler));
   }
 
   checkAuthStatus(): Observable < any > {
-    return this.http.get(`${config.url}/auth/check-auth-status`).pipe(take(1), map(
+    return this.http.get(`${config.url}auth/check-auth-status`).pipe(take(1), map(
       (result: {
         auth: boolean,
         message: string
@@ -93,11 +90,11 @@ export class AuthService {
   }
 
   recoverPassword(email: string): Observable < any > {
-    return this.http.get(`${config.url}/auth/get-password-recover-link/${email}`).pipe(take(1), catchError(errorHandler));
+    return this.http.get(`${config.url}auth/get-password-recover-link/${email}`).pipe(take(1), catchError(errorHandler));
   }
 
   getActivationLink(email: string): Observable < any > {
-    return this.http.get(`${config.url}/auth/get-activation-link/${email}`).pipe(take(1), catchError(errorHandler));
+    return this.http.get(`${config.url}auth/get-activation-link/${email}`).pipe(take(1), catchError(errorHandler));
   }
 
   getAccessToken(): string {
