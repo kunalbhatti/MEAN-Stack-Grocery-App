@@ -310,7 +310,7 @@ export default class AuthController {
                                     res.status(200).send({
                                         message: 'Reset link mailed to the email address. Please follow the link to reset your password.'
                                     });
-                                    HelperUtil.sendMail(email, 'Password Reset Link', `${this.serverLink}auth/password-recovery-page/${token}`);
+                                    HelperUtil.sendMail(email, 'Password Reset Link', `https://sheltered-castle-03171.herokuapp.com/auth/password-recovery-page/${token}`);
                                 }
                             }, error => {
                                 console.log(error);
@@ -451,7 +451,7 @@ export default class AuthController {
                                 token
                             });
 
-                            HelperUtil.sendMail(email, `GroceryManager: Account Activation`, `<a href="${this.serverLink}auth/activate-account/${token}">Click to authenticate</a>`).then(
+                            HelperUtil.sendMail(email, `GroceryManager: Account Activation`, `<a href="https://sheltered-castle-03171.herokuapp.com/auth/activate-account/${token}">Click to authenticate</a>`).then(
                                 () => {
                                     console.log('Email sent successfully to: ' + email);
                                 }
