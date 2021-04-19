@@ -14,6 +14,9 @@ import {
 import {
   AuthService
 } from 'src/app/services/auth.service';
+import {
+  ToasterService
+} from 'src/app/services/toaster.service';
 
 @Component({
   selector: 'app-recover-password',
@@ -24,6 +27,7 @@ export class RecoverPasswordPage implements OnInit {
 
   constructor(private authService: AuthService,
     private alertController: AlertController,
+    private toasterService: ToasterService,
     private router: Router) {}
 
   ngOnInit() {}
@@ -45,6 +49,8 @@ export class RecoverPasswordPage implements OnInit {
             alertEl.present();
           }
         );
+      }, (error: string) => {
+        this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
       }
     );
   }

@@ -4,10 +4,10 @@
 /*!**************************************!*\
   !*** ./src/app/services/config.json ***!
   \**************************************/
-/*! exports provided: dev_url, url, default */
+/*! exports provided: dev_url, server_url, url, default */
 /***/ (function(module) {
 
-module.exports = JSON.parse("{\"dev_url\":\"http://localhost:3000/\",\"url\":\"\"}");
+module.exports = JSON.parse("{\"dev_url\":\"http://localhost:3000/\",\"server_url\":\"https://sheltered-castle-03171.herokuapp.com/\",\"url\":\"https://sheltered-castle-03171.herokuapp.com/\"}");
 
 /***/ }),
 

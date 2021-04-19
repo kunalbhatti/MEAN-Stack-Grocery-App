@@ -34,7 +34,7 @@ const routes = [{
                 loadChildren: () => Promise.all(/*! import() | register-register-module */[__webpack_require__.e("common"), __webpack_require__.e("register-register-module")]).then(__webpack_require__.bind(null, /*! ./register/register.module */ "UrDz")).then(m => m.RegisterModule),
             }, {
                 path: 'recover-password',
-                loadChildren: () => __webpack_require__.e(/*! import() | recover-password-recover-password-module */ "recover-password-recover-password-module").then(__webpack_require__.bind(null, /*! ./recover-password/recover-password.module */ "z/3Y")).then(m => m.RecoverPasswordPageModule)
+                loadChildren: () => Promise.all(/*! import() | recover-password-recover-password-module */[__webpack_require__.e("common"), __webpack_require__.e("recover-password-recover-password-module")]).then(__webpack_require__.bind(null, /*! ./recover-password/recover-password.module */ "z/3Y")).then(m => m.RecoverPasswordPageModule)
             }, {
                 path: 'activate-account/:email',
                 loadChildren: () => Promise.all(/*! import() | activate-account-activate-account-module */[__webpack_require__.e("common"), __webpack_require__.e("activate-account-activate-account-module")]).then(__webpack_require__.bind(null, /*! ./activate-account/activate-account.module */ "cZJw")).then(m => m.ActivateAccountPageModule)

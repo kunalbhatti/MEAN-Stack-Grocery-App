@@ -64,25 +64,50 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _raw_loader_recover_password_page_html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! raw-loader!./recover-password.page.html */ "oZph");
 /* harmony import */ var _recover_password_page_scss__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./recover-password.page.scss */ "hcU5");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ "fXoL");
-/* harmony import */ var src_app_services_auth_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! src/app/services/auth.service */ "lGQG");
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/router */ "tyNb");
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ionic/angular */ "TEn/");
+/* harmony import */ var src_app_services_auth_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! src/app/services/auth.service */ "lGQG");
+/* harmony import */ var src_app_services_toaster_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! src/app/services/toaster.service */ "Ymxs");
+
+
+
 
 
 
 
 
 let RecoverPasswordPage = class RecoverPasswordPage {
-    constructor(authService) {
+    constructor(authService, alertController, toasterService, router) {
         this.authService = authService;
+        this.alertController = alertController;
+        this.toasterService = toasterService;
+        this.router = router;
     }
     ngOnInit() { }
     recoverPassword(form) {
         this.authService.recoverPassword(form.value.email).subscribe((result) => {
-            console.log(result);
+            this.alertController.create({
+                header: 'Success',
+                message: 'Password reset link has been mailed to the email. Please follow the link to reset your password.',
+                buttons: [{
+                        text: 'Ok',
+                        handler: () => {
+                            this.router.navigate(['/', 'auth', 'login']);
+                        }
+                    }]
+            }).then((alertEl) => {
+                alertEl.present();
+            });
+        }, (error) => {
+            this.toasterService.presentToast('Failure!!', error, 2000, 'danger');
         });
     }
 };
 RecoverPasswordPage.ctorParameters = () => [
-    { type: src_app_services_auth_service__WEBPACK_IMPORTED_MODULE_4__["AuthService"] }
+    { type: src_app_services_auth_service__WEBPACK_IMPORTED_MODULE_6__["AuthService"] },
+    { type: _ionic_angular__WEBPACK_IMPORTED_MODULE_5__["AlertController"] },
+    { type: src_app_services_toaster_service__WEBPACK_IMPORTED_MODULE_7__["ToasterService"] },
+    { type: _angular_router__WEBPACK_IMPORTED_MODULE_4__["Router"] }
 ];
 RecoverPasswordPage = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"])([
     Object(_angular_core__WEBPACK_IMPORTED_MODULE_3__["Component"])({
