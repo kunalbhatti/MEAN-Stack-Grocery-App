@@ -14,6 +14,7 @@ export interface ProductsModel {
     name: string;
     price: string;
     quantity ? : string;
+    unit ? : string;
     size ? : string;
     brand ? : string;
     stockCount ? : {
@@ -81,6 +82,7 @@ export class Products {
                 brand: product.brand,
                 size: product.size,
                 quantity: product.quantity,
+                unit: product.unit,
                 price: product.price
             }
         });

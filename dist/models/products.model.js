@@ -45,6 +45,7 @@ class Products {
                 brand: product.brand,
                 size: product.size,
                 quantity: product.quantity,
+                unit: product.unit,
                 price: product.price
             }
         });

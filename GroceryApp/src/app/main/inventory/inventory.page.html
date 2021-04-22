@@ -60,14 +60,14 @@
               </ion-item>
               <ion-item *ngIf="product?.quantity">
                 <ion-label>
-                  Quantity: {{product?.quantity}}
+                  Quantity: {{product?.quantity}} {{product?.unit}}
                 </ion-label>
               </ion-item>
               <ion-item *ngIf="product?.price">
                 <ion-label>Price: {{product?.price}}</ion-label>
               </ion-item>
               <ion-item>
-                <ion-label>Stock: {{product?.stockCount[currentGroup]}}</ion-label>
+                <ion-label>Stock: {{product?.stockCount[currentGroup]}} {{product?.unit}}</ion-label>
               </ion-item>
               <ion-item>
                 <ion-label>Status:
@@ -100,14 +100,14 @@
             </ion-card-header>
             <ion-card-content>
               <ion-item *ngIf="product?.size">Size: {{product?.size | titlecase}}</ion-item>
-              <ion-item *ngIf="product?.quantity">Quantity: {{product?.quantity}}</ion-item>
+              <ion-item *ngIf="product?.quantity">Quantity: {{product?.quantity}} {{product?.unit}}</ion-item>
               <ion-item *ngIf="product?.price">Price: {{product?.price}}</ion-item>
               <ion-item>Stock:
                 <ion-button fill="clear" color="dark" size="small" (click)="updateProductStockCount(product, -1);"
                   [disabled]="updateLock || product?.stockCount[currentGroup] === 0">
                   <ion-icon name="caret-down-outline"></ion-icon>
                 </ion-button>
-                <ion-text>{{product?.stockCount[currentGroup]}}</ion-text>
+                <ion-text>{{product?.stockCount[currentGroup]}} {{product?.unit}}</ion-text>
                 <ion-button fill="clear" color="dark" size="small" (click)="updateProductStockCount(product, 1);"
                   [disabled]="updateLock">
                   <ion-icon name="caret-up-outline"></ion-icon>

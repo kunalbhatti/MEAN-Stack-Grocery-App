@@ -30,7 +30,9 @@ export class CreateProductComponent implements OnInit {
   @Input() product: ProductModel;
   @Input() cid: string;
 
-  constructor(private modalController: ModalController, private settingsService: SettingsService, private toasterService: ToasterService) {}
+  constructor(private modalController: ModalController,
+    private settingsService: SettingsService,
+    private toasterService: ToasterService) {}
 
   ngOnInit() {}
 

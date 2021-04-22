@@ -31,13 +31,29 @@
               <ion-select-option value="large">Large</ion-select-option>
             </ion-select>
           </ion-item>
-          <ion-item lines="none">
-            <ion-label position="floating">Quantity</ion-label>
-            <ion-input [ngModel]="product?.quantity" name="quantity" minlength="2" maxlength="20"></ion-input>
-          </ion-item>
+          <ion-row>
+            <ion-col size="6" class="ion-no-padding">
+              <ion-item lines="none">
+                <ion-label position="floating">Quantity</ion-label>
+                <ion-input [ngModel]="product?.quantity" name="quantity" min="1" type="number"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="6" class="ion-no-padding">
+              <ion-item lines="none">
+                <ion-label position="floating">Unit</ion-label>
+                <ion-select okText="Okay" cancelText="Dismiss" [ngModel]="product?.unit" name="unit">
+                  <ion-select-option value="kilo gram(s)">Kilo Gram(s)</ion-select-option>
+                  <ion-select-option value="gram(s)">Gram(s)</ion-select-option>
+                  <ion-select-option value="liter(s)">Liter(s)</ion-select-option>
+                  <ion-select-option value="mili liter(s)">Mili Lilter(s)</ion-select-option>
+                  <ion-select-option value="">None</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+          </ion-row>
           <ion-item lines="none">
             <ion-label position="floating">Price <small>(Required)</small></ion-label>
-            <ion-input [ngModel]="product?.price" name="price" required minlength="2" maxlength="20"></ion-input>
+            <ion-input [ngModel]="product?.price" name="price" required min="1" type="number"></ion-input>
           </ion-item>
           <ion-input hidden [ngModel]="product?._id" name="_id"></ion-input>
           <ion-input hidden [ngModel]="cid" name="cid"></ion-input>

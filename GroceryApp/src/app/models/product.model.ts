@@ -2,6 +2,7 @@ export interface ProductModel {
   name: string;
   price: string;
   quantity ? : string;
+  unit: string;
   size ? : string;
   brand ? : string;
   stockCount ? : {
