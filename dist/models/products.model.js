@@ -71,7 +71,7 @@ class Products {
     static updateStockCount(filter, count, gid) {
         const db = db_util_1.getDb();
         return db.collection('user_products').updateOne(filter, {
-            $inc: {
+            $set: {
                 [`stockCount.${gid}`]: count
             }
         });
@@ -87,7 +87,7 @@ class Products {
     static updateCartCount(filter, count, gid) {
         const db = db_util_1.getDb();
         return db.collection('user_products').updateOne(filter, {
-            $inc: {
+            $set: {
                 [`cart.${gid}`]: count
             }
         });

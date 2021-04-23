@@ -199,7 +199,7 @@ export class InventoryPage {
       this.updateLock = true;
       this.inventoryService.updateStockCount(product._id, count, this.currentGroup).pipe(take(1)).subscribe(
         () => {
-          product.stockCount[this.currentGroup] += count;
+          product.stockCount[this.currentGroup] = count;
           this.updateProducts(product);
           // neutralize sort filter
           this.sortBy = 'none';
@@ -211,8 +211,9 @@ export class InventoryPage {
         }
       );
 
-      if (product.stockCount[this.currentGroup] + count > 0 && product.stockStatus[this.currentGroup] === 'empty' ||
-        product.stockCount[this.currentGroup] + count > 0 && !product.stockStatus[this.currentGroup]) {
+      if (count > 0 && product.stockStatus[this.currentGroup] === 'empty' ||
+        count > 0 && !product.stockStatus[this.currentGroup]) {
+        console.log('called')
         this.inventoryService.updateStockStatus(product._id, 'full', this.currentGroup).pipe(take(1)).subscribe(
           () => {
             product.stockStatus[this.currentGroup] = 'full';
@@ -223,7 +224,7 @@ export class InventoryPage {
         );
       }
 
-      if (product.stockCount[this.currentGroup] + count === 0) {
+      if (count === 0) {
         this.inventoryService.updateStockStatus(product._id, 'empty', this.currentGroup).pipe(take(1)).subscribe(
           () => {
             product.stockStatus[this.currentGroup] = 'empty';
@@ -421,6 +422,35 @@ export class InventoryPage {
       alertEl.present();
     });
 
+  }
+
+  presentManageStockAlert(product: ProductModel) {
+    this.alertController.create({
+      header: 'Update Stock',
+      inputs: [{
+        type: 'number',
+        name: 'stockCount',
+        value: product.stockCount[this.currentGroup],
+        placeholder: 'Stock Count'
+      }],
+      buttons: [{
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Update',
+          handler: (data: {
+            stockCount: number
+          }) => {
+            this.updateProductStockCount(product, +data.stockCount);
+          }
+        }
+      ]
+    }).then(
+      alertEl => {
+        alertEl.present();
+      }
+    );
   }
 
   // utility functions

@@ -117,47 +117,53 @@ export default class AuthController {
             email: userData.email
         }).then(
             (user: UserModel) => {
-                if (user.activated) {
-                    HelperUtil.compareHash(userData.password, user.password, (error: Error, same: boolean) => {
-                        if (error) {
-                            console.log(error);
-                            res.status(500).send({
-                                auth: false,
-                                message: responseCode[500]
-                            });
-                            return;
-                        }
-                        if (same) {
-                            HelperUtil.signToken({
-                                _id: user._id,
-                                type: 'login'
-                            }, 86400 * 365 * 10, (error: Error, token: string) => {
-                                if (error) {
-                                    console.log(error);
-                                    res.status(500).send({
-                                        auth: false,
-                                        message: responseCode[500]
-                                    });
-                                }
-                                res.status(200).send({
-                                    auth: true,
-                                    activated: true,
-                                    token
+                if (user) {
+                    if (user.activated) {
+                        HelperUtil.compareHash(userData.password, user.password, (error: Error, same: boolean) => {
+                            if (error) {
+                                console.log(error);
+                                res.status(500).send({
+                                    auth: false,
+                                    message: responseCode[500]
                                 });
-                            });
-                        } else {
-                            res.status(401).send({
-                                auth: false,
-                                message: responseCode[401]
-                            });
-                            return;
-                        }
-                    });
+                                return;
+                            }
+                            if (same) {
+                                HelperUtil.signToken({
+                                    _id: user._id,
+                                    type: 'login'
+                                }, 86400 * 365 * 10, (error: Error, token: string) => {
+                                    if (error) {
+                                        console.log(error);
+                                        res.status(500).send({
+                                            auth: false,
+                                            message: responseCode[500]
+                                        });
+                                    }
+                                    res.status(200).send({
+                                        auth: true,
+                                        activated: true,
+                                        token
+                                    });
+                                });
+                            } else {
+                                res.status(401).send({
+                                    auth: false,
+                                    message: responseCode[401]
+                                });
+                                return;
+                            }
+                        });
+                    } else {
+                        res.status(200).send({
+                            auth: false,
+                            activated: false,
+                            message: 'Account Not Activated'
+                        });
+                    }
                 } else {
-                    res.status(200).send({
-                        auth: false,
-                        activated: false,
-                        message: 'Account Not Activated'
+                    res.status(404).send({
+                        message: 'Email address not found.'
                     });
                 }
             }
@@ -368,58 +374,64 @@ export default class AuthController {
                 _id: new ObjectId(decoded._id)
             }).then(
                 user => {
-                    HelperUtil.verifyToken(user['lastResetToken'], (err, lastTokenDecoded) => {
-                        if (err) {
-                            return res.status(500).send({
-                                message: responseCode[500]
-                            });
-                        }
-
-                        // The token provided should have timestamp equal to the lastToken sent.
-                        // If the the time is less, it means that a new token was issued after this provided token
-                        // which will make this token invalid.
-                        if (decoded.time < lastTokenDecoded.time) {
-                            return res.status(400).send({
-                                message: 'The password reset link has expired.',
-                                expired: true
-                            });
-                        }
-
-                        //If the user tries to use same link to reset password more than once, send link expired.
-                        if ((req.params.token === user['lastResetToken']) && !user['resetTokenValid']) {
-                            return res.status(400).send({
-                                message: 'The password reset link has expired.',
-                                expired: true
-                            });
-                        }
-
-                        HelperUtil.genrateHash(newPassword, (err: Error, hash: string) => {
+                    if (user) {
+                        HelperUtil.verifyToken(user['lastResetToken'], (err, lastTokenDecoded) => {
                             if (err) {
-                                console.log(err)
                                 return res.status(500).send({
                                     message: responseCode[500]
                                 });
                             }
-                            // set the token as invalid after the token has been used for password reset
-                            User.updateUserData({
-                                email: user.email
-                            }, {
-                                password: hash,
-                                resetTokenValid: false
-                            }).then(
-                                () => {
-                                    res.status(200).send({
-                                        message: 'Password reset successfully.'
+
+                            // The token provided should have timestamp equal to the lastToken sent.
+                            // If the the time is less, it means that a new token was issued after this provided token
+                            // which will make this token invalid.
+                            if (decoded.time < lastTokenDecoded.time) {
+                                return res.status(400).send({
+                                    message: 'The password reset link has expired.',
+                                    expired: true
+                                });
+                            }
+
+                            //If the user tries to use same link to reset password more than once, send link expired.
+                            if ((req.params.token === user['lastResetToken']) && !user['resetTokenValid']) {
+                                return res.status(400).send({
+                                    message: 'The password reset link has expired.',
+                                    expired: true
+                                });
+                            }
+
+                            HelperUtil.genrateHash(newPassword, (err: Error, hash: string) => {
+                                if (err) {
+                                    console.log(err)
+                                    return res.status(500).send({
+                                        message: responseCode[500]
                                     });
                                 }
-                            ).catch(err => {
-                                console.log(err);
-                                res.status(500).send({
-                                    message: responseCode[500]
+                                // set the token as invalid after the token has been used for password reset
+                                User.updateUserData({
+                                    email: user.email
+                                }, {
+                                    password: hash,
+                                    resetTokenValid: false
+                                }).then(
+                                    () => {
+                                        res.status(200).send({
+                                            message: 'Password reset successfully.'
+                                        });
+                                    }
+                                ).catch(err => {
+                                    console.log(err);
+                                    res.status(500).send({
+                                        message: responseCode[500]
+                                    });
                                 });
                             });
-                        })
-                    })
+                        });
+                    } else {
+                        res.status(404).send({
+                            message: 'Email address not found.'
+                        });
+                    }
                 }
             )
         }
@@ -433,41 +445,48 @@ export default class AuthController {
             email
         }).then(
             (user: UserModel) => {
-                if (!user.activated) {
-                    HelperUtil.signToken({
-                        _id: user._id,
-                        type: 'activation'
-                    }, 86400, (err, token) => {
-                        if (err) {
-                            console.log(err)
-                            return res.status(500).send({
-                                message: responseCode[500]
-                            });
-                        }
-                        if (token) {
-                            res.status(200).send({
-                                activated: false,
-                                created: true,
-                                token
-                            });
+                if (user) {
 
-                            HelperUtil.sendMail(email, `GroceryManager: Account Activation`, `<a href="https://sheltered-castle-03171.herokuapp.com/auth/activate-account/${token}">Click to authenticate</a>`).then(
-                                () => {
-                                    console.log('Email sent successfully to: ' + email);
-                                }
-                            ).catch(err => {
-                                console.log(err);
+                    if (!user.activated) {
+                        HelperUtil.signToken({
+                            _id: user._id,
+                            type: 'activation'
+                        }, 86400, (err, token) => {
+                            if (err) {
+                                console.log(err)
                                 return res.status(500).send({
-                                    created: false,
                                     message: responseCode[500]
                                 });
-                            });
-                        }
-                    });
+                            }
+                            if (token) {
+                                res.status(200).send({
+                                    activated: false,
+                                    created: true,
+                                    token
+                                });
+
+                                HelperUtil.sendMail(email, `GroceryManager: Account Activation`, `<a href="https://sheltered-castle-03171.herokuapp.com/auth/activate-account/${token}">Click on the link to verify email and activate account.</a>`).then(
+                                    () => {
+                                        console.log('Email sent successfully to: ' + email);
+                                    }
+                                ).catch(err => {
+                                    console.log(err);
+                                    return res.status(500).send({
+                                        created: false,
+                                        message: responseCode[500]
+                                    });
+                                });
+                            }
+                        });
+                    } else {
+                        return res.status(200).send({
+                            activated: true,
+                            message: 'Your account is already active.'
+                        });
+                    }
                 } else {
-                    return res.status(200).send({
-                        activated: true,
-                        message: 'Your account is already active.'
+                    res.status(404).send({
+                        message: 'Email address not found.'
                     });
                 }
             }

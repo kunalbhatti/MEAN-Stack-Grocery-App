@@ -88,49 +88,56 @@ class AuthController {
         user_model_1.default.findUser({
             email: userData.email
         }).then((user) => {
-            if (user.activated) {
-                helper_util_1.default.compareHash(userData.password, user.password, (error, same) => {
-                    if (error) {
-                        console.log(error);
-                        res.status(500).send({
-                            auth: false,
-                            message: response_code_json_1.default[500]
-                        });
-                        return;
-                    }
-                    if (same) {
-                        helper_util_1.default.signToken({
-                            _id: user._id,
-                            type: 'login'
-                        }, 86400 * 365 * 10, (error, token) => {
-                            if (error) {
-                                console.log(error);
-                                res.status(500).send({
-                                    auth: false,
-                                    message: response_code_json_1.default[500]
-                                });
-                            }
-                            res.status(200).send({
-                                auth: true,
-                                activated: true,
-                                token
+            if (user) {
+                if (user.activated) {
+                    helper_util_1.default.compareHash(userData.password, user.password, (error, same) => {
+                        if (error) {
+                            console.log(error);
+                            res.status(500).send({
+                                auth: false,
+                                message: response_code_json_1.default[500]
                             });
-                        });
-                    }
-                    else {
-                        res.status(401).send({
-                            auth: false,
-                            message: response_code_json_1.default[401]
-                        });
-                        return;
-                    }
-                });
+                            return;
+                        }
+                        if (same) {
+                            helper_util_1.default.signToken({
+                                _id: user._id,
+                                type: 'login'
+                            }, 86400 * 365 * 10, (error, token) => {
+                                if (error) {
+                                    console.log(error);
+                                    res.status(500).send({
+                                        auth: false,
+                                        message: response_code_json_1.default[500]
+                                    });
+                                }
+                                res.status(200).send({
+                                    auth: true,
+                                    activated: true,
+                                    token
+                                });
+                            });
+                        }
+                        else {
+                            res.status(401).send({
+                                auth: false,
+                                message: response_code_json_1.default[401]
+                            });
+                            return;
+                        }
+                    });
+                }
+                else {
+                    res.status(200).send({
+                        auth: false,
+                        activated: false,
+                        message: 'Account Not Activated'
+                    });
+                }
             }
             else {
-                res.status(200).send({
-                    auth: false,
-                    activated: false,
-                    message: 'Account Not Activated'
+                res.status(404).send({
+                    message: 'Email address not found.'
                 });
             }
         }).catch(error => {
@@ -307,53 +314,60 @@ class AuthController {
             user_model_1.default.findUser({
                 _id: new mongodb_1.ObjectId(decoded._id)
             }).then(user => {
-                helper_util_1.default.verifyToken(user['lastResetToken'], (err, lastTokenDecoded) => {
-                    if (err) {
-                        return res.status(500).send({
-                            message: response_code_json_1.default[500]
-                        });
-                    }
-                    // The token provided should have timestamp equal to the lastToken sent.
-                    // If the the time is less, it means that a new token was issued after this provided token
-                    // which will make this token invalid.
-                    if (decoded.time < lastTokenDecoded.time) {
-                        return res.status(400).send({
-                            message: 'The password reset link has expired.',
-                            expired: true
-                        });
-                    }
-                    //If the user tries to use same link to reset password more than once, send link expired.
-                    if ((req.params.token === user['lastResetToken']) && !user['resetTokenValid']) {
-                        return res.status(400).send({
-                            message: 'The password reset link has expired.',
-                            expired: true
-                        });
-                    }
-                    helper_util_1.default.genrateHash(newPassword, (err, hash) => {
+                if (user) {
+                    helper_util_1.default.verifyToken(user['lastResetToken'], (err, lastTokenDecoded) => {
                         if (err) {
-                            console.log(err);
                             return res.status(500).send({
                                 message: response_code_json_1.default[500]
                             });
                         }
-                        // set the token as invalid after the token has been used for password reset
-                        user_model_1.default.updateUserData({
-                            email: user.email
-                        }, {
-                            password: hash,
-                            resetTokenValid: false
-                        }).then(() => {
-                            res.status(200).send({
-                                message: 'Password reset successfully.'
+                        // The token provided should have timestamp equal to the lastToken sent.
+                        // If the the time is less, it means that a new token was issued after this provided token
+                        // which will make this token invalid.
+                        if (decoded.time < lastTokenDecoded.time) {
+                            return res.status(400).send({
+                                message: 'The password reset link has expired.',
+                                expired: true
                             });
-                        }).catch(err => {
-                            console.log(err);
-                            res.status(500).send({
-                                message: response_code_json_1.default[500]
+                        }
+                        //If the user tries to use same link to reset password more than once, send link expired.
+                        if ((req.params.token === user['lastResetToken']) && !user['resetTokenValid']) {
+                            return res.status(400).send({
+                                message: 'The password reset link has expired.',
+                                expired: true
+                            });
+                        }
+                        helper_util_1.default.genrateHash(newPassword, (err, hash) => {
+                            if (err) {
+                                console.log(err);
+                                return res.status(500).send({
+                                    message: response_code_json_1.default[500]
+                                });
+                            }
+                            // set the token as invalid after the token has been used for password reset
+                            user_model_1.default.updateUserData({
+                                email: user.email
+                            }, {
+                                password: hash,
+                                resetTokenValid: false
+                            }).then(() => {
+                                res.status(200).send({
+                                    message: 'Password reset successfully.'
+                                });
+                            }).catch(err => {
+                                console.log(err);
+                                res.status(500).send({
+                                    message: response_code_json_1.default[500]
+                                });
                             });
                         });
                     });
-                });
+                }
+                else {
+                    res.status(404).send({
+                        message: 'Email address not found.'
+                    });
+                }
             });
         }
     }
@@ -362,39 +376,46 @@ class AuthController {
         user_model_1.default.findUser({
             email
         }).then((user) => {
-            if (!user.activated) {
-                helper_util_1.default.signToken({
-                    _id: user._id,
-                    type: 'activation'
-                }, 86400, (err, token) => {
-                    if (err) {
-                        console.log(err);
-                        return res.status(500).send({
-                            message: response_code_json_1.default[500]
-                        });
-                    }
-                    if (token) {
-                        res.status(200).send({
-                            activated: false,
-                            created: true,
-                            token
-                        });
-                        helper_util_1.default.sendMail(email, `GroceryManager: Account Activation`, `<a href="https://sheltered-castle-03171.herokuapp.com/auth/activate-account/${token}">Click to authenticate</a>`).then(() => {
-                            console.log('Email sent successfully to: ' + email);
-                        }).catch(err => {
+            if (user) {
+                if (!user.activated) {
+                    helper_util_1.default.signToken({
+                        _id: user._id,
+                        type: 'activation'
+                    }, 86400, (err, token) => {
+                        if (err) {
                             console.log(err);
                             return res.status(500).send({
-                                created: false,
                                 message: response_code_json_1.default[500]
                             });
-                        });
-                    }
-                });
+                        }
+                        if (token) {
+                            res.status(200).send({
+                                activated: false,
+                                created: true,
+                                token
+                            });
+                            helper_util_1.default.sendMail(email, `GroceryManager: Account Activation`, `<a href="https://sheltered-castle-03171.herokuapp.com/auth/activate-account/${token}">Click on the link to verify email and activate account.</a>`).then(() => {
+                                console.log('Email sent successfully to: ' + email);
+                            }).catch(err => {
+                                console.log(err);
+                                return res.status(500).send({
+                                    created: false,
+                                    message: response_code_json_1.default[500]
+                                });
+                            });
+                        }
+                    });
+                }
+                else {
+                    return res.status(200).send({
+                        activated: true,
+                        message: 'Your account is already active.'
+                    });
+                }
             }
             else {
-                return res.status(200).send({
-                    activated: true,
-                    message: 'Your account is already active.'
+                res.status(404).send({
+                    message: 'Email address not found.'
                 });
             }
         }).catch(error => {

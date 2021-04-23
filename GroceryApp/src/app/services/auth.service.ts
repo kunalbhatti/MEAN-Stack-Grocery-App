@@ -50,6 +50,7 @@ export class AuthService {
   }
 
   register(body: User): Observable < any > {
+    delete body['confirmPassword'];
     return this.http.post(`${config.url}auth/register`, body).pipe(take(1), catchError(errorHandler));
   }
 

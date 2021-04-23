@@ -21,7 +21,7 @@
     </ion-item>
     <ion-item>
       <ion-label position="floating">Total Cost <small>(Required)</small></ion-label>
-      <ion-input type="number" [ngModel]="+product?.price * +cart.value" name="cost" required></ion-input>
+      <ion-input type="number" [ngModel]="(+product?.price/ +product?.quantity) * +cart.value" name="cost" required></ion-input>
     </ion-item>
     <ion-item>
       <ion-row class="ion-text-center" style="display:flex; flex-flow: row">

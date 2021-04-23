@@ -217,7 +217,7 @@ export class CartPage {
       this.updateLock = true;
       this.cartService.updateCartCount(product._id, count, this.currentGroup.id).pipe(take(1)).subscribe(
         () => {
-          product.cart[this.currentGroup.id] += count;
+          product.cart[this.currentGroup.id] = count;
           this.updateProducts(product);
           // neutralize sort filter
           this.sortBy = 'none';
@@ -294,8 +294,9 @@ export class CartPage {
         text: 'Manage Product',
         icon: 'create-outline',
         handler: () => {
+          this.filtered = [];
           this.filtered.push(product);
-          this.filteredCost = +product.price * +product.cart[this.currentGroup.id];
+          this.filteredCost = (+product.price / +product.quantity) * +product.cart[this.currentGroup.id];
           this.showDoneButton = true;
           this.searchString = product.name;
         }
@@ -323,16 +324,19 @@ export class CartPage {
               // only add to inventory when the units and cost is greater that zero
               if (popoverResult.data.units > 0 && popoverResult.data.cost > 0) {
                 // first update the products cart count to zero by subracting  product.cart[this.currentGroup.id]
-                this.cartService.updateCartCount(product._id, -product.cart[this.currentGroup.id], this.currentGroup.id).subscribe(
+                const newCartCount = popoverResult.data.units >= product.cart[this.currentGroup.id] ? 0 : product.cart[this.currentGroup.id] - popoverResult.data.units;
+                this.cartService.updateCartCount(product._id, newCartCount, this.currentGroup.id).subscribe(
                   () => {
                     /// update the products cart count locally
-                    product.cart[this.currentGroup.id] -= product.cart[this.currentGroup.id];
+                    product.cart[this.currentGroup.id] = newCartCount;
                     this.updateProducts(product);
                     this.sortBy = 'none';
                     this.updateLock = false;
 
                     // update the inventory
-                    this.inventoryService.updateStockCount(product._id, popoverResult.data.units, this.currentGroup.id).subscribe(
+                    const newStockCount = popoverResult.data.units + +product.stockCount[this.currentGroup.id];
+
+                    this.inventoryService.updateStockCount(product._id, newStockCount, this.currentGroup.id).subscribe(
                       () => {
                         // if the products was previously empty, update the stok status to full
                         if (product.stockCount[this.currentGroup.id] === 0) {
@@ -422,7 +426,36 @@ export class CartPage {
     }).then((alertEl: HTMLIonAlertElement) => {
       alertEl.present();
     });
+  }
 
+
+  presentManageCartAlert(product: ProductModel) {
+    this.alertController.create({
+      header: 'Update Cart',
+      inputs: [{
+        type: 'number',
+        name: 'cartCount',
+        value: product.cart[this.currentGroup.id],
+        placeholder: 'Cart Count'
+      }],
+      buttons: [{
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Update',
+          handler: (data: {
+            cartCount: number
+          }) => {
+            this.updateProductCartCount(product, +data.cartCount);
+          }
+        }
+      ]
+    }).then(
+      alertEl => {
+        alertEl.present();
+      }
+    );
   }
 
 
@@ -450,12 +483,12 @@ export class CartPage {
     this.cartCost = 0;
 
     this.products.forEach((prod: ProductModel) => {
-      this.cartCost += +prod.price * +prod.cart[this.currentGroup.id];
-    })
+      this.cartCost += +prod.cart[this.currentGroup.id] * (+prod.price / +prod.quantity);
+    });
 
     this.filteredCost = 0;
 
-    this.filteredCost += +product.price * +product.cart[this.currentGroup.id];
+    this.filteredCost += (+product.price / +product.quantity) * +product.cart[this.currentGroup.id];
 
     this.allProducts = [...this.products];
   }
@@ -510,7 +543,7 @@ export class CartPage {
   calculateCartCost(products: ProductModel[]): number {
     let cost = 0
     products.forEach((prod: ProductModel) => {
-      cost += +prod.cart[this.currentGroup.id] * +prod.price;
+      cost += +prod.cart[this.currentGroup.id] * (+prod.price / +prod.quantity);
     });
     return cost;
   }

@@ -113,7 +113,7 @@ export class Products {
         const db: Db = getDb();
         return db.collection('user_products').updateOne(
             filter, {
-                $inc: {
+                $set: {
                     [`stockCount.${gid}`]: count
                 }
             });
@@ -135,7 +135,7 @@ export class Products {
 
         return db.collection('user_products').updateOne(
             filter, {
-                $inc: {
+                $set: {
                     [`cart.${gid}`]: count
                 }
             }
