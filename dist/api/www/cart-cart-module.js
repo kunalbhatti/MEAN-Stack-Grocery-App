@@ -59,7 +59,7 @@ CartModule = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"])([
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony default export */ __webpack_exports__["default"] = ("<ion-header>\n  <ion-toolbar>\n    <ion-title class=\"ion-padding-top\">\n      Cart\n      <ion-label *ngIf=\"currentGroup?.name\"><small>({{currentGroup?.name|titlecase}})</small></ion-label>\n    </ion-title>\n  </ion-toolbar>\n  <ion-toolbar>\n    <ion-buttons slot=\"start\" *ngIf=\"searchString === ''\">\n      <ion-button (click)=\"presentCategoryFilterPopover()\" size=\"small\">\n        <ion-icon name=\"filter-outline\"></ion-icon>\n      </ion-button>\n    </ion-buttons>\n    <ion-grid>\n      <ion-row class=\"ion-justify-content-center\">\n        <ion-col size=\"12\" size-sm=\"10\" size-md=\"8\" size-lg=\"6\" size-xl=\"4\"\n          class=\"ion-margin-start ion-margin-end ion-no-padding\">\n          <ion-searchbar color=\"light\" showCancelButton=\"focus\" [(ngModel)]=\"searchString\" #searchStr\n            (ionInput)=\"getProductList(searchStr.value)\">\n          </ion-searchbar>\n        </ion-col>\n      </ion-row>\n    </ion-grid>\n    <ion-buttons slot=\"end\" *ngIf=\"searchString === ''\">\n      <ion-button (click)=\"presentSortPopover()\" size=\"small\">\n        <ion-icon name=\"funnel-outline\"></ion-icon>\n      </ion-button>\n    </ion-buttons>\n  </ion-toolbar>\n</ion-header>\n\n<ion-content>\n  <ion-grid>\n    <ion-row class=\"ion-justify-content-center\">\n      <ion-col size=\"12\" size-sm=\"10\" size-md=\"8\" class=\"ion-text-center\">\n        <ion-toolbar size=\"12\" class=\"ion-text-center\" style=\"background-color: #1f1f1f;\">\n          <ion-title *ngIf=\"(productError === '' && searchString === '') ||\n          (filterError === '' && searchString !== ''); else errorCondition\">{{selectedCategory.name | titlecase}}\n          </ion-title>\n          <ng-template #errorCondition>\n            <ion-title>Operation Failed</ion-title>\n          </ng-template>\n        </ion-toolbar>\n\n        <ion-list style=\"background-color: rgb(40, 41, 44);\" *ngIf=\"searchString === '' && products?.length > 0\">\n          <ion-card>\n            <ion-item style=\"font-size: 0.9rem;\">\n              <ion-label color=\"primary\">Estimated Cost</ion-label>\n              <ion-text color=\"success\">{{cartCost}} /-</ion-text>\n            </ion-item>\n          </ion-card>\n          <ion-card *ngFor=\"let product of products\">\n            <ion-card-header>\n              <ion-card-title>\n                {{product?.name | titlecase}}\n              </ion-card-title>\n              <ion-card-subtitle>\n                {{product?.brand | titlecase}}\n              </ion-card-subtitle>\n            </ion-card-header>\n            <ion-card-content>\n              <ion-item *ngIf=\"product?.size\">\n                <ion-label>\n                  Size: {{product?.size | titlecase}}\n                </ion-label>\n              </ion-item>\n              <ion-item *ngIf=\"product?.quantity\">\n                <ion-label>\n                  Quantity: {{product?.quantity}}\n                </ion-label>\n              </ion-item>\n              <ion-item *ngIf=\"product?.price\">\n                <ion-label>Price: {{product?.price}}</ion-label>\n              </ion-item>\n              <ion-item>\n                <ion-label>Cart: {{product?.cart[currentGroup.id]}}</ion-label>\n              </ion-item>\n            </ion-card-content>\n            <ion-row class=\"ion-justify-content-center\">\n              <ion-button fill=\"clear\" color=\"dark\" (click)=\"presentCartActionSheet(product)\">\n                <ion-icon name=\"ellipsis-horizontal\"></ion-icon>\n              </ion-button>\n            </ion-row>\n          </ion-card>\n        </ion-list>\n\n        <ion-list style=\"background-color: rgb(40, 41, 44);\" class=\"ion-padding\" *ngIf=\"searchString === ''\">\n          <ion-text *ngIf=\"productError === '' && products?.length === 0\">{{searchStatus}}</ion-text>\n          <ion-text *ngIf=\"productError !== ''\">{{productError}}</ion-text>\n        </ion-list>\n\n        <ion-list style=\"background-color: rgb(40, 41, 44);\" *ngIf=\"searchString !== '' && filtered.length > 0\">\n          <ion-card>\n            <ion-item style=\"font-size: 0.9rem;\">\n              <ion-label color=\"primary\">Estimated Cost</ion-label>\n              <ion-text color=\"success\">{{filteredCost}} /-</ion-text>\n            </ion-item>\n          </ion-card>\n          <ion-card *ngFor=\"let product of filtered\">\n            <ion-card-header>\n              <ion-card-title>\n                {{product?.name | titlecase}}\n              </ion-card-title>\n              <ion-card-subtitle>\n                {{product?.brand | titlecase}}\n              </ion-card-subtitle>\n            </ion-card-header>\n            <ion-card-content>\n              <ion-item *ngIf=\"product?.size\">Size: {{product?.size | titlecase}}</ion-item>\n              <ion-item *ngIf=\"product?.quantity\">Quantity: {{product?.quantity}}</ion-item>\n              <ion-item *ngIf=\"product?.price\">Price: {{product?.price}}</ion-item>\n              <ion-item>Stock:\n                {{product?.stockCount[currentGroup.id]}}\n              </ion-item>\n              <ion-item>Status:\n                {{product?.stockStatus[currentGroup.id] === '' ? 'Empty' : product?.stockStatus[currentGroup.id] | titlecase}}\n              </ion-item>\n              <ion-item>Cart:\n                <ion-button fill=\"clear\" color=\"dark\" size=\"small\" (click)=\"updateProductCartCount(product, -1);\"\n                  [disabled]=\"updateLock || product?.cart[currentGroup.id] === 0\">\n                  <ion-icon name=\"caret-down-outline\"></ion-icon>\n                </ion-button>\n                <ion-text>{{product?.cart[currentGroup.id]}}</ion-text>\n                <ion-button fill=\"clear\" color=\"dark\" size=\"small\" (click)=\"updateProductCartCount(product, 1);\"\n                  [disabled]=\"updateLock\">\n                  <ion-icon name=\"caret-up-outline\"></ion-icon>\n                </ion-button>\n              </ion-item>\n              <ion-item lines=\"none\" *ngIf=\"showDoneButton\">\n                <ion-col class=\"ion-text-center ion-padding-top\">\n                  <ion-button fill=\"clear\" (click)=\"showDoneButton = false; searchString = ''\">Done</ion-button>\n                </ion-col>\n              </ion-item>\n            </ion-card-content>\n          </ion-card>\n        </ion-list>\n        <ion-list style=\"background-color: rgb(40, 41, 44);\" class=\"ion-padding\" *ngIf=\"searchString !== ''\">\n          <ion-text *ngIf=\"searchString !== '' && filterError === '' && filtered?.length === 0\">{{filterStatus}}\n          </ion-text>\n          <ion-text *ngIf=\"searchString !== '' && filterError !== ''\">{{filterError}}</ion-text>\n        </ion-list>\n      </ion-col>\n    </ion-row>\n  </ion-grid>\n\n</ion-content>\n");
+/* harmony default export */ __webpack_exports__["default"] = ("<ion-header>\n  <ion-toolbar>\n    <ion-title class=\"ion-padding-top\">\n      Cart\n      <ion-label *ngIf=\"currentGroup?.name\"><small>({{currentGroup?.name|titlecase}})</small></ion-label>\n    </ion-title>\n  </ion-toolbar>\n  <ion-toolbar>\n    <ion-buttons slot=\"start\" *ngIf=\"searchString === ''\">\n      <ion-button (click)=\"presentCategoryFilterPopover()\" size=\"small\">\n        <ion-icon name=\"filter-outline\"></ion-icon>\n      </ion-button>\n    </ion-buttons>\n    <ion-grid>\n      <ion-row class=\"ion-justify-content-center\">\n        <ion-col size=\"12\" size-sm=\"10\" size-md=\"8\" size-lg=\"6\" size-xl=\"4\"\n          class=\"ion-margin-start ion-margin-end ion-no-padding\">\n          <ion-searchbar color=\"light\" showCancelButton=\"focus\" [(ngModel)]=\"searchString\" #searchStr\n            (ionInput)=\"getProductList(searchStr.value)\">\n          </ion-searchbar>\n        </ion-col>\n      </ion-row>\n    </ion-grid>\n    <ion-buttons slot=\"end\" *ngIf=\"searchString === ''\">\n      <ion-button (click)=\"presentSortPopover()\" size=\"small\">\n        <ion-icon name=\"funnel-outline\"></ion-icon>\n      </ion-button>\n    </ion-buttons>\n  </ion-toolbar>\n</ion-header>\n\n<ion-content>\n  <ion-grid>\n    <ion-row class=\"ion-justify-content-center\">\n      <ion-col size=\"12\" size-sm=\"10\" size-md=\"8\" class=\"ion-text-center\">\n        <ion-toolbar size=\"12\" class=\"ion-text-center\" style=\"background-color: #1f1f1f;\">\n          <ion-title *ngIf=\"(productError === '' && searchString === '') ||\n          (filterError === '' && searchString !== ''); else errorCondition\">{{selectedCategory.name | titlecase}}\n          </ion-title>\n          <ng-template #errorCondition>\n            <ion-title>Operation Failed</ion-title>\n          </ng-template>\n        </ion-toolbar>\n\n        <ion-list style=\"background-color: rgb(40, 41, 44);\" *ngIf=\"searchString === '' && products?.length > 0\">\n          <ion-card>\n            <ion-item style=\"font-size: 0.9rem;\">\n              <ion-label color=\"primary\">Estimated Cost</ion-label>\n              <ion-text color=\"success\">{{cartCost}} /-</ion-text>\n            </ion-item>\n          </ion-card>\n          <ion-card *ngFor=\"let product of products\">\n            <ion-card-header>\n              <ion-card-title>\n                {{product?.name | titlecase}}\n              </ion-card-title>\n              <ion-card-subtitle>\n                {{product?.brand | titlecase}}\n              </ion-card-subtitle>\n            </ion-card-header>\n            <ion-card-content>\n              <ion-item *ngIf=\"product?.size\">\n                <ion-label>\n                  Size: {{product?.size | titlecase}}\n                </ion-label>\n              </ion-item>\n              <!-- <ion-item *ngIf=\"product?.quantity\">\n                <ion-label>\n                  Quantity: {{product?.quantity}} {{product?.unit}}\n                </ion-label>\n              </ion-item>\n              <ion-item *ngIf=\"product?.price\">\n                <ion-label>Price: {{product?.price}}</ion-label>\n              </ion-item> -->\n              <ion-item>\n                <ion-label>Cart: {{product?.cart[currentGroup.id]}} {{product?.unit}}</ion-label>\n              </ion-item>\n            </ion-card-content>\n            <ion-row class=\"ion-justify-content-center\">\n              <ion-button fill=\"clear\" color=\"dark\" (click)=\"presentCartActionSheet(product)\">\n                <ion-icon name=\"ellipsis-horizontal\"></ion-icon>\n              </ion-button>\n            </ion-row>\n          </ion-card>\n        </ion-list>\n\n        <ion-list style=\"background-color: rgb(40, 41, 44);\" class=\"ion-padding\" *ngIf=\"searchString === ''\">\n          <ion-text *ngIf=\"productError === '' && products?.length === 0\">{{searchStatus}}</ion-text>\n          <ion-text *ngIf=\"productError !== ''\">{{productError}}</ion-text>\n        </ion-list>\n\n        <ion-list style=\"background-color: rgb(40, 41, 44);\" *ngIf=\"searchString !== '' && filtered.length > 0\">\n          <ion-card>\n            <ion-item style=\"font-size: 0.9rem;\">\n              <ion-label color=\"primary\">Estimated Cost</ion-label>\n              <ion-text color=\"success\">{{filteredCost}} /-</ion-text>\n            </ion-item>\n          </ion-card>\n          <ion-card *ngFor=\"let product of filtered\">\n            <ion-card-header>\n              <ion-card-title>\n                {{product?.name | titlecase}}\n              </ion-card-title>\n              <ion-card-subtitle>\n                {{product?.brand | titlecase}}\n              </ion-card-subtitle>\n            </ion-card-header>\n            <ion-card-content>\n              <ion-item *ngIf=\"product?.size\">Size: {{product?.size | titlecase}}</ion-item>\n              <ion-item *ngIf=\"product?.quantity\">Quantity: {{product?.quantity}} {{product?.unit}}</ion-item>\n              <ion-item *ngIf=\"product?.price\">Price: {{product?.price}}</ion-item>\n              <ion-item>Stock:\n                {{product?.stockCount[currentGroup.id]}}\n              </ion-item>\n              <ion-item>Status:\n                {{product?.stockStatus[currentGroup.id] === '' ? 'Empty' : product?.stockStatus[currentGroup.id] | titlecase}}\n              </ion-item>\n              <!-- <ion-item>Cart:\n                <ion-button fill=\"clear\" color=\"dark\" size=\"small\" (click)=\"updateProductCartCount(product, -1);\"\n                  [disabled]=\"updateLock || product?.cart[currentGroup.id] === 0\">\n                  <ion-icon name=\"caret-down-outline\"></ion-icon>\n                </ion-button>\n                <ion-text>{{product?.cart[currentGroup.id]}} {{product?.unit}}</ion-text>\n                <ion-button fill=\"clear\" color=\"dark\" size=\"small\" (click)=\"updateProductCartCount(product, 1);\"\n                  [disabled]=\"updateLock\">\n                  <ion-icon name=\"caret-up-outline\"></ion-icon>\n                </ion-button>\n              </ion-item> -->\n              <ion-item>Cart: {{product?.cart[currentGroup.id]}} {{product?.unit}}\n                <ion-button fill=\"clear\" color=\"dark\" (click) = \"presentManageCartAlert(product)\">\n                  <ion-icon name=\"create-outline\"></ion-icon>\n                </ion-button>\n              </ion-item>\n              <ion-item lines=\"none\" *ngIf=\"showDoneButton\">\n                <ion-col class=\"ion-text-center ion-padding-top\">\n                  <ion-button fill=\"clear\" (click)=\"showDoneButton = false; searchString = ''\">Done</ion-button>\n                </ion-col>\n              </ion-item>\n            </ion-card-content>\n          </ion-card>\n        </ion-list>\n        <ion-list style=\"background-color: rgb(40, 41, 44);\" class=\"ion-padding\" *ngIf=\"searchString !== ''\">\n          <ion-text *ngIf=\"searchString !== '' && filterError === '' && filtered?.length === 0\">{{filterStatus}}\n          </ion-text>\n          <ion-text *ngIf=\"searchString !== '' && filterError !== ''\">{{filterError}}</ion-text>\n        </ion-list>\n      </ion-col>\n    </ion-row>\n  </ion-grid>\n\n</ion-content>\n");
 
 /***/ }),
 
@@ -268,7 +268,7 @@ let CartPage = class CartPage {
         if (this.currentGroup.id.length > 0) {
             this.updateLock = true;
             this.cartService.updateCartCount(product._id, count, this.currentGroup.id).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_6__["take"])(1)).subscribe(() => {
-                product.cart[this.currentGroup.id] += count;
+                product.cart[this.currentGroup.id] = count;
                 this.updateProducts(product);
                 // neutralize sort filter
                 this.sortBy = 'none';
@@ -332,8 +332,9 @@ let CartPage = class CartPage {
                     text: 'Manage Product',
                     icon: 'create-outline',
                     handler: () => {
+                        this.filtered = [];
                         this.filtered.push(product);
-                        this.filteredCost = +product.price * +product.cart[this.currentGroup.id];
+                        this.filteredCost = (+product.price / +product.quantity) * +product.cart[this.currentGroup.id];
                         this.showDoneButton = true;
                         this.searchString = product.name;
                     }
@@ -355,14 +356,16 @@ let CartPage = class CartPage {
                                 // only add to inventory when the units and cost is greater that zero
                                 if (popoverResult.data.units > 0 && popoverResult.data.cost > 0) {
                                     // first update the products cart count to zero by subracting  product.cart[this.currentGroup.id]
-                                    this.cartService.updateCartCount(product._id, -product.cart[this.currentGroup.id], this.currentGroup.id).subscribe(() => {
+                                    const newCartCount = popoverResult.data.units >= product.cart[this.currentGroup.id] ? 0 : product.cart[this.currentGroup.id] - popoverResult.data.units;
+                                    this.cartService.updateCartCount(product._id, newCartCount, this.currentGroup.id).subscribe(() => {
                                         /// update the products cart count locally
-                                        product.cart[this.currentGroup.id] -= product.cart[this.currentGroup.id];
+                                        product.cart[this.currentGroup.id] = newCartCount;
                                         this.updateProducts(product);
                                         this.sortBy = 'none';
                                         this.updateLock = false;
                                         // update the inventory
-                                        this.inventoryService.updateStockCount(product._id, popoverResult.data.units, this.currentGroup.id).subscribe(() => {
+                                        const newStockCount = popoverResult.data.units + +product.stockCount[this.currentGroup.id];
+                                        this.inventoryService.updateStockCount(product._id, newStockCount, this.currentGroup.id).subscribe(() => {
                                             // if the products was previously empty, update the stok status to full
                                             if (product.stockCount[this.currentGroup.id] === 0) {
                                                 this.inventoryService.updateStockStatus(product._id, 'full', this.currentGroup.id).subscribe(() => { }, (error) => {
@@ -441,6 +444,29 @@ let CartPage = class CartPage {
             alertEl.present();
         });
     }
+    presentManageCartAlert(product) {
+        this.alertController.create({
+            header: 'Update Cart',
+            inputs: [{
+                    type: 'number',
+                    name: 'cartCount',
+                    value: product.cart[this.currentGroup.id],
+                    placeholder: 'Cart Count'
+                }],
+            buttons: [{
+                    text: 'Cancel',
+                    role: 'cancel'
+                }, {
+                    text: 'Update',
+                    handler: (data) => {
+                        this.updateProductCartCount(product, +data.cartCount);
+                    }
+                }
+            ]
+        }).then(alertEl => {
+            alertEl.present();
+        });
+    }
     // utility functions
     updateProducts(product) {
         const index = this.products.findIndex((prod) => {
@@ -461,10 +487,10 @@ let CartPage = class CartPage {
         });
         this.cartCost = 0;
         this.products.forEach((prod) => {
-            this.cartCost += +prod.price * +prod.cart[this.currentGroup.id];
+            this.cartCost += +prod.cart[this.currentGroup.id] * (+prod.price / +prod.quantity);
         });
         this.filteredCost = 0;
-        this.filteredCost += +product.price * +product.cart[this.currentGroup.id];
+        this.filteredCost += (+product.price / +product.quantity) * +product.cart[this.currentGroup.id];
         this.allProducts = [...this.products];
     }
     applyProductCategoryFilter(cid) {
@@ -505,7 +531,7 @@ let CartPage = class CartPage {
     calculateCartCost(products) {
         let cost = 0;
         products.forEach((prod) => {
-            cost += +prod.cart[this.currentGroup.id] * +prod.price;
+            cost += +prod.cart[this.currentGroup.id] * (+prod.price / +prod.quantity);
         });
         return cost;
     }

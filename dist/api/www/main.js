@@ -7,7 +7,7 @@
 /*! exports provided: dev_url, server_url, url, default */
 /***/ (function(module) {
 
-module.exports = JSON.parse("{\"dev_url\":\"http://localhost:3000/\",\"server_url\":\"https://sheltered-castle-03171.herokuapp.com/\",\"url\":\"https://sheltered-castle-03171.herokuapp.com/\"}");
+module.exports = JSON.parse("{\"dev_url\":\"http://localhost:3000/\",\"server_url\":\"https://sheltered-castle-03171.herokuapp.com/\",\"url\":\"\"}");
 
 /***/ }),
 
@@ -692,6 +692,7 @@ let AuthService = class AuthService {
         return this.http.post(`${_config_json__WEBPACK_IMPORTED_MODULE_6__["url"]}auth/login`, body).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["take"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["catchError"])(_error_handler__WEBPACK_IMPORTED_MODULE_7__["default"]));
     }
     register(body) {
+        delete body['confirmPassword'];
         return this.http.post(`${_config_json__WEBPACK_IMPORTED_MODULE_6__["url"]}auth/register`, body).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["take"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["catchError"])(_error_handler__WEBPACK_IMPORTED_MODULE_7__["default"]));
     }
     getUserDetails() {
